@@ -43,6 +43,11 @@
 @interface MenuController: UIViewController
 @end
 
+@interface Pylon: NSObject
+-(IBAction) life;
+
+@end
+
 @interface SplashController: UIViewController
 
 @property IBOutlet UILabel * title;

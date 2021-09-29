@@ -11,7 +11,7 @@
         <!--SplashController-->
         <scene sceneID="s0d-6b-0kx">
             <objects>
-                <viewController storyboardIdentifier="SplashController" title="SplashController" id="Y6W-OH-hqX" customClass="SplashController" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SplashController" title="SplashController" modalPresentationStyle="fullScreen" id="Y6W-OH-hqX" customClass="SplashController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="5EZ-qb-Rvc">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -23,16 +23,6 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xey-4C-gU5">
-                                <rect key="frame" x="169" y="575" width="76" height="48"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="30"/>
-                                <state key="normal" title="Login"/>
-                                <connections>
-                                    <action selector="controlTouched:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="tTH-eR-psU"/>
-                                    <segue destination="vYC-MB-KOT" kind="show" id="jO9-Qf-eOZ"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -41,12 +31,12 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ief-a0-LHa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="928.98550724637687" y="93.75"/>
+            <point key="canvasLocation" x="932" y="564"/>
         </scene>
         <!--Login Controller-->
         <scene sceneID="uw0-iv-ilF">
             <objects>
-                <viewController storyboardIdentifier="LoginController" id="vYC-MB-KOT" customClass="LoginController" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LoginController" modalPresentationStyle="fullScreen" id="vYC-MB-KOT" customClass="LoginController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cWB-kz-Ny9">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -63,21 +53,37 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <navigationItem key="navigationItem" id="LtC-qf-vCP"/>
-                    <connections>
-                        <segue destination="8aw-7i-1GL" kind="show" identifier="LoginToMenu" id="34V-yw-HBF"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="f8c-k2-A3r" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1828.985507246377" y="93.75"/>
+            <point key="canvasLocation" x="3514" y="-161"/>
         </scene>
         <!--Menu Controller-->
         <scene sceneID="iKs-WB-UI8">
             <objects>
-                <viewController id="8aw-7i-1GL" customClass="MenuController" sceneMemberID="viewController">
+                <viewController modalPresentationStyle="fullScreen" id="8aw-7i-1GL" customClass="MenuController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="QY8-32-sld">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Menu." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0mu-2Q-BwV">
+                                <rect key="frame" x="143" y="101" width="129" height="51"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="black" pointSize="42"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xey-4C-gU5">
+                                <rect key="frame" x="169" y="594" width="76" height="48"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="30"/>
+                                <state key="normal" title="Login"/>
+                                <connections>
+                                    <action selector="controlTouched:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="tTH-eR-psU"/>
+                                    <segue destination="vYC-MB-KOT" kind="show" identifier="LoginButtonSplashToLogin" id="jO9-Qf-eOZ"/>
+                                </connections>
+                            </button>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="fhG-60-6a5"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
@@ -85,7 +91,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EKc-Hd-gDV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2635" y="94"/>
+            <point key="canvasLocation" x="2136" y="-175"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="YIB-sD-zXX">
@@ -99,6 +105,7 @@
                     <nil name="viewControllers"/>
                     <connections>
                         <segue destination="Y6W-OH-hqX" kind="relationship" relationship="rootViewController" id="Eaz-XX-zsw"/>
+                        <segue destination="8aw-7i-1GL" kind="show" identifier="ToMenu" id="61o-Lf-6W7"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Dzk-9k-cbq" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

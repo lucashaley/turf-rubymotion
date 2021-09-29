@@ -18,6 +18,9 @@
 @implementation MenuController
 @end
 
+@implementation Pylon
+@end
+
 @implementation SplashController
 @end
 
