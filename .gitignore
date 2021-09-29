@@ -51,3 +51,4 @@ build-iPhoneSimulator/
 
 .DS_Store
 /build-log/
+ib.xcodeproj

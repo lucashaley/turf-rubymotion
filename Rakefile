@@ -29,7 +29,7 @@ Motion::Project::App.setup do |app|
   # ===========================================================================================
   # 2. Set your app name (this is what will show up under the icon when your app is installed).
   # ===========================================================================================
-  app.name = 'Turff-RubyMotion'
+  app.name = 'turf-rubymotion'
 
   # version for your app
   app.version = '0.1'
@@ -118,10 +118,37 @@ Motion::Project::App.setup do |app|
     app.seed_id + '.' + app.identifier
   ]
 
+  # https://azukidigital.com/blog/2014/rubymotion-and-google-ios-sdk/
+  app.info_plist['CFBundleURLTypes'] = [{
+    # s'CFBundleURLName' => 'com.companyname.appname',
+    'CFBundleURLSchemes' => ['com.googleusercontent.apps.858979761808-s8em2ueobqgnhi6905jcrifshedb4r61']
+  }]
+  # https://github.com/amirrajan/rubymotion-applied/issues/127
+  app.info_plist['FirebaseAppDelegateProxyEnabled'] = false
+
   app.pods do
-    pod 'Firebase/Auth'
+    source 'https://cdn.cocoapods.org/'
+    # The Swift pod `FacebookCore` depends upon `FBSDKCoreKit`, which does not define modules.
+    # To opt into those targets generating module maps (which is necessary to import them from
+    # Swift when building as static libraries), you may set `use_modular_headers!` globally
+    # in your Podfile, or specify `:modular_headers => true` for particular dependencies.
+    # pod 'FBSDKCoreKit', '~> 11.2.0', :modular_headers => true
+    # pod 'FBSDKLoginKit', '~> 11.2.0', :modular_headers => true
+    # pod 'FBSDKShareKit', '~> 11.2.0', :modular_headers => true
+    # pod 'FacebookCore', :modular_headers => true
+    # pod 'FacebookLogin', :modular_headers => true
+    # pod 'FacebookShare', :modular_headers => true
+
+    pod 'Firebase', '~> 8.7.0'
+    pod 'Firebase/Auth', '~> 8.7.0'
     pod 'Firebase/Database'
     pod 'GoogleSignIn'
+    # pod 'FirebaseUI', '~> 12.0.2'
+    # pod 'FirebaseUI/Auth'
+    # pod 'FirebaseUI/Google'
+    # # pod 'FirebaseUI/Twitter'
+    # pod 'FirebaseUI/OAuth' # Used for Sign in with Apple, Twitter, etc
+    # pod 'FirebaseUI/Phone'
   end
 end
 

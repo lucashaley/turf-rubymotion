@@ -10,3 +10,6 @@ gem 'bubble-wrap'
 
 # https://code.tutsplus.com/tutorials/lets-write-a-rubymotion-app-part-1--cms-20612
 gem 'ib'
+
+# https://github.com/opyh/motion-state-machine
+gem 'motion-state-machine'
