@@ -56,3 +56,5 @@ ib.xcodeproj
 *.swp
 *.orig
 *.storyboardc
+
+GoogleService-Info.plist
