@@ -15,10 +15,19 @@
 @implementation LoginController
 @end
 
+@implementation Machine
+@end
+
 @implementation MenuController
 @end
 
+@implementation NewController
+@end
+
 @implementation Pylon
+@end
+
+@implementation SettingsController
 @end
 
 @implementation SplashController

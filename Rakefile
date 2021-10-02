@@ -70,6 +70,8 @@ Motion::Project::App.setup do |app|
   app.info_plist['UIRequiresFullScreen'] = true
   app.info_plist['ITSAppUsesNonExemptEncryption'] = false
 
+  app.frameworks += ['CoreLocation','MessageUI']
+
   # ===========================================================================================
   # 7. To deploy to an actual device, you will need to create a developer certificate at:
   #    https://developer.apple.com/account/ios/certificate/development
@@ -117,6 +119,10 @@ Motion::Project::App.setup do |app|
   app.entitlements['keychain-access-groups'] = [
     app.seed_id + '.' + app.identifier
   ]
+
+  # Description for the Location service allow dialog
+  app.info_plist['NSLocationAlwaysUsageDescription'] = 'Description'
+  app.info_plist['NSLocationWhenInUseUsageDescription'] = 'Description'
 
   # https://azukidigital.com/blog/2014/rubymotion-and-google-ios-sdk/
   app.info_plist['CFBundleURLTypes'] = [{

@@ -10,6 +10,8 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
+#import <CoreLocation/CoreLocation.h>
+#import <MessageUI/MessageUI.h>
 #import <CoreTelephony/CoreTelephony.h>
 #import <CoreText/CoreText.h>
 #import <LocalAuthentication/LocalAuthentication.h>
@@ -18,6 +20,8 @@
 #import <SystemConfiguration/SystemConfiguration.h>
 
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
+-(IBAction) to_menu;
+
 @end
 
 @interface DbView: UIView
@@ -31,16 +35,28 @@
 @end
 
 @interface LoginController: UIViewController
+@end
 
-@property IBOutlet UILabel * title;
-@property IBOutlet UIButton * login_button;
-
--(IBAction) viewDidLoad;
--(IBAction) controlTouched:(id) sender;
+@interface Machine: NSObject
+-(IBAction) initialize;
+-(IBAction) segue:(id) name;
+-(IBAction) generate_new_id;
 
 @end
 
 @interface MenuController: UIViewController
+-(IBAction) controlTouched:(id) sender;
+
+@end
+
+@interface NewController: UIViewController
+
+@property IBOutlet UILabel * gamecode;
+
+-(IBAction) viewDidLoad;
+-(IBAction) cancel_new_game;
+-(IBAction) compose_sms;
+
 @end
 
 @interface Pylon: NSObject
@@ -48,12 +64,14 @@
 
 @end
 
+@interface SettingsController: UIViewController
+-(IBAction) dismiss_modal;
+
+@end
+
 @interface SplashController: UIViewController
-
-@property IBOutlet UILabel * title;
-@property IBOutlet UIButton * login_button;
-
--(IBAction) controlTouched:(id) sender;
+-(IBAction) viewDidLoad;
+-(IBAction) handleSingleTap:(id) recognizer;
 
 @end
 

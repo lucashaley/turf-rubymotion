@@ -1,59 +1,78 @@
 class Machine
-  attr_accessor :name, :fsm, :delegate
+  attr_accessor :name,
+                :fsm,
+                :delegate,
+                :rootview,
+                :db_app,
+                :user
 
   def initialize
     @delegate = UIApplication.sharedApplication.delegate
+    @rootview = UIApplication.sharedApplication.delegate.window.rootViewController
+
+    # Firebase
+    FIRApp.configure
+    puts FIRApp
+    @db_app = FIRApp.defaultApp()
+    puts @db_app.name
+
+    @db = FIRDatabase.databaseForApp(@db_app)
+    @db_ref = @db.reference
+
+    @db_ref.child("smegma").setValue("taste")
+
+    # StateMachine
     @fsm = StateMachine::Base.new start_state: :splash, verbose: true
 
+    ####################
+    # SPLASH SCREEN
     @fsm.when :splash do |state|
       state.on_entry { puts "Machine start splash" }
       state.on_exit { puts "Machine end splash" }
 
       state.transition_to :menu,
-        after: $splash_timeout,
+        after: 10,
         on: :splashToMenu,
         # on: :ready_for_splash,
-        action: @timeout_splash
+        action: Proc.new { segue("ToMenu") }
+        # action: Proc.new { UIApplication.sharedApplication.delegate.window.rootViewController.performSegueWithIdentifier("ToMenu", sender: self) }
     end
 
+    ####################
+    # MENU SCREEN
     @fsm.when :menu do |state|
-      state.on_entry {
-        puts "Machine starting menu"
-      }
-      state.on_exit {
-        puts "Machine ending menu"
-      }
+      state.on_entry { puts "Machine starting menu" }
+      state.on_exit { puts "Machine ending menu" }
     end
 
+    ####################
+    # LOGGING IN MODAL
     @fsm.when :logging_in do |state|
-      state.on_entry {
-        puts "Machine starting logging_in!"
-      }
-      state.on_exit {
-        puts "Machine ending logging_in!"
-      }
+      state.on_entry { puts "Machine starting logging_in!" }
+      state.on_exit { puts "Machine ending logging_in!" }
     end
 
-    @fsm.start!
+    # calling this from the application instead
+    # @fsm.start!
   end
   def self.instance
     @instance ||= self.new
   end
-  # def name(value)
-  #   @name = value
-  # end
-  # def name
-  #   @name
-  # end
 
-  @load_splash = Proc.new {
-    puts "Machine loading splash yoooo"
-    # segue = UIStoryboardSegue.initWithIdentifier("splashscreen", source: splash_controller, destination: login_controller)
-    @delegate.rootViewController.performSegueWithIdentifier("TestSegue", sender: self)
-  }
+  def segue (name)
+    @delegate.window.rootViewController.performSegueWithIdentifier(name, sender: self)
 
-  @timeout_splash = Proc.new {
-    puts "Machine timeout splash"
-    @delegate.rootViewController.performSegueWithIdentifier("ToMenu", sender: self)
-  }
+    # this doesn't work!
+    # @rootview.performSegueWithIdentifier(name, sender: self)
+  end
+
+  def generate_new_id
+    puts "Machine generate_new_id"
+    # update the UI with the gamecode
+    # https://gist.github.com/mbajur/2aba832a6df3fc31fe7a82d3109cb626
+    new_id = rand(36**6).to_s(36)
+
+    # check if it exists already
+    # puts @db_ref.child("games")
+  end
 end
