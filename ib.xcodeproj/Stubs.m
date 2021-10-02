@@ -6,10 +6,16 @@
 @implementation AppDelegate
 @end
 
+@implementation CharacterController
+@end
+
 @implementation DbView
 @end
 
 @implementation DbViewController
+@end
+
+@implementation JoinController
 @end
 
 @implementation LoginController

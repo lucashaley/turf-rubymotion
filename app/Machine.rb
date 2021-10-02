@@ -12,9 +12,9 @@ class Machine
 
     # Firebase
     FIRApp.configure
-    puts FIRApp
+    # puts FIRApp
     @db_app = FIRApp.defaultApp()
-    puts @db_app.name
+    # puts @db_app.name
 
     @db = FIRDatabase.databaseForApp(@db_app)
     @db_ref = @db.reference
@@ -43,6 +43,9 @@ class Machine
     @fsm.when :menu do |state|
       state.on_entry { puts "Machine starting menu" }
       state.on_exit { puts "Machine ending menu" }
+
+      state.transition_to :logging_in,
+        on: :log_in
     end
 
     ####################
@@ -57,6 +60,11 @@ class Machine
   end
   def self.instance
     @instance ||= self.new
+  end
+
+  def set_state(state)
+    puts ("set_state")
+    @fsm.event(state)
   end
 
   def segue (name)

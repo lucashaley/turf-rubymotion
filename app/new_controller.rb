@@ -4,6 +4,8 @@ class NewController < UIViewController
 
   # outlet :mapview, MKMapView
   outlet :gamecode, UILabel
+  outlet :character_view, CharacterController
+  outlet :cancel_button, UIButton
 
   def viewDidLoad
     # mapview.setCenterCoordinate(CLLocationCoordinate2D.new(50, 50), animated:true)
@@ -11,6 +13,8 @@ class NewController < UIViewController
     # create a new game in Firebase and retrieve its ID
     @new_id = Machine.instance.generate_new_id
     gamecode.text = @new_id
+
+    Machine.instance.segue("ToCharacter")
   end
 
   def cancel_new_game
@@ -34,5 +38,9 @@ class NewController < UIViewController
     puts "didFinishWithResult"
     NSLog("SMS Result: #{result}")
     controller.dismissModalViewControllerAnimated(true)
+  end
+
+  def dismiss_new
+    Machine.instance.segue("ToMenu")
   end
 end

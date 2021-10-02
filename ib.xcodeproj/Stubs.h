@@ -24,6 +24,9 @@
 
 @end
 
+@interface CharacterController: UIViewController
+@end
+
 @interface DbView: UIView
 -(IBAction) drawRect:(id) rect;
 
@@ -34,7 +37,21 @@
 
 @end
 
+@interface JoinController: UIViewController
+
+@property IBOutlet UILabel * gamecode;
+@property IBOutlet CharacterController * character_view;
+@property IBOutlet UIButton * cancel_button;
+
+-(IBAction) viewDidLoad;
+-(IBAction) cancel_new_game;
+-(IBAction) dismiss_new;
+
+@end
+
 @interface LoginController: UIViewController
+-(IBAction) viewDidLoad;
+
 @end
 
 @interface Machine: NSObject
@@ -45,17 +62,32 @@
 @end
 
 @interface MenuController: UIViewController
+
+@property IBOutlet UIButton * button_login;
+@property IBOutlet UIButton * button_settings;
+@property IBOutlet UIButton * button_characters;
+@property IBOutlet UIButton * button_game_new;
+@property IBOutlet UIButton * button_game_join;
+
 -(IBAction) controlTouched:(id) sender;
+-(IBAction) action_login:(id) sender;
+-(IBAction) action_settings:(id) sender;
+-(IBAction) action_characters:(id) sender;
+-(IBAction) action_game_new:(id) sender;
+-(IBAction) action_game_join:(id) sender;
 
 @end
 
 @interface NewController: UIViewController
 
 @property IBOutlet UILabel * gamecode;
+@property IBOutlet CharacterController * character_view;
+@property IBOutlet UIButton * cancel_button;
 
 -(IBAction) viewDidLoad;
 -(IBAction) cancel_new_game;
 -(IBAction) compose_sms;
+-(IBAction) dismiss_new;
 
 @end
 

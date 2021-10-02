@@ -33,8 +33,8 @@ class AppDelegate
     # also
     # http://www.zenruby.info/2016/05/procs-and-lambdas-closures-in-ruby.html
     handleAuthStateChanged = Proc.new do | auth, b |
-      puts auth
-      puts auth.inspect
+      # puts auth
+      # puts auth.inspect
     end
 
     handleAuthDataResult = Proc.new do | authResult, error |
@@ -42,7 +42,7 @@ class AppDelegate
         puts error.localizedDescription
         puts error.userInfo
       end
-      puts authResult.user
+      # puts authResult.user
       @user = authResult.user
 
       # remember that with objective-c, boolean proprties must have the ?
