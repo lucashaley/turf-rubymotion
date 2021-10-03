@@ -1,9 +1,5 @@
 class MenuController < UIViewController
-  # https://code.tutsplus.com/tutorials/lets-write-a-rubymotion-app-part-1--cms-20612
   extend IB
-
-  # outlet :title, UILabel
-  # outlet :login_button, UIButton
 
   outlet :button_login, UIButton
   outlet :button_settings, UIButton
@@ -11,12 +7,19 @@ class MenuController < UIViewController
   outlet :button_game_new, UIButton
   outlet :button_game_join, UIButton
 
+  def viewDidLoad
+    if Machine.instance.user
+      button_login.setTitle("Logout", forState:UIControlStateNormal)
+    else
+      button_login.setTitle("Login", forState:UIControlStateNormal)
+    end
+  end
+
   def controlTouched(sender)
     puts "touched"
   end
 
   def action_login(sender)
-    puts ("action_login")
     Machine.instance.set_state(:log_in)
   end
 
