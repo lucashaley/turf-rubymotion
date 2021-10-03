@@ -21,6 +21,13 @@ class Machine
 
     @db_ref.child("smegma").setValue("taste")
 
+    ####################
+    # FIREBASE AUTH
+    @user = nil
+    @auth = FIRAuth.authWithApp(@db_app)
+
+
+
     # StateMachine
     @fsm = StateMachine::Base.new start_state: :splash, verbose: true
 
