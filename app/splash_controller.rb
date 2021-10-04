@@ -9,6 +9,6 @@ class SplashController < UIViewController
   end
 
   def handleSingleTap(recognizer)
-    UIApplication.sharedApplication.delegate.to_menu
+    Machine.instance.fsm.event(:splashToMenu)
   end
 end
