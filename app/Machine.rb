@@ -4,31 +4,55 @@ class Machine
                 :delegate,
                 :rootview,
                 :db_app,
-                :user
+                :user,
+                :player,
+                :game
 
   def initialize
     @delegate = UIApplication.sharedApplication.delegate
     @rootview = UIApplication.sharedApplication.delegate.window.rootViewController
+    @game = Game.new
 
-    # Firebase
+    ####################
+    # FIREBASE
     FIRApp.configure
-    # puts FIRApp
     @db_app = FIRApp.defaultApp()
-    # puts @db_app.name
-
     @db = FIRDatabase.databaseForApp(@db_app)
     @db_ref = @db.reference
 
-    @db_ref.child("smegma").setValue("taste")
+    #####################
+    # AUTHENTICATION
+    # this was so useful
+    # https://www.rubyguides.com/2016/02/ruby-procs-and-lambdas/
+    # also
+    # http://www.zenruby.info/2016/05/procs-and-lambdas-closures-in-ruby.html
+    handleAuthStateChanged = Proc.new do | auth, b |
+      puts "handleAuthStateChanged"
+      # puts auth
+      # puts auth.inspect
+    end
+
+    # Not sure if this is even used any more
+    # handleAuthDataResult = Proc.new do | authResult, error |
+    #   unless error.nil?
+    #     puts error.localizedDescription
+    #     puts error.userInfo
+    #   end
+    #   # puts authResult.user
+    #   @user = authResult.user
+    #
+    #   # remember that with objective-c, boolean proprties must have the ?
+    #   puts @user.anonymous?
+    # end
 
     ####################
     # FIREBASE AUTH
     @user = nil
     @auth = FIRAuth.authWithApp(@db_app)
+    FIRAuth.auth.addAuthStateDidChangeListener(handleAuthStateChanged)
 
-
-
-    # StateMachine
+    ####################
+    # STATEMACHINE
     @fsm = StateMachine::Base.new start_state: :splash, verbose: true
 
     ####################
@@ -65,6 +89,9 @@ class Machine
     # calling this from the application instead
     # @fsm.start!
   end
+
+  #####################
+  # SINGLETON
   def self.instance
     @instance ||= self.new
   end
@@ -89,5 +116,10 @@ class Machine
 
     # check if it exists already
     # puts @db_ref.child("games")
+  end
+
+  def set_player(player)
+    puts "set_player: #{player}"
+    @player = player
   end
 end
