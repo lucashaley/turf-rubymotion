@@ -82,10 +82,24 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ztx-ns-xCz">
+                                <rect key="frame" x="147" y="193" width="80" height="48"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="30"/>
+                                <state key="normal" title="Scout"/>
+                                <connections>
+                                    <action selector="action_settings:" destination="8aw-7i-1GL" eventType="touchUpInside" id="DD9-7Q-Nej"/>
+                                    <action selector="controlTouched:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="lFM-SC-CbJ"/>
+                                    <action selector="select_scout" destination="eZk-Vt-bN8" eventType="touchUpInside" id="kjj-6w-20p"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="z1Q-Oc-yGC"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
+                    <connections>
+                        <outlet property="scout_button" destination="Ztx-ns-xCz" id="42X-Cz-FGW"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wcd-Km-ZQr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

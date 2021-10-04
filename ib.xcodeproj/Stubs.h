@@ -24,7 +24,16 @@
 
 @end
 
+@interface Character: NSObject
+@end
+
 @interface CharacterController: UIViewController
+
+@property IBOutlet UIButton * scout_button;
+
+-(IBAction) select_scout;
+-(IBAction) dismiss_modal;
+
 @end
 
 @interface DbView: UIView
@@ -34,6 +43,11 @@
 
 @interface DbViewController: UIViewController
 -(IBAction) loadView;
+
+@end
+
+@interface Game: NSObject
+-(IBAction) initialize;
 
 @end
 
@@ -56,8 +70,10 @@
 
 @interface Machine: NSObject
 -(IBAction) initialize;
+-(IBAction) set_state:(id) state;
 -(IBAction) segue:(id) name;
 -(IBAction) generate_new_id;
+-(IBAction) set_player:(id) player;
 
 @end
 
@@ -69,6 +85,7 @@
 @property IBOutlet UIButton * button_game_new;
 @property IBOutlet UIButton * button_game_join;
 
+-(IBAction) viewDidLoad;
 -(IBAction) controlTouched:(id) sender;
 -(IBAction) action_login:(id) sender;
 -(IBAction) action_settings:(id) sender;
@@ -93,6 +110,11 @@
 
 @interface Pylon: NSObject
 -(IBAction) life;
+
+@end
+
+@interface Scout: Character
+-(IBAction) initialize;
 
 @end
 

@@ -6,6 +6,9 @@
 @implementation AppDelegate
 @end
 
+@implementation Character
+@end
+
 @implementation CharacterController
 @end
 
@@ -13,6 +16,9 @@
 @end
 
 @implementation DbViewController
+@end
+
+@implementation Game
 @end
 
 @implementation JoinController
@@ -31,6 +37,9 @@
 @end
 
 @implementation Pylon
+@end
+
+@implementation Scout
 @end
 
 @implementation SettingsController
