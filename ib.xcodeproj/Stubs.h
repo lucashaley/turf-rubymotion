@@ -20,8 +20,6 @@
 #import <SystemConfiguration/SystemConfiguration.h>
 
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
--(IBAction) to_menu;
-
 @end
 
 @interface Character: NSObject
@@ -48,6 +46,21 @@
 
 @interface Game: NSObject
 -(IBAction) initialize;
+-(IBAction) generate_new_id;
+
+@end
+
+@interface GameController: UIViewController
+
+@property IBOutlet MKMapView * map_view;
+@property IBOutlet UIButton * button_pylon;
+
+-(IBAction) viewDidLoad;
+-(IBAction) locationUpdate:(id) location;
+-(IBAction) touch_down;
+-(IBAction) touch_up;
+-(IBAction) touch_out;
+-(IBAction) set_button_color:(id) color;
 
 @end
 

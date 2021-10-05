@@ -21,6 +21,9 @@
 @implementation Game
 @end
 
+@implementation GameController
+@end
+
 @implementation JoinController
 @end
 
