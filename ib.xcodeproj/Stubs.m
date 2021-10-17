@@ -51,3 +51,12 @@
 @implementation SplashController
 @end
 
+@implementation IEDGE
+@end
+
+@implementation Edge
+@end
+
+@implementation Point
+@end
+

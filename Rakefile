@@ -39,7 +39,7 @@ Motion::Project::App.setup do |app|
   #    If you're using RubyMotion Starter Edition. You cannot set this value (the latest
   #    version of iOS will be used).
   # ===========================================================================================
-  # app.deployment_target = '10.0'
+  app.deployment_target = '14.5'
 
   # ===========================================================================================
   # 4. Set the architectures for which to build.
@@ -70,7 +70,7 @@ Motion::Project::App.setup do |app|
   app.info_plist['UIRequiresFullScreen'] = true
   app.info_plist['ITSAppUsesNonExemptEncryption'] = false
 
-  app.frameworks += ['CoreLocation','MessageUI']
+  app.frameworks += ['CoreLocation','MessageUI', 'MapKit']
 
   # ===========================================================================================
   # 7. To deploy to an actual device, you will need to create a developer certificate at:

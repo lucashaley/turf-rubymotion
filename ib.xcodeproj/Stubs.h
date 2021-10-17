@@ -12,6 +12,7 @@
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
 #import <MessageUI/MessageUI.h>
+#import <MapKit/MapKit.h>
 #import <CoreTelephony/CoreTelephony.h>
 #import <CoreText/CoreText.h>
 #import <LocalAuthentication/LocalAuthentication.h>
@@ -55,8 +56,10 @@
 @property IBOutlet MKMapView * map_view;
 @property IBOutlet UIButton * button_pylon;
 
+-(IBAction) viewWillAppear:(id) animated;
 -(IBAction) viewDidLoad;
 -(IBAction) locationUpdate:(id) location;
+-(IBAction) create_new_pylon;
 -(IBAction) touch_down;
 -(IBAction) touch_up;
 -(IBAction) touch_out;
@@ -139,6 +142,23 @@
 @interface SplashController: UIViewController
 -(IBAction) viewDidLoad;
 -(IBAction) handleSingleTap:(id) recognizer;
+
+@end
+
+@interface IEDGE: Struct
+-(IBAction) triangulate:(id) verts;
+-(IBAction) main;
+-(IBAction) bm;
+-(IBAction) run_random:(id) nv;
+-(IBAction) output_random:(id) nv;
+
+@end
+
+@interface Edge: NSObject
+@end
+
+@interface Point: NSObject
+-(IBAction) to_s;
 
 @end
 
