@@ -21,7 +21,7 @@ class Wakawaka # < Cell
   def vertices
     puts "\n\nWakawaka::vertices"
     verts = vertices_from_cell(@cell)
-    puts "Verts: #{verts}"
+    # puts "Verts: #{verts}"
     verts
   end
 

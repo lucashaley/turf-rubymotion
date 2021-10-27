@@ -24,6 +24,9 @@ class GameController < UIViewController
     @voronoi_map.voronoi_cells.each do |cell|
       @map_view.addOverlay(cell.overlay)
     end
+    puts "Adding annotations"
+    puts "annotations: #{@voronoi_map.annotations}"
+    map_view.addAnnotations(@voronoi_map.annotations)
   end
 
   def viewDidLoad
@@ -80,13 +83,15 @@ class GameController < UIViewController
     # @voronoi_map
 
     test_dict = Hash.new
-    test_pylon_01 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33374960204376, -122.03019990835675))
-    test_pylon_02 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.333062054067, -122.03113705459889))
-    test_pylon_03 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33224134831166, -122.03311472880185))
-    test_pylon_04 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.32977886077367, -122.03048131661657))
+    test_pylon_01 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33374960204376, -122.03019990835675), UIColor.systemBlueColor, "Jenny")
+    test_pylon_02 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.333062054067, -122.03113705459889), UIColor.systemBlueColor, "Gilbert")
+    test_pylon_03 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33224134831166, -122.03311472880185), UIColor.systemBlueColor, "Jenny")
+    test_pylon_04 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33077886077367, -122.03048131661657), UIColor.systemBlueColor, "Gilbert")
     test_pylon_05 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33316896808407, -122.02850863291272))
-    test_pylon_06 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33085252713372, -122.02803842959912))
+    test_pylon_06 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33085252713372, -122.02833842959912), UIColor.systemBlueColor, "Gilbert")
     test_pylon_07 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33432727342505, -122.03242334715573))
+    test_pylon_08 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33096123684747, -122.03426217107544))
+    test_pylon_09 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.3357776539391, -122.02908752007481))
     test_dict[test_pylon_01.uuID] = test_pylon_01
     test_dict[test_pylon_02.uuID] = test_pylon_02
     test_dict[test_pylon_03.uuID] = test_pylon_03
@@ -94,21 +99,31 @@ class GameController < UIViewController
     test_dict[test_pylon_05.uuID] = test_pylon_05
     test_dict[test_pylon_06.uuID] = test_pylon_06
     test_dict[test_pylon_07.uuID] = test_pylon_07
+    test_dict[test_pylon_08.uuID] = test_pylon_08
+    test_dict[test_pylon_09.uuID] = test_pylon_09
 
     # test_dict.each do |k, v|
     #   puts "\ntest_dict::pylon: #{k.UUIDString}\n#{v}"
     # end
+    # @pylon_annotation_view = MKAnnotationView.initWithAnnotation(PylonAnnotation, reuseIdentifier: "PylonAnnotationView")
+    map_view.registerClass(PylonAnnotation, forAnnotationViewWithReuseIdentifier: "PylonAnnotation")
+    test_dict.each do |k, v|
+      @voronoi_map.pylons.setObject(v, forKey:k)
+      map_view.addAnnotation(PylonAnnotation.new(v).annotation)
+    end
 
     vcells = @voronoi_map.voronoi_cells_from_pylons(test_dict)
 
     vcells.each do |vc|
-      "GameController::viewDidLoad adding overlay: #{vc}"
+      # "GameController::viewDidLoad adding overlay: #{vc}"
       map_view.addOverlay(vc.overlay)
+
+      # [self.vMap.cellTowers setObject:cellTower forKey:cellTower.uuID];
     end
 
     puts "Adding annotations"
     puts "annotations: #{@voronoi_map.annotations}"
-    map_view.addAnnotations(@voronoi_map.annotations)
+    # map_view.addAnnotations(@voronoi_map.annotations)
 
     # map_view.addAnnotation(Pylon.new(-41.30201, 174.77322))
     # puts "Adding pylons"
@@ -306,14 +321,31 @@ class GameController < UIViewController
   #   overlayView
   # end
 
+  def renderOverlays
+    puts "\n\nrenderOverlays"
+    overlaysToRemove = map_view.overlays.mutableCopy
+    map_view.removeOverlays(overlaysToRemove)
+
+    vcells = @voronoi_map.voronoiCells
+
+    vcells.each do |cell|
+      map_view.addOverlay(cell.overlay)
+    end
+  end
+
   def create_new_pylon
     puts "creating new pylon"
     # p = Pylon.new(map_view.centerCoordinate.longitude, map_view.centerCoordinate.latitude)
     # puts p.coordinate.longitude
     # map_view.addAnnotation(p.annotation)
-    map_view.addAnnotation(Pylon.new(map_view.centerCoordinate.latitude, map_view.centerCoordinate.longitude).annotation)
+    # map_view.addAnnotation(Pylon.new(map_view.centerCoordinate.latitude, map_view.centerCoordinate.longitude).annotation)
     # map_view.setNeedsDisplay
-    map_view.annotations.each { |ann| puts "Coord: #{ann.coordinate.latitude}, #{ann.coordinate.longitude}" }
+    # map_view.annotations.each { |ann| puts "Coord: #{ann.coordinate.latitude}, #{ann.coordinate.longitude}" }
+
+    p = Pylon.initWithLocation(map_view.centerCoordinate)
+    @voronoi_map.pylons.setObject(p, forKey:p.uuID)
+    map_view.addAnnotation(PylonAnnotation.new(p).annotation)
+    self.renderOverlays
   end
 
   def touch_down

@@ -2,13 +2,13 @@
 class Pylon < Site # move away from the Site superclass?
   attr_accessor :location, :color, :title # not sure what this is for
 
-  def self.initWithLocation(location, color = UIColor.systemRedColor)
+  def self.initWithLocation(location, color = UIColor.systemRedColor, title = "MungMung")
     puts "\nPylon::initWithLocation location:#{location}, color: #{color}"
     p = Pylon.alloc.init
-    puts "New Pylon: #{p.description}"
+    # puts "New Pylon: #{p.description}"
     p.location = location
     p.color = color
-    p.title = "MungMung"
+    p.title = title
     # check if location is a CLLocation?
     # @location = location
     # map_point = MKMapPointForCoordinate(@location)
@@ -48,7 +48,7 @@ class Pylon < Site # move away from the Site superclass?
   alias :distanceFromLocation :distance_from_location
 
   def to_s
-    "UUID: #{uuID.UUIDString}; Location: #{@location.latitude}, #{@location.longitude}; Coord: #{coord.x}, #{coord.y}; Color: #{@color}\n\n"
+    "Pylon: UUID: #{uuID.UUIDString}; Location: #{@location.latitude}, #{@location.longitude}; Coord: #{coord.x}, #{coord.y}; Color: #{@color}"
   end
 
   def setLocation(location)

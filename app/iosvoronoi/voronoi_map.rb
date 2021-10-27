@@ -29,7 +29,7 @@ class VoronoiMap
     puts "\n\nDONE\n\n"
 
     result.cells.each_with_index do |cell, index|
-      puts "\nvoronoi_cells_from_pylons::cell#{index}: #{cell} site:#{cell.site}"
+      # puts "\nvoronoi_cells_from_pylons::cell#{index}: #{cell} site:#{cell.site}"
       pylon = pylons.objectForKey(cell.site.uuID)
       # puts "voronoi_cells_from_pylons::pylon: #{pylon}\n\n"
 
@@ -43,6 +43,7 @@ class VoronoiMap
 
     return voronoi_cells
   end
+  alias :voronoiCellsFromPylons :voronoi_cells_from_pylons
 
   def voronoi_cells
     return voronoi_cells_from_pylons(@pylons)
@@ -53,12 +54,12 @@ class VoronoiMap
     puts "\n\nannotations"
     annotations = []
 
-    puts "pylons.addValues: #{@pylons.allValues}"
+    # puts "pylons.addValues: #{@pylons.allValues}"
     @pylons.allValues.each do |pylon|
       # annotations << PylonAnnotation.alloc.init
-      anno = PylonAnnotation.new(pylon.location.coordinate)
+      anno = PylonAnnotation.new(pylon)
       anno.title = pylon.title
-      anno.color = pylon.color
+      # anno.color = pylon.color
 
       puts "anno: #{anno}"
 

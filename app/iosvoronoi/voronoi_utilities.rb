@@ -1,13 +1,13 @@
 # https://github.com/DevRhys/iosvoronoi/blob/master/Example/iosvoronoi/BHEUtilities.m
 module VoronoiUtilities
   def vertices_from_cell(cell)
-    puts "\nVoronoiUtilities::vertices_from_cell: #{cell} halfedges: #{cell.halfedges}"
+    # puts "\nVoronoiUtilities::vertices_from_cell: #{cell} halfedges: #{cell.halfedges}"
     vertices = []
 
     cell.halfedges.each do |halfedge|
       start_point = halfedge.getStartpoint
       end_point = halfedge.getEndpoint
-      puts "Points: #{start_point}, #{end_point}"
+      # puts "Points: #{start_point}, #{end_point}"
 
       # not sure if this is correct
       # add to array if not already there
@@ -27,15 +27,15 @@ module VoronoiUtilities
   alias :verticesFromCell :vertices_from_cell
 
   def overlay_from_vertices(vertices)
-    puts "\nVoronoiUtilities::overlay_from_vertices"
-    puts "vertices: #{vertices.length}"
+    # puts "\nVoronoiUtilities::overlay_from_vertices"
+    # puts "vertices: #{vertices.length}"
     points = []
 
     # can we use map here?
     # do we have to do the whole pointer array thing here?
     vertices.each do |vertex|
       mp = MKMapPointMake(vertex.x, vertex.y)
-      puts "mp: #{mp.x}, #{mp.y}"
+      # puts "mp: #{mp.x}, #{mp.y}"
       # points << MKMapPointMake(vertex.x, vertex.y)
       points << mp
     end
@@ -70,16 +70,16 @@ module VoronoiUtilities
     a = MKMapPointForCoordinate(CLLocationCoordinate2DMake( \
           region.center.latitude + region.span.latitudeDelta / 2, \
           region.center.longitude - region.span.longitudeDelta / 2 ))
-    puts "a: #{a.x}, #{a.y}"
+    # puts "a: #{a.x}, #{a.y}"
     b = MKMapPointForCoordinate(CLLocationCoordinate2DMake( \
           region.center.latitude - region.span.latitudeDelta / 2, \
           region.center.longitude + region.span.longitudeDelta / 2 ))
-    puts "b: #{b.x}, #{b.y}"
+    # puts "b: #{b.x}, #{b.y}"
     rect = MKMapRectMake([a.x, b.x].min, [a.y, b.y].min, (a.x - b.x).abs, (a.y - b.y).abs)
-    puts "rect: #{rect.origin.x}"
+    # puts "rect: #{rect.origin.x}"
 
-    double_check = MKCoordinateRegionForMapRect(rect)
-    puts "coord check: #{double_check.center.latitude}, #{double_check.center.longitude}"
+    # double_check = MKCoordinateRegionForMapRect(rect)
+    # puts "coord check: #{double_check.center.latitude}, #{double_check.center.longitude}"
     return rect
   end
 end
