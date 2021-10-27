@@ -1,10 +1,14 @@
 class GameController < UIViewController
   extend IB
+  include VoronoiUtilities
 
   outlet :map_view, MKMapView
   outlet :button_pylon, UIButton
 
+  attr_accessor :voronoi_map
+
   def viewWillAppear(animated)
+    puts "\n\nGameController::viewWillAppear\n\n"
     @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
       lm.requestWhenInUseAuthorization
 
@@ -14,22 +18,28 @@ class GameController < UIViewController
       lm.delegate = self
     end
 
-    super
+    # super
+
+    # ask the map to generate tesselation
+    @voronoi_map.voronoi_cells.each do |cell|
+      @map_view.addOverlay(cell.overlay)
+    end
   end
 
   def viewDidLoad
+    puts "\n\nGameController::viewDidLoad\n\n"
     # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
     map_view.showsUserLocation = true
     map_view.showsPitchControl = true
 
     location = CLLocationCoordinate2D.new
-    location.latitude = -41.302220
-    location.longitude = 174.775456
+    location.latitude = 37.33189332651307
+    location.longitude = -122.03128724123847
     puts "Location: #{location}"
 
     span = MKCoordinateSpan.new
-    span.latitudeDelta = 0.005
-    span.longitudeDelta = 0.005
+    span.latitudeDelta = 0.01
+    span.longitudeDelta = 0.01
     puts "Span: #{span}"
 
     region = MKCoordinateRegion.new
@@ -59,17 +69,56 @@ class GameController < UIViewController
         action: proc { create_new_pylon }
     end
 
+    puts "Starting button state machine\n\n"
     @button_fsm.start!
 
+    coordRegion = MKCoordinateRegionForMapRect(mkmaprect_for_coord_region(region))
+    puts "\ncorrdRegion: #{coordRegion.center}"
+    # Machine.instance.bounding_box = map_view.convertRegion(coordRegion, toRectToView: map_view)
+    Machine.instance.bounding_box = mkmaprect_for_coord_region(region)
+    @voronoi_map = VoronoiMap.new
+    # @voronoi_map
+
+    test_dict = Hash.new
+    test_pylon_01 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33374960204376, -122.03019990835675))
+    test_pylon_02 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.333062054067, -122.03113705459889))
+    test_pylon_03 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33224134831166, -122.03311472880185))
+    test_pylon_04 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.32977886077367, -122.03048131661657))
+    test_pylon_05 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33316896808407, -122.02850863291272))
+    test_pylon_06 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33085252713372, -122.02803842959912))
+    test_pylon_07 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33432727342505, -122.03242334715573))
+    test_dict[test_pylon_01.uuID] = test_pylon_01
+    test_dict[test_pylon_02.uuID] = test_pylon_02
+    test_dict[test_pylon_03.uuID] = test_pylon_03
+    test_dict[test_pylon_04.uuID] = test_pylon_04
+    test_dict[test_pylon_05.uuID] = test_pylon_05
+    test_dict[test_pylon_06.uuID] = test_pylon_06
+    test_dict[test_pylon_07.uuID] = test_pylon_07
+
+    # test_dict.each do |k, v|
+    #   puts "\ntest_dict::pylon: #{k.UUIDString}\n#{v}"
+    # end
+
+    vcells = @voronoi_map.voronoi_cells_from_pylons(test_dict)
+
+    vcells.each do |vc|
+      "GameController::viewDidLoad adding overlay: #{vc}"
+      map_view.addOverlay(vc.overlay)
+    end
+
+    puts "Adding annotations"
+    puts "annotations: #{@voronoi_map.annotations}"
+    map_view.addAnnotations(@voronoi_map.annotations)
+
     # map_view.addAnnotation(Pylon.new(-41.30201, 174.77322))
-    puts "Adding pylons"
+    # puts "Adding pylons"
     # @player_annotation_view = MKAnnotationView.initWithAnnotation(Pylon, reuseIdentifier: "PylonAnnotationView")
     # map_view.registerClass(MKUserLocation, forAnnotationViewWithReuseIdentifier: "PlayerAnnotation")
     # map_view.registerClass(Pylon, forAnnotationViewWithReuseIdentifier: "PylonAnnotation")
     # Pylon::Test_Pylons.each { |pylon| puts pylon.coordinate.longitude }
     # Pylon::Test_Pylons.each { |pylon| map_view.addAnnotation(pylon.annotation) }
 
-    puts "Adding overlay"
+    # puts "Adding overlay"
     # pol = MKPolygon.polygonWithPoints()
     # pt01 = MKMapPoint.new
     # pt01.x = 37.33224775088951
@@ -97,25 +146,25 @@ class GameController < UIViewController
     # puts "Overlays: #{map_view.overlays}"
 
 
-    co01 = CLLocationCoordinate2DMake(37.33510602017382, -122.0303608121068)
-    # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co01))
-    co02 = CLLocationCoordinate2DMake(37.336076101951534, -122.02405461862536)
-    # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co02))
-    co03 = CLLocationCoordinate2DMake(37.3327634456037, -122.02935601332467)
-    # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co03))
-    co04 = CLLocationCoordinate2DMake(37.336076101951534, -122.02405461862536)
-    # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co04))
-    co05 = CLLocationCoordinate2DMake(37.333062054067, -122.03113705459889)
-    # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co05))
-    co06 = CLLocationCoordinate2DMake(37.329422767200626, -122.0290652396243)
-    # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co06))
-    co07 = CLLocationCoordinate2DMake(37.32970834952277, -122.03300306881782)
-    # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co07))
-    co08 = CLLocationCoordinate2DMake(37.33402614123069, -122.03180114380011)
-    # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co08))
-    co09 = CLLocationCoordinate2DMake(37.33262534062823, -122.03418763374351)
-    # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co09))
-    co10 = CLLocationCoordinate2DMake(37.33556758275723, -122.03503708868698)
+    # co01 = CLLocationCoordinate2DMake(37.33510602017382, -122.0303608121068)
+    # # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co01))
+    # co02 = CLLocationCoordinate2DMake(37.336076101951534, -122.02405461862536)
+    # # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co02))
+    # co03 = CLLocationCoordinate2DMake(37.3327634456037, -122.02935601332467)
+    # # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co03))
+    # co04 = CLLocationCoordinate2DMake(37.336076101951534, -122.02405461862536)
+    # # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co04))
+    # co05 = CLLocationCoordinate2DMake(37.333062054067, -122.03113705459889)
+    # # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co05))
+    # co06 = CLLocationCoordinate2DMake(37.329422767200626, -122.0290652396243)
+    # # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co06))
+    # co07 = CLLocationCoordinate2DMake(37.32970834952277, -122.03300306881782)
+    # # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co07))
+    # co08 = CLLocationCoordinate2DMake(37.33402614123069, -122.03180114380011)
+    # # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co08))
+    # co09 = CLLocationCoordinate2DMake(37.33262534062823, -122.03418763374351)
+    # # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co09))
+    # co10 = CLLocationCoordinate2DMake(37.33556758275723, -122.03503708868698)
     # map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(co10))
     # co_arr = [co01, co02, co03]
     # co_ptr = Pointer.new(CLLocationCoordinate2D.type, co_arr.length)
@@ -128,58 +177,58 @@ class GameController < UIViewController
     # puts "Overlays: #{map_view.overlays}"
 
 
-    mp01 = MKMapPointForCoordinate(co01)
-    mp02 = MKMapPointForCoordinate(co02)
-    mp03 = MKMapPointForCoordinate(co03)
-    mp04 = MKMapPointForCoordinate(co04)
-    mp05 = MKMapPointForCoordinate(co05)
-    mp06 = MKMapPointForCoordinate(co06)
-    mp07 = MKMapPointForCoordinate(co07)
-    mp08 = MKMapPointForCoordinate(co08)
-    mp09 = MKMapPointForCoordinate(co09)
-    mp10 = MKMapPointForCoordinate(co10)
-    mp_arr = [mp01, mp02, mp03, mp04, mp05, mp06, mp07, mp08, mp09, mp10]
+    # mp01 = MKMapPointForCoordinate(co01)
+    # mp02 = MKMapPointForCoordinate(co02)
+    # mp03 = MKMapPointForCoordinate(co03)
+    # mp04 = MKMapPointForCoordinate(co04)
+    # mp05 = MKMapPointForCoordinate(co05)
+    # mp06 = MKMapPointForCoordinate(co06)
+    # mp07 = MKMapPointForCoordinate(co07)
+    # mp08 = MKMapPointForCoordinate(co08)
+    # mp09 = MKMapPointForCoordinate(co09)
+    # mp10 = MKMapPointForCoordinate(co10)
+    # mp_arr = [mp01, mp02, mp03, mp04, mp05, mp06, mp07, mp08, mp09, mp10]
+    #
+    # tris = Delaunay::triangulate(mp_arr)
+    # # puts "Tris.verts: #{tris[0]}"
+    # # puts "Tris.tris: #{tris[1]}"
 
-    tris = Delaunay::triangulate(mp_arr)
-    # puts "Tris.verts: #{tris[0]}"
-    # puts "Tris.tris: #{tris[1]}"
+    # tris[1].each do |tri|
+    #   # puts "Current tri: #{tri}"
+    #   # puts "Current tri complete: #{tri.complete}"
+    #   # puts "WHAT: #{tris[0][tri.p1]}"
+    #   # puts "#{tris[0][tri.p1]}, #{tris[0][tri.p2]}, #{tris[0][tri.p3]}"
+    #   unless tri.complete == false or tris[0][tri.p1] == nil or tris[0][tri.p2] == nil or tris[0][tri.p3] == nil
+    #     tri01 = MKCoordinateForMapPoint(tris[0][tri.p1])
+    #     puts "tri01: #{tri01.longitude}"
+    #     tri02 = MKCoordinateForMapPoint(tris[0][tri.p2])
+    #     puts "tri02: #{tri02.longitude}"
+    #     tri03 = MKCoordinateForMapPoint(tris[0][tri.p3])
+    #     puts "tri03: #{tri03.longitude}"
+    #     tri_ptr = Pointer.new(CLLocationCoordinate2D.type, 3)
+    #     tri_ptr[0] = tri01
+    #     tri_ptr[1] = tri02
+    #     tri_ptr[2] = tri03
+    #     tri_poly = MKPolygon.polygonWithCoordinates(tri_ptr, count:3)
+    #     puts "tri_poly: #{tri_poly}"
+    #     puts "tri_poly pointCount: #{tri_poly.pointCount}"
+    #     puts "tri_poly points: #{tri_poly.points}"
+    #     puts "tri_poly points: #{tri_poly.locationAtPointIndex(0)}, #{tri_poly.locationAtPointIndex(1)}, #{tri_poly.locationAtPointIndex(2)}"
+    #     map_view.addOverlay(tri_poly)
+    #   end
+    # end
 
-    tris[1].each do |tri|
-      # puts "Current tri: #{tri}"
-      # puts "Current tri complete: #{tri.complete}"
-      # puts "WHAT: #{tris[0][tri.p1]}"
-      # puts "#{tris[0][tri.p1]}, #{tris[0][tri.p2]}, #{tris[0][tri.p3]}"
-      unless tri.complete == false or tris[0][tri.p1] == nil or tris[0][tri.p2] == nil or tris[0][tri.p3] == nil
-        tri01 = MKCoordinateForMapPoint(tris[0][tri.p1])
-        puts "tri01: #{tri01.longitude}"
-        tri02 = MKCoordinateForMapPoint(tris[0][tri.p2])
-        puts "tri02: #{tri02.longitude}"
-        tri03 = MKCoordinateForMapPoint(tris[0][tri.p3])
-        puts "tri03: #{tri03.longitude}"
-        tri_ptr = Pointer.new(CLLocationCoordinate2D.type, 3)
-        tri_ptr[0] = tri01
-        tri_ptr[1] = tri02
-        tri_ptr[2] = tri03
-        tri_poly = MKPolygon.polygonWithCoordinates(tri_ptr, count:3)
-        puts "tri_poly: #{tri_poly}"
-        puts "tri_poly pointCount: #{tri_poly.pointCount}"
-        puts "tri_poly points: #{tri_poly.points}"
-        puts "tri_poly points: #{tri_poly.locationAtPointIndex(0)}, #{tri_poly.locationAtPointIndex(1)}, #{tri_poly.locationAtPointIndex(2)}"
-        map_view.addOverlay(tri_poly)
-      end
-    end
-
-    center_mappoints = tris[2].map { |center| MKMapPointMake(center.x, center.y) }
-    center_coords = center_mappoints.map { |mappoint| MKCoordinateForMapPoint(mappoint) }
-    center_coords.each do |center|
-      puts "Center: #{center.longitude}"
-    end
-
-    tris[2].each do |center|
-      mp = MKMapPointMake(center.x, center.y)
-      puts "mp: #{mp}"
-      map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(MKCoordinateForMapPoint(mp)))
-    end
+    # center_mappoints = tris[2].map { |center| MKMapPointMake(center.x, center.y) }
+    # center_coords = center_mappoints.map { |mappoint| MKCoordinateForMapPoint(mappoint) }
+    # center_coords.each do |center|
+    #   puts "Center: #{center.longitude}"
+    # end
+    #
+    # tris[2].each do |center|
+    #   mp = MKMapPointMake(center.x, center.y)
+    #   puts "mp: #{mp}"
+    #   map_view.addAnnotation(MKPointAnnotation.alloc.initWithCoordinate(MKCoordinateForMapPoint(mp)))
+    # end
   end
 
   # def locationManager(manager, didUpdateLocations:locations)
@@ -199,7 +248,7 @@ class GameController < UIViewController
 
   PylonViewIdentifier = 'PylonViewIdentifier'
   def mapView(map_view, viewForAnnotation:annotation)
-    puts "viewForAnnotation"
+    puts "\n\nviewForAnnotation"
     # if annotation.kind_of?
     if annotation == map_view.userLocation
       puts "PLAYER"
@@ -208,10 +257,12 @@ class GameController < UIViewController
     puts "viewForAnnotation: #{annotation.class}"
     # check to see if it exists and has been queued
     if annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PylonViewIdentifier)
-      # annotation_view.annotation = pylon
+      puts "using existing view"
+      annotation_view.annotation = pylon
     else
       # create a new one
       # MKPinAnnotationView is depreciated
+      puts "create new view"
       annotation_view = MKMarkerAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier:PylonViewIdentifier)
       annotation_view.canShowCallout = false
     end
@@ -224,14 +275,17 @@ class GameController < UIViewController
 
   def mapView(map_view, rendererForOverlay:overlay)
     puts "rendererForOverlay: #{overlay}"
-    overlay = MKPolygonRenderer.alloc.initWithOverlay(overlay)
-    overlay.lineWidth = 0.75
-    overlay.strokeColor = UIColor.colorWithHue(0.5, saturation: 0.9, brightness: 0.9, alpha: 1.0)
+    rend = MKPolygonRenderer.alloc.initWithOverlay(overlay)
+    rend.lineWidth = 0.75
+    rend.strokeColor = UIColor.colorWithHue(0.5, saturation: 0.9, brightness: 0.9, alpha: 1.0)
     # overlay.fillColor = UIColor.systemGreenColor
-    overlay.fillColor = UIColor.colorWithHue(0.2, saturation: 0.9, brightness: 0.9, alpha: 0.3)
-    overlay.lineJoin = KCGLineJoinMiter
+    rend.fillColor = UIColor.colorWithHue(0.2, saturation: 0.9, brightness: 0.9, alpha: 0.3)
+    unless overlay.overlayColor.nil?
+      rend.fillColor = overlay.overlayColor.colorWithAlphaComponent(0.3)
+    end
+    rend.lineJoin = KCGLineJoinMiter
 
-    return overlay
+    return rend
   end
 
   # def mapView(map_view, viewForOverlay:overlay)

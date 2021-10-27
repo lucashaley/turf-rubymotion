@@ -72,6 +72,10 @@ Motion::Project::App.setup do |app|
 
   app.frameworks += ['CoreLocation','MessageUI', 'MapKit']
 
+  # app.vendor_project('vendor/objcvoronoi-master', :xcode,
+  #     :headers_dir => 'objcvoronoi')
+  # app.frameworks << 'Cocoa'
+
   # ===========================================================================================
   # 7. To deploy to an actual device, you will need to create a developer certificate at:
   #    https://developer.apple.com/account/ios/certificate/development
@@ -155,6 +159,9 @@ Motion::Project::App.setup do |app|
     # # pod 'FirebaseUI/Twitter'
     # pod 'FirebaseUI/OAuth' # Used for Sign in with Apple, Twitter, etc
     # pod 'FirebaseUI/Phone'
+
+    # https://github.com/DevRhys/iosvoronoi
+    pod 'iosvoronoi'
   end
 end
 
@@ -177,3 +184,7 @@ def define_icon_defaults!(app)
     }
   }
 end
+
+# https://github.com/archan937/motion-bundler
+# Track and specify files and their mutual dependencies within the :motion Bundler group
+# MotionBundler.setup

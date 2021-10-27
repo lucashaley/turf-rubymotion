@@ -6,12 +6,14 @@ class Machine
                 :db_app,
                 :user,
                 :player,
-                :game
+                :game,
+                :bounding_box
 
   def initialize
     @delegate = UIApplication.sharedApplication.delegate
     @rootview = UIApplication.sharedApplication.delegate.window.rootViewController
     @game = Game.new
+    # @bounding_box = UIScreen.mainScreen.bounds
 
     ####################
     # FIREBASE

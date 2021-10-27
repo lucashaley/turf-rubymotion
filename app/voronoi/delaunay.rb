@@ -48,8 +48,20 @@ class Delaunaycore
           open.delete_at(index)
         end
 
-        for polygon.count-2..0 do |i]
+        # This is really messy
+        for j in polygon.count-2..0 do
+          for k in polygon.count-1..0 do
+            polygon.remove(k)
+            polygon.remove(j)
 
+            # what is this doing
+            # k--
+            next
+          end
+        end
+
+        polygon.each do |p|
+          # tri = Triangle.new
         end
       end
     end
