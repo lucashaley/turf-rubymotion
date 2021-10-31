@@ -15,9 +15,12 @@
 #import <MapKit/MapKit.h>
 #import <CoreTelephony/CoreTelephony.h>
 #import <CoreText/CoreText.h>
+#import <FirebaseAnalytics/FirebaseAnalytics.h>
+#import <GoogleAppMeasurement/GoogleAppMeasurement.h>
 #import <LocalAuthentication/LocalAuthentication.h>
 #import <SafariServices/SafariServices.h>
 #import <Security/Security.h>
+#import <StoreKit/StoreKit.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
@@ -47,7 +50,9 @@
 
 @interface Game: NSObject
 -(IBAction) initialize;
+-(IBAction) init_new_game;
 -(IBAction) generate_new_id;
+-(IBAction) add_pylon:(id) pylon;
 
 @end
 
@@ -59,11 +64,58 @@
 -(IBAction) viewWillAppear:(id) animated;
 -(IBAction) viewDidLoad;
 -(IBAction) locationUpdate:(id) location;
+-(IBAction) renderOverlays;
 -(IBAction) create_new_pylon;
 -(IBAction) touch_down;
 -(IBAction) touch_up;
 -(IBAction) touch_out;
 -(IBAction) set_button_color:(id) color;
+
+@end
+
+@interface MKPolygon: NSObject
+@end
+
+@interface Pylon: Site
+-(IBAction) distance_from_pylon:(id) pylon;
+-(IBAction) distance_from_location:(id) location;
+-(IBAction) to_s;
+-(IBAction) setLocation:(id) location;
+-(IBAction) to_hash;
+
+@end
+
+@interface PylonAnnotation: NSObject
+-(IBAction) initialize:(id) pylon;
+-(IBAction) initWithPylon:(id) pylon;
+-(IBAction) color;
+-(IBAction) pylon_id;
+-(IBAction) set_coordinate:(id) coord;
+-(IBAction) coordinate;
+
+@end
+
+@interface PylonCell: NSObject
+-(IBAction) edges;
+-(IBAction) vertices;
+-(IBAction) overlay;
+
+@end
+
+@interface VoronoiMap: NSObject
+-(IBAction) initialize;
+-(IBAction) voronoi_cells_from_pylons:(id) in_pylons;
+-(IBAction) voronoi_cells;
+-(IBAction) annotations;
+
+@end
+
+@interface Wakawaka: NSObject
+-(IBAction) color;
+-(IBAction) edges;
+-(IBAction) vertices;
+-(IBAction) overlay;
+-(IBAction) to_s;
 
 @end
 
@@ -80,7 +132,8 @@
 @end
 
 @interface LoginController: UIViewController
--(IBAction) viewDidLoad;
+-(IBAction) viewDidAppear:(id) animated;
+-(IBAction) dismiss_modal;
 
 @end
 
@@ -124,11 +177,6 @@
 
 @end
 
-@interface Pylon: NSObject
--(IBAction) life;
-
-@end
-
 @interface Scout: Character
 -(IBAction) initialize;
 
@@ -154,11 +202,29 @@
 
 @end
 
+@interface Delaunaycore: NSObject
+-(IBAction) super_triangle:(id) points;
+
+@end
+
 @interface Edge: NSObject
+-(IBAction) contains_vertex:(id) point;
+
+@end
+
+@interface Geodata: NSObject
 @end
 
 @interface Point: NSObject
 -(IBAction) to_s;
+-(IBAction) dot:(id) other;
+
+@end
+
+@interface Triangle: NSObject
+-(IBAction) contains_in_circumcircle:(id) point;
+-(IBAction) shares_vertex_with:(id) triangle;
+-(IBAction) find_common_edge_with:(id) triangle;
 
 @end
 

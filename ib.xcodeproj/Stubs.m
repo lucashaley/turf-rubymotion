@@ -24,6 +24,24 @@
 @implementation GameController
 @end
 
+@implementation MKPolygon
+@end
+
+@implementation Pylon
+@end
+
+@implementation PylonAnnotation
+@end
+
+@implementation PylonCell
+@end
+
+@implementation VoronoiMap
+@end
+
+@implementation Wakawaka
+@end
+
 @implementation JoinController
 @end
 
@@ -39,9 +57,6 @@
 @implementation NewController
 @end
 
-@implementation Pylon
-@end
-
 @implementation Scout
 @end
 
@@ -54,9 +69,18 @@
 @implementation IEDGE
 @end
 
+@implementation Delaunaycore
+@end
+
 @implementation Edge
 @end
 
+@implementation Geodata
+@end
+
 @implementation Point
+@end
+
+@implementation Triangle
 @end
 

@@ -14,19 +14,19 @@ class Wakawaka # < Cell
   end
 
   def edges
-    puts "\n\nWakawaka::edges"
+    # puts "\n\nWakawaka::edges"
     @cell.halfedges
   end
 
   def vertices
-    puts "\n\nWakawaka::vertices"
+    # puts "\n\nWakawaka::vertices"
     verts = vertices_from_cell(@cell)
     # puts "Verts: #{verts}"
     verts
   end
 
   def overlay
-    puts "\n\nWakawaka::overlay"
+    # puts "\n\nWakawaka::overlay"
     overlay = overlay_from_vertices(vertices)
     overlay.overlayColor = color
     overlay

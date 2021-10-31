@@ -7,12 +7,12 @@ class PylonCell # < NSObject
   def initialize(cell, pylon)
     # this wraps around cell, because we need to add a color?
     # but why can't we subclass?
-    puts "PylonCell::initialize: cell: #{cell}; pylon: #{pylon}"
+    # puts "PylonCell::initialize: cell: #{cell}; pylon: #{pylon}"
     @cell = cell
     @pylon = pylon
     @color = pylon.color
 
-    puts "\n\nPylonCell::initialize cell:#{@cell.description} site:#{@cell.site.description}"
+    # puts "\n\nPylonCell::initialize cell:#{@cell.description} site:#{@cell.site.description}"
   end
 
   def edges

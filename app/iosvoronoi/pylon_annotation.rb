@@ -3,7 +3,7 @@ class PylonAnnotation # < MKPointAnnotation # do we want to do this?
   attr_accessor :title, :pylon, :annotation
 
   def initialize(pylon)
-    puts "\n\nPylonAnnotation::initialize location: #{pylon.location}"
+    # puts "\n\nPylonAnnotation::initialize location: #{pylon.location}"
     # @coordinate = pylon.location
     # @pylon_id = pylon.uuID
     @pylon = pylon
