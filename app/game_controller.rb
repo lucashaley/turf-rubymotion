@@ -10,26 +10,31 @@ class GameController < UIViewController
 
   def viewWillAppear(animated)
     puts "\n\nGameController::viewWillAppear\n\n"
+    # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
+    map_view.showsUserLocation = true
+    map_view.showsPitchControl = true
+    initialize_location_manager
+    add_overlays_and_annotations
 
     ### SET UP LOCATIONS ###
-    @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
-      lm.requestWhenInUseAuthorization
-
-      # constant needs to be capitalized because?
-      lm.desiredAccuracy = KCLLocationAccuracyBest
-      lm.startUpdatingLocation
-      lm.delegate = self
-    end
+    # @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
+    #   lm.requestWhenInUseAuthorization
+    #
+    #   # constant needs to be capitalized because?
+    #   lm.desiredAccuracy = KCLLocationAccuracyBest
+    #   lm.startUpdatingLocation
+    #   lm.delegate = self
+    # end
 
     ### GET PLAYER LOCATION and SET BOUNDS ###
 
     ### OVERLAYS ###
-    @voronoi_map.voronoi_cells.each do |cell|
-      @map_view.addOverlay(cell.overlay)
-    end
-
-    ### ANNOTATIONS ###
-    map_view.addAnnotations(@voronoi_map.annotations)
+    # @voronoi_map.voronoi_cells.each do |cell|
+    #   map_view.addOverlay(cell.overlay)
+    # end
+    #
+    # ### ANNOTATIONS ###
+    # map_view.addAnnotations(@voronoi_map.annotations)
 
 
     # THIS WORKED
@@ -39,25 +44,24 @@ class GameController < UIViewController
 
   def viewDidLoad
     puts "\n\nGameController::viewDidLoad\n\n"
-    # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
-    map_view.showsUserLocation = true
-    map_view.showsPitchControl = true
 
-    location = CLLocationCoordinate2D.new
-    location.latitude = 37.33189332651307
-    location.longitude = -122.03128724123847
-    puts "Location: #{location}"
 
-    span = MKCoordinateSpan.new
-    span.latitudeDelta = 0.05
-    span.longitudeDelta = 0.05
-    puts "Span: #{span}"
+    # location = CLLocationCoordinate2D.new
+    # location.latitude = 37.33189332651307
+    # location.longitude = -122.03128724123847
+    # puts "Location: #{location}"
+    #
+    # span = MKCoordinateSpan.new
+    # span.latitudeDelta = 0.05
+    # span.longitudeDelta = 0.05
+    # puts "Span: #{span}"
+    #
+    # region = MKCoordinateRegion.new
+    # region.span = span
+    # region.center = location
+    # # region.center = @player_location # for some reason we don't have this yet
 
-    region = MKCoordinateRegion.new
-    region.span = span
-    region.center = location
-    # region.center = @player_location # for some reason we don't have this yet
-
+    region = create_play_region({"span" => MKCoordinateSpanMake(0.01, 0.01)})
     map_view.setRegion(region, animated:false)
     map_view.regionThatFits(region)
 
@@ -188,6 +192,7 @@ class GameController < UIViewController
     return rend
   end
 
+  # REFACTOR with method below?
   def renderOverlays
     # puts "\n\nrenderOverlays"
     overlaysToRemove = map_view.overlays.mutableCopy
@@ -201,8 +206,10 @@ class GameController < UIViewController
   end
 
   def create_new_pylon
-    # puts "creating new pylon"
-    p = Pylon.initWithLocation(map_view.centerCoordinate)
+    puts "create_new_pylon"
+    # Ahh this is the cultprit
+    # p = Pylon.initWithLocation(map_view.centerCoordinate)
+    p = Pylon.initWithLocation(@player_location)
     @voronoi_map.pylons.setObject(p, forKey:p.uuID)
     map_view.addAnnotation(PylonAnnotation.new(p).annotation)
     self.renderOverlays
@@ -228,5 +235,58 @@ class GameController < UIViewController
 
   def set_button_color(color)
     button_pylon.tintColor = color
+  end
+
+  def initialize_location_manager
+    puts "initialize_location_manager"
+    @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
+      lm.requestWhenInUseAuthorization
+
+      # constant needs to be capitalized because?
+      lm.desiredAccuracy = KCLLocationAccuracyBest
+      lm.startUpdatingLocation
+      lm.delegate = self
+    end
+  end
+
+  def add_overlays_and_annotations
+    puts "add_overlays_and_annotations"
+    add_overlays
+    add_annotations
+  end
+  def add_overlays
+    puts "add_overlays"
+    @voronoi_map.voronoi_cells.each do |cell|
+      map_view.addOverlay(cell.overlay)
+    end
+  end
+  def add_annotations
+    puts "add_annotations"
+    map_view.addAnnotations(@voronoi_map.annotations)
+  end
+
+  # Use *args?
+  def create_play_region(args = {})
+    puts "create_play_region"
+    location = args[:location] || CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
+    span = args[:span] || MKCoordinateSpanMake(0.05, 0.05)
+    region = MKCoordinateRegionMake(location, span)
+    # unless in_location
+    #   # Default to Apple for simulation
+    #   location = CLLocationCoordinate2D.new
+    #   location.latitude = 37.33189332651307
+    #   location.longitude = -122.03128724123847
+    # end
+    # unless in_span
+    #   # We should probably set up constants for this somewhere
+    #   span = MKCoordinateSpan.new
+    #   span.latitudeDelta = 0.05
+    #   span.longitudeDelta = 0.05
+    # end
+    # region = MKCoordinateRegion.new
+    # region.span = span
+    # region.center = location
+    #
+    # return region
   end
 end
