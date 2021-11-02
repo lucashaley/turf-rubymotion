@@ -9,8 +9,11 @@ class Wakawaka # < Cell
     @pylon = in_pylon
   end
 
+  # def color
+  #   @pylon.color
+  # end
   def color
-    @pylon.color
+    @pylon.lifespan_color || @pylon.color
   end
 
   def edges
