@@ -70,7 +70,7 @@ Motion::Project::App.setup do |app|
   app.info_plist['UIRequiresFullScreen'] = true
   app.info_plist['ITSAppUsesNonExemptEncryption'] = false
 
-  app.frameworks += ['CoreLocation','MessageUI', 'MapKit']
+  app.frameworks += ['CoreLocation','MessageUI', 'MapKit', 'AudioToolbox']
 
   # app.vendor_project('vendor/objcvoronoi-master', :xcode,
   #     :headers_dir => 'objcvoronoi')

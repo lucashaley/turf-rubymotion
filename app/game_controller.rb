@@ -16,19 +16,28 @@ class GameController < UIViewController
     initialize_location_manager
     add_overlays_and_annotations
 
+    # AUDIO SETUP
+    boundary_audio = player_for_audio("boundary")
+
     # THIS WORKED
     # Machine.instance.db_game_ref.child("pylons/pylon-03").setValue("Hairline")
     Machine.instance.db_game_ref.observeEventType(FIRDataEventTypeValue, withBlock:Machine.instance.handleDataResult)
 
     # Testing NSNotifications
+    # PYLON CHANGE
     @pylon_observer = App.notification_center.observe "PylonChange" do |notification|
       puts "PYLON CHANGE"
 
       # render the wakawaka and annotations
       renderOverlays
     end
+    # BOUNDARY EXIT
     @exit_observer = App.notification_center.observe "BoundaryExit" do |notification|
       puts "BOUNDARY EXIT"
+
+      # trying sounds
+      puts "Playing Sound"
+      boundary_audio.play
 
       # set the player state
 
@@ -37,6 +46,7 @@ class GameController < UIViewController
 
       # mark the player's last location
     end
+    # BOUNDARY ENTER
     @enter_observer = App.notification_center.observe "BoundaryEnter" do |notification|
       puts "BOUNDARY ENTER"
 
@@ -47,6 +57,7 @@ class GameController < UIViewController
 
       # remove the players last location
     end
+    # PLAYER DISAPPEAR
     @disappear_observer = App.notification_center.observe "PlayerDisappear" do |notification|
       puts "PLAYER DISAPPEAR"
 
@@ -57,6 +68,7 @@ class GameController < UIViewController
 
       # mark the player's last location
     end
+    # PLAYER APPEAR
     @appear_observer = App.notification_center.observe "PlayerAppear" do |notification|
       puts "PLAYER APPEAR"
 
@@ -72,9 +84,11 @@ class GameController < UIViewController
   def viewDidLoad
     puts "\n\nGameController::viewDidLoad\n\n"
 
-    region = create_play_region({"span" => MKCoordinateSpanMake(0.01, 0.01)})
+    region = create_play_region
     map_view.setRegion(region, animated:false)
-    map_view.regionThatFits(region)
+    # map_view.regionThatFits(region) # this adjusts the region to fir the current view
+    Machine.instance.bounding_box = mkmaprect_for_coord_region(region)
+    @voronoi_map = VoronoiMap.new
 
     @button_fsm = StateMachine::Base.new start_state: :up, verbose: true
     @button_fsm.when :up do |state|
@@ -99,11 +113,10 @@ class GameController < UIViewController
     puts "Starting button state machine\n\n"
     @button_fsm.start!
 
-    coordRegion = MKCoordinateRegionForMapRect(mkmaprect_for_coord_region(region))
-    puts "\ncorrdRegion: #{coordRegion.center}"
+    # coordRegion = MKCoordinateRegionForMapRect(mkmaprect_for_coord_region(region))
+    # puts "\ncorrdRegion: #{coordRegion.center}"
     # Machine.instance.bounding_box = map_view.convertRegion(coordRegion, toRectToView: map_view)
-    Machine.instance.bounding_box = mkmaprect_for_coord_region(region)
-    @voronoi_map = VoronoiMap.new
+
     # @voronoi_mapCIColor.alloc.initWithString("1.0 0.1 0.1 0.3")
 
     test_dict = Hash.new
@@ -158,7 +171,7 @@ class GameController < UIViewController
 
   def locationManager(manager, didFailWithError:error)
     puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
-    App.notification_center.post 'PlayerDisappear'
+    App.notification_center.post "PlayerDisappear"
   end
 
   def locationUpdate(location)
@@ -285,7 +298,16 @@ class GameController < UIViewController
   def create_play_region(args = {})
     puts "create_play_region"
     location = args[:location] || CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
-    span = args[:span] || MKCoordinateSpanMake(0.05, 0.05)
+    span = args[:span] || MKCoordinateSpanMake(0.01, 0.01)
     region = MKCoordinateRegionMake(location, span)
+  end
+
+  def player_for_audio(filename)
+    sound_path = NSBundle.mainBundle.pathForResource(filename, ofType:"mp3")
+    sound_url = NSURL.fileURLWithPath(sound_path)
+    error_ptr = Pointer.new(:object)
+    player_audio = AVAudioPlayer.alloc.initWithContentsOfURL(sound_url, error:error_ptr)
+    puts "AVAudioPlayer error: #{error_ptr[0]}"
+    return player_audio
   end
 end
