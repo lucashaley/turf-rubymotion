@@ -4,9 +4,48 @@ class Pylon < Site # move away from the Site superclass?
                 :color,
                 :title, # not sure what this is for
                 :lifespan,
-                :birthdate
+                :birthdate,
+                :lifespan_multiplier,
+                :machine
 
+  def self.initWithHash(args = {})
+    puts "Pylon initialize"
+    p = Pylon.alloc.init
+    p.location = args[:location] || CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
+    p.color = args[:color]? UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(args[:color])) : UIColor.systemYellowColor
+    p.title = args[:title] || "MungMung"
+    p.lifespan = args[:lifespan] || 10
+    p.lifespan_multiplier = 0.3
+    p.birthdate = args[:birthdate] || Time.now
+
+    _map_point = MKMapPointForCoordinate(p.location)
+    p.setCoord(CGPointMake(_map_point.x, _map_point.y))
+
+    p.machine= StateMachine::Base.new start_state: :active, verbose: true
+    p.machine.when :active do |state|
+      # state.on_entry { puts "PYLON MACHINE ENTRY" }
+      # state.on_exit { puts "PYLON MACHINE EXIT" }
+      state.transition_to :dying,
+        after: p.lifespan * 0.5,
+        action: Proc.new { App.notification_center.post 'PylonChange' }
+    end
+    p.machine.when :dying do |state|
+      state.on_entry { p.lifespan_multiplier = 0.15 }
+      state.transition_to :inactive,
+        after: p.lifespan * 0.5,
+        action: Proc.new { App.notification_center.post 'PylonChange' }
+    end
+    p.machine.when :inactive do |state|
+      state.on_entry { p.lifespan_multiplier = 0.05 }
+    end
+    p.machine.start!
+    App.notification_center.post 'PylonChange'
+    return p
+  end
+
+  # REFACTOR convert to *args
   def self.initWithLocation(location, color = "1.0 0.1 0.1 0.3", title = "MungMung")
+    puts "Pylon initWithLocation"
     p = Pylon.alloc.init
     p.location = location
 
@@ -20,6 +59,7 @@ class Pylon < Site # move away from the Site superclass?
 
     p.setCoord(CGPointMake(map_point.x, map_point.y))
     p.birthdate = Time.now
+    p.lifespan = 10
     return p
   end
 
@@ -61,5 +101,10 @@ class Pylon < Site # move away from the Site superclass?
     _h[:location] = { "latitude"=>@location.latitude, "longitude"=>@location.longitude }
     _h[:birthdate] = @birthdate.utc.to_a
     _h
+  end
+
+  def lifespan_color
+    @lifespan_multiplier? @color.colorWithAlphaComponent(@lifespan_multiplier) : @color
+    # return @color.colorWithAlphaComponent(@lifespan_multiplier)
   end
 end
