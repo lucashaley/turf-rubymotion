@@ -16,50 +16,61 @@ class GameController < UIViewController
     initialize_location_manager
     add_overlays_and_annotations
 
-    ### SET UP LOCATIONS ###
-    # @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
-    #   lm.requestWhenInUseAuthorization
-    #
-    #   # constant needs to be capitalized because?
-    #   lm.desiredAccuracy = KCLLocationAccuracyBest
-    #   lm.startUpdatingLocation
-    #   lm.delegate = self
-    # end
-
-    ### GET PLAYER LOCATION and SET BOUNDS ###
-
-    ### OVERLAYS ###
-    # @voronoi_map.voronoi_cells.each do |cell|
-    #   map_view.addOverlay(cell.overlay)
-    # end
-    #
-    # ### ANNOTATIONS ###
-    # map_view.addAnnotations(@voronoi_map.annotations)
-
-
     # THIS WORKED
     # Machine.instance.db_game_ref.child("pylons/pylon-03").setValue("Hairline")
     Machine.instance.db_game_ref.observeEventType(FIRDataEventTypeValue, withBlock:Machine.instance.handleDataResult)
+
+    # Testing NSNotifications
+    @pylon_observer = App.notification_center.observe "PylonChange" do |notification|
+      puts "PYLON CHANGE"
+
+      # render the wakawaka and annotations
+      renderOverlays
+    end
+    @exit_observer = App.notification_center.observe "BoundaryExit" do |notification|
+      puts "BOUNDARY EXIT"
+
+      # set the player state
+
+      # disable the pylon button
+      button_pylon.enabled = false
+
+      # mark the player's last location
+    end
+    @enter_observer = App.notification_center.observe "BoundaryEnter" do |notification|
+      puts "BOUNDARY ENTER"
+
+      # set the player state
+
+      # enable the pylon button
+      button_pylon.enabled = true
+
+      # remove the players last location
+    end
+    @disappear_observer = App.notification_center.observe "PlayerDisappear" do |notification|
+      puts "PLAYER DISAPPEAR"
+
+      # set the player state
+
+      # disable the pylon button
+      button_pylon.enabled = false
+
+      # mark the player's last location
+    end
+    @appear_observer = App.notification_center.observe "PlayerAppear" do |notification|
+      puts "PLAYER APPEAR"
+
+      # set the player state
+
+      # enable the pylon button
+      button_pylon.enabled = true
+
+      # remove the players last location
+    end
   end
 
   def viewDidLoad
     puts "\n\nGameController::viewDidLoad\n\n"
-
-
-    # location = CLLocationCoordinate2D.new
-    # location.latitude = 37.33189332651307
-    # location.longitude = -122.03128724123847
-    # puts "Location: #{location}"
-    #
-    # span = MKCoordinateSpan.new
-    # span.latitudeDelta = 0.05
-    # span.longitudeDelta = 0.05
-    # puts "Span: #{span}"
-    #
-    # region = MKCoordinateRegion.new
-    # region.span = span
-    # region.center = location
-    # # region.center = @player_location # for some reason we don't have this yet
 
     region = create_play_region({"span" => MKCoordinateSpanMake(0.01, 0.01)})
     map_view.setRegion(region, animated:false)
@@ -96,8 +107,8 @@ class GameController < UIViewController
     # @voronoi_mapCIColor.alloc.initWithString("1.0 0.1 0.1 0.3")
 
     test_dict = Hash.new
-    test_pylon_01 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33374960204376, -122.03019990835675), "0.1 0.1 1.0 0.3", "Jenny")
-    test_pylon_02 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.333062054067, -122.03113705459889), "0.1 0.1 1.0 0.3", "Gilbert")
+    test_pylon_01 = Pylon.initWithHash({:location=>CLLocationCoordinate2DMake(37.33374960204376, -122.03019990835675), :color=>"0.1 0.1 1.0 0.3", :title=>"Jenny"})
+    test_pylon_02 = Pylon.initWithHash({:location=>CLLocationCoordinate2DMake(37.333062054067, -122.03113705459889), :color=>"0.1 0.1 1.0 0.3", :title=>"Lame-o", :lifespan=>6})
     test_pylon_03 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33224134831166, -122.03311472880185), "0.1 0.1 1.0 0.3", "Jenny")
     test_pylon_04 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33077886077367, -122.03048131661657), "0.1 0.1 1.0 0.3", "Gilbert")
     test_pylon_05 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33316896808407, -122.02850863291272))
@@ -137,11 +148,17 @@ class GameController < UIViewController
   # https://github.com/HipByte/RubyMotionSamples/blob/a387842594fd0ac9d8560d2dc64eff4d87534093/ios/Locations/app/locations_controller.rb
   def locationManager(manager, didUpdateToLocation:newLocation, fromLocation:oldLocation)
     # puts "GameController.didUpdateLocation: #{newLocation} to: #{oldLocation}"
+
+    # Check if we are outside the bounds of play
+    unless MKMapRectContainsPoint(Machine.instance.bounding_box, MKMapPointForCoordinate(newLocation.coordinate))
+      App.notification_center.post 'BoundaryExit'
+    end
     locationUpdate(newLocation)
   end
 
   def locationManager(manager, didFailWithError:error)
     puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
+    App.notification_center.post 'PlayerDisappear'
   end
 
   def locationUpdate(location)
@@ -265,28 +282,10 @@ class GameController < UIViewController
     map_view.addAnnotations(@voronoi_map.annotations)
   end
 
-  # Use *args?
   def create_play_region(args = {})
     puts "create_play_region"
     location = args[:location] || CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
     span = args[:span] || MKCoordinateSpanMake(0.05, 0.05)
     region = MKCoordinateRegionMake(location, span)
-    # unless in_location
-    #   # Default to Apple for simulation
-    #   location = CLLocationCoordinate2D.new
-    #   location.latitude = 37.33189332651307
-    #   location.longitude = -122.03128724123847
-    # end
-    # unless in_span
-    #   # We should probably set up constants for this somewhere
-    #   span = MKCoordinateSpan.new
-    #   span.latitudeDelta = 0.05
-    #   span.longitudeDelta = 0.05
-    # end
-    # region = MKCoordinateRegion.new
-    # region.span = span
-    # region.center = location
-    #
-    # return region
   end
 end
