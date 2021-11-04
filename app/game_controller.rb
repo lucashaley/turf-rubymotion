@@ -66,7 +66,7 @@ class GameController < UIViewController
       # set the player state
 
       # disable the pylon button
-      button_pylon.enabled = false
+      # button_pylon.enabled = false
 
       # mark the player's last location
     end
@@ -160,8 +160,13 @@ class GameController < UIViewController
     # puts "GameController.didUpdateLocation: #{newLocation} to: #{oldLocation}"
 
     # Check if we are outside the bounds of play
-    unless MKMapRectContainsPoint(Machine.instance.bounding_box, MKMapPointForCoordinate(newLocation.coordinate))
-      App.notification_center.post 'BoundaryExit'
+    # unless MKMapRectContainsPoint(Machine.instance.bounding_box, MKMapPointForCoordinate(newLocation.coordinate))
+    #   App.notification_center.post 'BoundaryExit'
+    # end
+    if MKMapRectContainsPoint(Machine.instance.bounding_box, MKMapPointForCoordinate(newLocation.coordinate))
+      @local_player.machine.event(:enter_bounds)
+    else
+      @local_player.machine.event(:exit_bounds)
     end
     locationUpdate(newLocation)
   end
