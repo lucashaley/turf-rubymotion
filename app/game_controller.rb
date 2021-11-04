@@ -195,7 +195,9 @@ class GameController < UIViewController
       # create a new one
       # MKPinAnnotationView is depreciated
       # puts "create new view"
-      annotation_view = MKMarkerAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier:PylonViewIdentifier)
+      # annotation_view = MKMarkerAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier:PylonViewIdentifier)
+      annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier:PylonViewIdentifier)
+      annotation_view.image = UIImage.imageNamed("pylon_test_01.png")
       annotation_view.canShowCallout = false
     end
     annotation_view
