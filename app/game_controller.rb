@@ -16,6 +16,8 @@ class GameController < UIViewController
     initialize_location_manager
     add_overlays_and_annotations
 
+    @local_player = Player.new
+
     # AUDIO SETUP
     boundary_audio = player_for_audio("boundary")
 
@@ -113,12 +115,7 @@ class GameController < UIViewController
     puts "Starting button state machine\n\n"
     @button_fsm.start!
 
-    # coordRegion = MKCoordinateRegionForMapRect(mkmaprect_for_coord_region(region))
-    # puts "\ncorrdRegion: #{coordRegion.center}"
-    # Machine.instance.bounding_box = map_view.convertRegion(coordRegion, toRectToView: map_view)
-
-    # @voronoi_mapCIColor.alloc.initWithString("1.0 0.1 0.1 0.3")
-
+    # TEST PYLONS
     test_dict = Hash.new
     test_pylon_01 = Pylon.initWithHash({:location=>CLLocationCoordinate2DMake(37.33374960204376, -122.03019990835675), :color=>"0.1 0.1 1.0 0.3", :title=>"Jenny"})
     test_pylon_02 = Pylon.initWithHash({:location=>CLLocationCoordinate2DMake(37.333062054067, -122.03113705459889), :color=>"0.1 0.1 1.0 0.3", :title=>"Lame-o", :lifespan=>6})
@@ -177,6 +174,7 @@ class GameController < UIViewController
   def locationUpdate(location)
     loc = location.coordinate
     @player_location = location.coordinate
+    @local_player.location = location
     # map_view.setCenterCoordinate(loc)
   end
 
