@@ -140,17 +140,14 @@ class GameController < UIViewController
     #   puts "\ntest_dict::pylon: #{k.UUIDString}\n#{v}"
     # end
     # @pylon_annotation_view = MKAnnotationView.initWithAnnotation(PylonAnnotation, reuseIdentifier: "PylonAnnotationView")
-    map_view.registerClass(PylonAnnotation, forAnnotationViewWithReuseIdentifier: "PylonAnnotation")
+    # map_view.registerClass(PylonAnnotation, forAnnotationViewWithReuseIdentifier: "PylonAnnotation")
     test_dict.each do |k, v|
       @voronoi_map.pylons.setObject(v, forKey:k)
-      map_view.addAnnotation(PylonAnnotation.new(v).annotation)
     end
-
     vcells = @voronoi_map.voronoi_cells_from_pylons(test_dict)
 
-    vcells.each do |vc|
-      map_view.addOverlay(vc.overlay)
-    end
+    add_overlays_and_annotations
+
   end
 
 
@@ -195,14 +192,28 @@ class GameController < UIViewController
     # check to see if it exists and has been queued
     if annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PylonViewIdentifier)
       # puts "using existing view"
-      annotation_view.annotation = pylon
+      # annotation_view.annotation = pylon # what does this line do?
     else
       # create a new one
       # MKPinAnnotationView is depreciated
       # puts "create new view"
       # annotation_view = MKMarkerAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier:PylonViewIdentifier)
       annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier:PylonViewIdentifier)
-      annotation_view.image = UIImage.imageNamed("pylon_test_01.png")
+
+      # use png
+      # annotation_view.image = UIImage.imageNamed("pylon_test_01.png")
+      # dynamically generate
+      ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
+
+      annotation_view.image = ui_renderer.imageWithActions(
+        lambda do |context|
+          path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
+          # UIColor.blueColor.setFill
+          annotation.color.setFill
+          path.fill
+        end
+      )
+
       annotation_view.canShowCallout = false
     end
     annotation_view
@@ -246,7 +257,7 @@ class GameController < UIViewController
     # p = Pylon.initWithLocation(map_view.centerCoordinate)
     p = Pylon.initWithLocation(@player_location)
     @voronoi_map.pylons.setObject(p, forKey:p.uuID)
-    map_view.addAnnotation(PylonAnnotation.new(p).annotation)
+    map_view.addAnnotation(PylonAnnotation.new(p))
     self.renderOverlays
     new_path = "pylons/#{p.uuID.UUIDString}"
     puts "new_path: #{new_path}"
@@ -282,6 +293,7 @@ class GameController < UIViewController
       lm.startUpdatingLocation
       lm.delegate = self
     end
+    map_view.registerClass(PylonAnnotation, forAnnotationViewWithReuseIdentifier: "PylonAnnotation")
   end
 
   def add_overlays_and_annotations

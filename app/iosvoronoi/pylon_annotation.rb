@@ -1,5 +1,5 @@
 # https://github.com/DevRhys/iosvoronoi/blob/master/Example/iosvoronoi/BHECellTowerAnnotation.h
-class PylonAnnotation # < MKPointAnnotation # do we want to do this?
+class PylonAnnotation # < MKPointAnnotation # do we want to do this? Oh wait maybe to get the color
   attr_accessor :title, :pylon, :annotation
 
   def initialize(pylon)
@@ -32,6 +32,7 @@ class PylonAnnotation # < MKPointAnnotation # do we want to do this?
     @pylon.uuID
   end
 
+  # MKAnnotation interface methods
   def set_coordinate(coord)
     # @coordinate = coord
     @annotation.coordinate = coord
