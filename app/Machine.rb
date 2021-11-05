@@ -8,7 +8,9 @@ class Machine
                 :player,
                 :game,
                 :bounding_box,
-                :db_game_ref
+                :db_game_ref,
+                :db_ref,
+                :db
 
   attr_reader :handleDataResult
 
@@ -28,12 +30,12 @@ class Machine
     @db_game_ref = @db.referenceWithPath('games/test-game-01')
 
     @handleDataResult = Proc.new do | data |
-      puts "\n----\nhandleDataResult\n----\n"
-      puts "#{data}"
-      data.children.each do |c|
-        puts "\n#{c.value}"
-      end
-      _test_game = Game.init_from_firebase(data)
+      # puts "\n----\nhandleDataResult\n----\n"
+      # puts "Data: #{data}"
+      # data.children.each do |c|
+      #   puts "\n#{c.value}"
+      # end
+      # _test_game = Game.init_from_firebase(data) # what is this doing here
     end
 
     #####################

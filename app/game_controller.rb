@@ -6,6 +6,7 @@ class GameController < UIViewController
   outlet :button_pylon, UIButton
 
   attr_accessor :voronoi_map,
+                :game,
                 :player_location
 
   def viewWillAppear(animated)
@@ -16,6 +17,8 @@ class GameController < UIViewController
     initialize_location_manager
     add_overlays_and_annotations
 
+    @game = Game.new
+    @fb_game = Game.init_from_firebase({:gamecode => "cqb9g7"})
     @local_player = Player.new
 
     # AUDIO SETUP

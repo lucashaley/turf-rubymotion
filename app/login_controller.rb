@@ -37,7 +37,6 @@ class LoginController < UIViewController
 
                 Dispatch::Queue.new('turf-test-db').async do
                   FIRAuth.auth.signInWithCredential(credential, completion: lambda do | authResult, error |
-                    puts 'holy balls'
                     puts user.profile.name
                     Machine.instance.user = user
                     dismiss_modal
