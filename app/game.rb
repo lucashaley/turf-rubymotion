@@ -24,34 +24,27 @@ class Game
 
   def self.init_from_firebase(data)
     puts "\n\n----\ninit_from_firebase\ndata: #{data}\n\n"
-    _pylons = []
+    @pylons = []
+    _pylons = {}
     # _this_ref = Machine.instance.db.child("games").orderByChild("gamecode").equalTo(data[:gamecode]).on("value")
     _games_ref = Machine.instance.db.referenceWithPath("games")
     _this_query = _games_ref.queryOrderedByChild("gamecode").queryEqualToValue(data[:gamecode])
     puts "_this_query: #{_this_query}"
     _this_query.observeSingleEventOfType(FIRDataEventTypeValue, withBlock:
       lambda do |snapshot|
-        puts "Snapshot: #{snapshot.hasChildren}\n"
         snapshot.children.each do |child|
-          puts "Child value: #{child.value}\n"
+          _pylons = child.value[:pylons]
+          _pylons.each do |p|
+            _new_pylon = Pylon.initWithHash(p[1])
+            # this is awkward, should be part of natural init
+            _new_pylon.set_uuid(p[0])
+            puts "\n_new_pylon: #{_new_pylon}"
+            @pylons << _new_pylon
+          end
         end
+        puts "@pylons:\n#{@pylons}"
       end
     )
-
-
-
-    _this_pylons = _this_query.ref.child("pylons")
-    puts "_this_pylons: #{_this_pylons.URL}"
-    _this_pylons.observeSingleEventOfType(FIRDataEventTypeValue, withBlock:
-      lambda do |snapshot|
-        puts "Snapshot: #{snapshot.hasChildren}\n"
-        snapshot.children.each do |child|
-          puts "Child value: #{child.value}\n"
-        end
-      end
-    )
-
-    puts _pylons
   end
 
   def generate_new_id

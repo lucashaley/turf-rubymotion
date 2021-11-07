@@ -10,8 +10,14 @@ class Pylon < Site # move away from the Site superclass?
 
   def self.initWithHash(args = {})
     puts "Pylon initialize"
+    puts "args: #{args}"
+    puts "latitude: #{args[:location][:latitude]}"
     p = Pylon.alloc.init
-    p.location = args[:location] || CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
+    p.location = args[:location]?
+      CLLocationCoordinate2DMake(
+        args[:location][:latitude],
+        args[:location][:longitude])
+      : CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
     p.color = args[:color]? UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(args[:color])) : UIColor.systemYellowColor
     p.title = args[:title] || "MungMung"
     p.lifespan = args[:lifespan] || 10
@@ -106,5 +112,9 @@ class Pylon < Site # move away from the Site superclass?
   def lifespan_color
     @lifespan_multiplier? @color.colorWithAlphaComponent(@lifespan_multiplier) : @color
     # return @color.colorWithAlphaComponent(@lifespan_multiplier)
+  end
+
+  def set_uuid(new_uuid)
+    self.uuID = NSUUID.alloc.initWithUUIDString(new_uuid)
   end
 end

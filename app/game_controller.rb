@@ -120,8 +120,8 @@ class GameController < UIViewController
 
     # TEST PYLONS
     test_dict = Hash.new
-    test_pylon_01 = Pylon.initWithHash({:location=>CLLocationCoordinate2DMake(37.33374960204376, -122.03019990835675), :color=>"0.1 0.1 1.0 0.3", :title=>"Jenny"})
-    test_pylon_02 = Pylon.initWithHash({:location=>CLLocationCoordinate2DMake(37.333062054067, -122.03113705459889), :color=>"0.1 0.1 1.0 0.3", :title=>"Lame-o", :lifespan=>6})
+    test_pylon_01 = Pylon.initWithHash({:location=>{:latitude=>37.33374960204376, :longitude=>-122.03019990835675}, :color=>"0.1 0.1 1.0 0.3", :title=>"Jenny"})
+    test_pylon_02 = Pylon.initWithHash({:location=>{:latitude=>37.333062054067, :longitude=>-122.03113705459889}, :color=>"0.1 0.1 1.0 0.3", :title=>"Lame-o", :lifespan=>6})
     test_pylon_03 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33224134831166, -122.03311472880185), "0.1 0.1 1.0 0.3", "Jenny")
     test_pylon_04 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33077886077367, -122.03048131661657), "0.1 0.1 1.0 0.3", "Gilbert")
     test_pylon_05 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33316896808407, -122.02850863291272))
@@ -212,8 +212,8 @@ class GameController < UIViewController
         lambda do |context|
           path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
           # UIColor.blueColor.setFill
-          annotation.color.setFill
-          path.fill
+          annotation.color.setStroke
+          path.stroke
         end
       )
 
