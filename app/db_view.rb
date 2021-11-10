@@ -7,6 +7,6 @@ class DbView < UIView
     text = "Doing database"
     font = UIFont.systemFontOfSize(36)
     UIColor.whiteColor.set
-    text.drawAtPoint(CGPoint.new(10, 20), withFont:font)
+    text.drawAtPoint(CGPoint.new(10, 20), withFont: font)
   end
 end

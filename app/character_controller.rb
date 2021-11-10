@@ -10,6 +10,6 @@ class CharacterController < UIViewController
   end
 
   def dismiss_modal
-    self.presentingViewController.dismissViewControllerAnimated(true, completion:nil)
+    presentingViewController.dismissViewControllerAnimated(true, completion: nil)
   end
 end
