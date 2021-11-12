@@ -3,8 +3,10 @@ class Wakawaka # < Cell
 
   attr_accessor :cell, :pylon, :site
 
+  DEBUGGING = false
+
   def initialize(in_cell, in_pylon)
-    # puts "Wakawaka::initialize: pylon: #{in_pylon} cell:#{in_cell}"
+    puts "WAKAWAKA: INITIALIZE" if DEBUGGING
     @cell = in_cell
     @pylon = in_pylon
   end
@@ -13,7 +15,9 @@ class Wakawaka # < Cell
   #   @pylon.color
   # end
   def color
-    @pylon.lifespan_color || @pylon.color
+    puts "WAKAWAKA: COLOR" if DEBUGGING
+    puts "#{pylon}" if DEBUGGING
+    @pylon.lifespan_color
   end
 
   def edges
@@ -29,8 +33,10 @@ class Wakawaka # < Cell
   end
 
   def overlay
-    # puts "\n\nWakawaka::overlay"
+    puts "WAKAWAKA: OVERLAY" if DEBUGGING
+    # THIS IS OTHER PLACES
     overlay = overlay_from_vertices(vertices)
+    # puts "#{overlay}, #{@pylon.title}"
     overlay.overlayColor = color
     overlay
   end

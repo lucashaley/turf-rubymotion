@@ -6,17 +6,25 @@ class Machine
                 :db_app,
                 :user,
                 :player,
-                :game,
                 :bounding_box,
                 :db_game_ref,
                 :db_ref,
-                :db
+                :db,
+                :current_view,
+                :location_manager
 
-  attr_reader :handleDataResult
+  attr_reader :handleDataResult,
+    :game
+
+  DEBUGGING = true
 
   def initialize
+    puts "MACHINE: INITIALIZE".green if DEBUGGING
+
     @delegate = UIApplication.sharedApplication.delegate
     @rootview = UIApplication.sharedApplication.delegate.window.rootViewController
+
+    @tracking = false
     # @game = Game.new
     # @bounding_box = UIScreen.mainScreen.bounds
 
@@ -73,13 +81,13 @@ class Machine
 
     ####################
     # STATEMACHINE
-    @fsm = StateMachine::Base.new start_state: :splash, verbose: true
+    @fsm = StateMachine::Base.new start_state: :splash, verbose: DEBUGGING
 
     ####################
     # SPLASH SCREEN
     @fsm.when :splash do |state|
-      state.on_entry { puts "Machine start splash" }
-      state.on_exit { puts "Machine end splash" }
+      state.on_entry { puts "Machine start splash".pink }
+      state.on_exit { puts "Machine end splash".pink }
 
       state.transition_to :menu,
         after: 10,
@@ -128,19 +136,71 @@ class Machine
     # @rootview.performSegueWithIdentifier(name, sender: self)
   end
 
-  def generate_new_id
-    puts "Machine generate_new_id"
-    # update the UI with the gamecode
-    # https://gist.github.com/mbajur/2aba832a6df3fc31fe7a82d3109cb626
-    new_id = rand(36**6).to_s(36)
-    # can also use NSUUID?
+  # def generate_new_id
+  #   puts "MACHINE: GENERATE_NEW_ID".blue if DEBUGGING
+  #   # update the UI with the gamecode
+  #   # https://gist.github.com/mbajur/2aba832a6df3fc31fe7a82d3109cb626
+  #   new_id = rand(36**6).to_s(36)
+  #   # can also use NSUUID?
+  #
+  #   # check if it exists already
+  #   # puts @db_ref.child("games")
+  # end
 
-    # check if it exists already
-    # puts @db_ref.child("games")
+  def initialize_location_manager
+    puts "MACHINE: INITIALIZE_LOCATION_MANAGER".blue if DEBUGGING
+    @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
+      lm.requestWhenInUseAuthorization
+
+      # constant needs to be capitalized because Ruby
+      lm.desiredAccuracy = KCLLocationAccuracyBest
+      lm.startUpdatingLocation
+      lm.delegate = self
+    end
+  end
+
+  # https://github.com/HipByte/RubyMotionSamples/blob/a387842594fd0ac9d8560d2dc64eff4d87534093/ios/Locations/app/locations_controller.rb
+  def locationManager(manager, didUpdateToLocation:newLocation, fromLocation:oldLocation)
+    puts "MACHINE: DIDUPDATETOLOCATION".blue if DEBUGGING
+    return unless @tracking
+    if MKMapRectContainsPoint(@bounding_box, MKMapPointForCoordinate(newLocation.coordinate))
+      @player.machine.event(:enter_bounds)
+    else
+      @player.machine.event(:exit_bounds)
+    end
+    locationUpdate(newLocation)
+  end
+
+  def locationManager(manager, didFailWithError:error)
+    puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
+    App.notification_center.post "PlayerDisappear"
+  end
+
+  def locationUpdate(location)
+    loc = location.coordinate
+    # @player_location = location.coordinate
+    @layer.location = location
+    # map_view.setCenterCoordinate(loc)
   end
 
   def set_player(player)
-    puts "set_player: #{player}"
+    puts "MACHINE: SET_PLAYER".blue if DEBUGGING
     @player = player
+  end
+
+  def create_new_game
+    puts "MACHINE: CREATE_NEW_GAME".blue if DEBUGGING
+    @game = Game.init_new_game
+  end
+
+  def set_game(game)
+    puts "MACHINE: SET_GAME".blue if DEBUGGING
+    puts "#{game}"
+    @game = game
+  end
+
+  def create_new_pylon(location)
+    puts "MACHINE: CREATE_NEW_PYLON".blue if DEBUGGING
+    @game.create_new_pylon(location)
   end
 end

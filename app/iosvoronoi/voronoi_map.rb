@@ -4,12 +4,15 @@ class VoronoiMap
   # This will be translated into Firebase structure.
   attr_accessor :pylons
 
+  DEBUGGING = false
+
   def initialize
+    # what is the structure of this hash?
     @pylons = Hash.new
   end
 
   def voronoi_cells_from_pylons(in_pylons)
-    # puts "\n\nvoronoi_cells_from_pylons"
+    puts "VORONOI_MAP: VORONOI_CELLS_FROM_PYLONS".blue if DEBUGGING
     voronoi_cells = []
     voronoi = Voronoi.alloc.init
     voronoi.boundingBox = Machine.instance.bounding_box
@@ -36,11 +39,13 @@ class VoronoiMap
   alias :voronoiCellsFromPylons :voronoi_cells_from_pylons
 
   def voronoi_cells
+    puts "VORONOI_MAP: VORONOI_CELLS".blue if DEBUGGING
     return voronoi_cells_from_pylons(@pylons)
   end
   alias :voronoiCells :voronoi_cells
 
   def annotations
+    # What is this doing here
     annotations = []
 
     @pylons.allValues.each do |pylon|

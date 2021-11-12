@@ -1,5 +1,6 @@
 class GameController < UIViewController
   extend IB
+  extend Debugging
   include VoronoiUtilities
 
   outlet :map_view, MKMapView
@@ -9,16 +10,21 @@ class GameController < UIViewController
                 :game,
                 :player_location
 
+  DEBUGGING = true
+
   def viewWillAppear(animated)
-    puts "\n\nGameController::viewWillAppear\n\n"
+    puts "GAME_CONTROLLER: VIEWWILLAPPEAR".light_blue
     # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
     map_view.showsUserLocation = true
     map_view.showsPitchControl = true
     initialize_location_manager
     add_overlays_and_annotations
 
-    @game = Game.new
-    @fb_game = Game.init_from_firebase({:gamecode => "cqb9g7"})
+
+    # Machine.instance.set_game(Game.init_from_firebase({:gamecode => "cqb9g7"}))
+    puts "Machine trying to create a new game"
+    Machine.instance.create_new_game
+
     @local_player = Player.new
 
     # AUDIO SETUP
@@ -26,19 +32,47 @@ class GameController < UIViewController
 
     # THIS WORKED
     # Machine.instance.db_game_ref.child("pylons/pylon-03").setValue("Hairline")
-    Machine.instance.db_game_ref.observeEventType(FIRDataEventTypeValue, withBlock:Machine.instance.handleDataResult)
+    Machine.instance.db_game_ref.observeEventType(FIRDataEventTypeValue,
+      withBlock: Machine.instance.handleDataResult)
 
     # Testing NSNotifications
+    # PYLON NEW
+    @pylon_new_observer = App.notification_center.observe "PylonNew" do |notification|
+      puts "PYLON NEW".yellow
+      puts "notification: #{notification}"
+      puts "notification.name: #{notification.name}"
+      puts "notification.object: #{notification.object}"
+      puts "notification.userInfo: #{notification.userInfo}"
+      puts "notification.object.URL: #{notification.object.ref.URL}"
+      puts "notification.object.key: #{notification.object.key}"
+      puts "#{notification.object.value}"
+      puts "#{notification.object.childrenCount}"
+
+      handle_new_pylon({:uuiD => notification.object.key}.merge notification.object.value)
+    end
     # PYLON CHANGE
     @pylon_observer = App.notification_center.observe "PylonChange" do |notification|
-      puts "PYLON CHANGE"
+      puts "PYLON CHANGE".yellow
 
       # render the wakawaka and annotations
       renderOverlays
     end
+    @pylon_death_observer = App.notification_center.observe "PylonDeath" do |notification|
+      puts "PYLON DEATH".yellow
+      puts "notification: #{notification.object[:object]}"
+      # remove the pylon from the array
+      # test_dict.delete(notification.object.uuid)
+      _removed_pylon = @voronoi_map.pylons.delete(notification.object[:object].uuID)
+      puts "_removed_pylon: #{_removed_pylon}"
+      # redraw everything
+      puts "\nRemoving annotation? #{notification.object[:object].annotation}"
+      map_view.removeAnnotation(notification.object[:object].annotation)
+      renderOverlays
+      add_overlays_and_annotations
+    end
     # BOUNDARY EXIT
     @exit_observer = App.notification_center.observe "BoundaryExit" do |notification|
-      puts "BOUNDARY EXIT"
+      puts "BOUNDARY EXIT".yellow
 
       # trying sounds
       puts "Playing Sound"
@@ -53,7 +87,7 @@ class GameController < UIViewController
     end
     # BOUNDARY ENTER
     @enter_observer = App.notification_center.observe "BoundaryEnter" do |notification|
-      puts "BOUNDARY ENTER"
+      puts "BOUNDARY ENTER".yellow
 
       # set the player state
 
@@ -64,7 +98,7 @@ class GameController < UIViewController
     end
     # PLAYER DISAPPEAR
     @disappear_observer = App.notification_center.observe "PlayerDisappear" do |notification|
-      puts "PLAYER DISAPPEAR"
+      puts "PLAYER DISAPPEAR".yellow
 
       # set the player state
 
@@ -75,7 +109,7 @@ class GameController < UIViewController
     end
     # PLAYER APPEAR
     @appear_observer = App.notification_center.observe "PlayerAppear" do |notification|
-      puts "PLAYER APPEAR"
+      puts "PLAYER APPEAR".yellow
 
       # set the player state
 
@@ -87,7 +121,8 @@ class GameController < UIViewController
   end
 
   def viewDidLoad
-    puts "\n\nGameController::viewDidLoad\n\n"
+    puts "GAMECONTROLLER: VIEWDIDLOAD".light_blue
+    Machine.instance.current_view = self
 
     region = create_play_region
     map_view.setRegion(region, animated:false)
@@ -119,16 +154,17 @@ class GameController < UIViewController
     @button_fsm.start!
 
     # TEST PYLONS
+    puts "Setting up test pylons" if DEBUGGING
     test_dict = Hash.new
-    test_pylon_01 = Pylon.initWithHash({:location=>{:latitude=>37.33374960204376, :longitude=>-122.03019990835675}, :color=>"0.1 0.1 1.0 0.3", :title=>"Jenny"})
-    test_pylon_02 = Pylon.initWithHash({:location=>{:latitude=>37.333062054067, :longitude=>-122.03113705459889}, :color=>"0.1 0.1 1.0 0.3", :title=>"Lame-o", :lifespan=>6})
-    test_pylon_03 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33224134831166, -122.03311472880185), "0.1 0.1 1.0 0.3", "Jenny")
-    test_pylon_04 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33077886077367, -122.03048131661657), "0.1 0.1 1.0 0.3", "Gilbert")
-    test_pylon_05 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33316896808407, -122.02850863291272))
-    test_pylon_06 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33085252713372, -122.02833842959912), "0.1 0.1 1.0 0.3", "Gilbert")
-    test_pylon_07 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33432727342505, -122.03242334715573))
-    test_pylon_08 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.33096123684747, -122.03426217107544))
-    test_pylon_09 = Pylon.initWithLocation(CLLocationCoordinate2DMake(37.3357776539391, -122.02908752007481))
+    test_pylon_01 = Pylon.initWithHash({:location=>{:latitude=>37.33374960204376, :longitude=>-122.03019990835675}, :color=>"0.1 0.1 1.0 0.3", :title=>"test_01"})
+    test_pylon_02 = Pylon.initWithHash({:location=>{:latitude=>37.333062054067, :longitude=>-122.03113705459889}, :color=>"0.1 0.1 1.0 0.3", :title=>"test_02", :lifespan=>0})
+    test_pylon_03 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33224134831166, -122.03311472880185), :color=>"0.1 0.1 1.0 0.3", :title=>"test_03")
+    test_pylon_04 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33077886077367, -122.03048131661657), :color=>"0.1 0.1 1.0 0.3", :title=>"test_04")
+    test_pylon_05 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33316896808407, -122.02850863291272), :title=>"test_05", :lifespan=>0)
+    test_pylon_06 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33085252713372, -122.02833842959912), :color=>"0.1 0.1 1.0 0.3", :title=>"test_06")
+    test_pylon_07 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33432727342505, -122.03242334715573), :title=>"test_07")
+    test_pylon_08 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33096123684747, -122.03426217107544), :title=>"test_08", :lifespan=>20)
+    test_pylon_09 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.3357776539391, -122.02908752007481), :title=>"test_09")
     test_dict[test_pylon_01.uuID] = test_pylon_01
     test_dict[test_pylon_02.uuID] = test_pylon_02
     test_dict[test_pylon_03.uuID] = test_pylon_03
@@ -155,6 +191,20 @@ class GameController < UIViewController
 
 
   ### LOCATION MANAGER DELEGATES ###
+
+  def initialize_location_manager
+    puts "initialize_location_manager"
+    @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
+      lm.requestWhenInUseAuthorization
+
+      # constant needs to be capitalized because?
+      lm.desiredAccuracy = KCLLocationAccuracyBest
+      lm.startUpdatingLocation
+      lm.delegate = self
+    end
+    map_view.registerClass(PylonAnnotation, forAnnotationViewWithReuseIdentifier: "PylonAnnotation")
+  end
+
   # https://github.com/HipByte/RubyMotionSamples/blob/a387842594fd0ac9d8560d2dc64eff4d87534093/ios/Locations/app/locations_controller.rb
   def locationManager(manager, didUpdateToLocation:newLocation, fromLocation:oldLocation)
     # puts "GameController.didUpdateLocation: #{newLocation} to: #{oldLocation}"
@@ -185,8 +235,7 @@ class GameController < UIViewController
 
   PylonViewIdentifier = 'PylonViewIdentifier'
   def mapView(map_view, viewForAnnotation:annotation)
-    # puts "\n\nviewForAnnotation"
-    # if annotation.kind_of?
+
     if annotation == map_view.userLocation
       puts "PLAYER"
       return nil
@@ -227,14 +276,14 @@ class GameController < UIViewController
   end
 
   def mapView(map_view, rendererForOverlay:overlay)
-    # puts "rendererForOverlay: #{overlay}"
+    # puts "GAME_CONTROLLER: MAPVIEW.RENDERFOROVERLAY"
     rend = MKPolygonRenderer.alloc.initWithOverlay(overlay)
     rend.lineWidth = 0.75
     rend.strokeColor = UIColor.colorWithHue(0.5, saturation: 0.9, brightness: 0.9, alpha: 1.0)
     # overlay.fillColor = UIColor.systemGreenColor
     rend.fillColor = UIColor.colorWithHue(0.2, saturation: 0.9, brightness: 0.9, alpha: 0.3)
     unless overlay.overlayColor.nil?
-      rend.fillColor = overlay.overlayColor
+      rend.fillColor = UIColor.colorWithCGColor(overlay.overlayColor.CGColor)
     end
     rend.lineJoin = KCGLineJoinMiter
 
@@ -252,19 +301,6 @@ class GameController < UIViewController
     vcells.each do |cell|
       map_view.addOverlay(cell.overlay)
     end
-  end
-
-  def create_new_pylon
-    puts "create_new_pylon"
-    # Ahh this is the cultprit
-    # p = Pylon.initWithLocation(map_view.centerCoordinate)
-    p = Pylon.initWithLocation(@player_location)
-    @voronoi_map.pylons.setObject(p, forKey:p.uuID)
-    map_view.addAnnotation(PylonAnnotation.new(p))
-    self.renderOverlays
-    new_path = "pylons/#{p.uuID.UUIDString}"
-    puts "new_path: #{new_path}"
-    Machine.instance.db_game_ref.child(new_path).setValue(p.to_hash)
   end
 
   def touch_down
@@ -286,37 +322,24 @@ class GameController < UIViewController
     button_pylon.tintColor = color
   end
 
-  def initialize_location_manager
-    puts "initialize_location_manager"
-    @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
-      lm.requestWhenInUseAuthorization
-
-      # constant needs to be capitalized because?
-      lm.desiredAccuracy = KCLLocationAccuracyBest
-      lm.startUpdatingLocation
-      lm.delegate = self
-    end
-    map_view.registerClass(PylonAnnotation, forAnnotationViewWithReuseIdentifier: "PylonAnnotation")
-  end
-
   def add_overlays_and_annotations
     puts "add_overlays_and_annotations"
     add_overlays
     add_annotations
   end
   def add_overlays
-    puts "add_overlays"
+    puts "GAME_CONTROLLER: ADD_OVERLAYS".blue if DEBUGGING
     @voronoi_map.voronoi_cells.each do |cell|
       map_view.addOverlay(cell.overlay)
     end
   end
   def add_annotations
-    puts "add_annotations"
+    puts "GAME_CONTROLLER: ADD_ANNOTATIIONS".blue if DEBUGGING
     map_view.addAnnotations(@voronoi_map.annotations)
   end
 
   def create_play_region(args = {})
-    puts "create_play_region"
+    puts "GAME_CONTROLLER: CREATE_PLAY_REGION".blue if DEBUGGING
     location = args[:location] || CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
     span = args[:span] || MKCoordinateSpanMake(0.01, 0.01)
     region = MKCoordinateRegionMake(location, span)
@@ -327,7 +350,36 @@ class GameController < UIViewController
     sound_url = NSURL.fileURLWithPath(sound_path)
     error_ptr = Pointer.new(:object)
     player_audio = AVAudioPlayer.alloc.initWithContentsOfURL(sound_url, error:error_ptr)
-    puts "AVAudioPlayer error: #{error_ptr[0]}"
+    puts "AVAudioPlayer error: #{error_ptr[0]}" if error_ptr[0]
     return player_audio
+  end
+
+  def create_new_pylon
+    puts "GAME_CONTROLLER: CREATE_NEW_PYLON".blue if DEBUGGING
+
+    # # Ahh this is the cultprit
+    # # p = Pylon.initWithLocation(map_view.centerCoordinate)
+    # p = Pylon.initWithLocation(@player_location)
+    # @voronoi_map.pylons.setObject(p, forKey:p.uuID)
+    # map_view.addAnnotation(PylonAnnotation.new(p))
+    # self.renderOverlays
+    # new_path = "pylons/#{p.uuID.UUIDString}"
+    # puts "new_path: #{new_path}"
+    # Machine.instance.db_game_ref.child(new_path).setValue(p.to_hash)
+
+    # this gets it into the DB, but not on screen
+    # @fb_game.create_new_pylon(@player_location)
+    Machine.instance.create_new_pylon(@player_location)
+  end
+
+  def handle_new_pylon(data)
+    puts "GAME_CONTROLLER: HANDLE_NEW_PYLON" if DEBUGGING
+
+    _p = Pylon.initWithHash(data)
+    puts "_p: #{_p}"
+    _p.uuID = data[:uuID]
+
+    @voronoi_map.pylons.setObject(_p, forKey:_p.uuID)
+    renderOverlays
   end
 end

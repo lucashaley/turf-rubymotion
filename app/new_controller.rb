@@ -8,11 +8,18 @@ class NewController < UIViewController
   outlet :cancel_button, UIButton
 
   def viewDidLoad
-    # mapview.setCenterCoordinate(CLLocationCoordinate2D.new(50, 50), animated:true)
+    puts "NEWCONTROLLER: VIEWDIDLOAD".light_blue
+    Machine.instance.current_view = self
+
+    # get the current player's location
+    Machine.instance.initialize_location_manager
 
     # create a new game in Firebase and retrieve its ID
-    @new_id = Machine.instance.generate_new_id
-    gamecode.text = @new_id
+    Machine.instance.create_new_game
+    puts "New game uuID: #{Machine.instance.game.uuID.UUIDString}"
+
+    # set player in db
+
 
     Machine.instance.segue("ToCharacter")
   end
