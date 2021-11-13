@@ -29,62 +29,77 @@ class Game
       .setValue({:gamecode => _game.gamecode},
       withCompletionBlock:
         lambda do | error, ref |
-          @firebase_ref = ref
+          _game.firebase_ref = ref
+          _game.set_ref(ref)
           puts "\nNew game reference: #{ref}".red
-          ref.child("pylons/plug").setValue("foo")
+          # ref.child("pylons/plug").setValue("foo")
+          # _game.firebase_ref.child("pylons/plug").setValue("foo")
+
+          # Add some pylons in for testing
+          # These should end up being the starting positions
+          puts ("Creating test pylons")
+          _game.create_new_pylon(CLLocationCoordinate2DMake(37.33350562755614, -122.02849767766669))
+          _game.create_new_pylon(CLLocationCoordinate2DMake(37.33063930240253, -122.03102976399545))
         end
     )
     return _game
   end
 
-  def self.init_from_firebase(data)
-    puts "GAME: INIT_FROM_FIREBASE".green if DEBUGGING
-    _game = Game.new
-    _game.gamecode = data[:gamecode] || "abc123"
-    _game.pylons = []
-    _pylons = {}
-    # _this_ref = Machine.instance.db.child("games").orderByChild("gamecode").equalTo(data[:gamecode]).on("value")
-    _games_ref = Machine.instance.db.referenceWithPath("games")
-    _this_query = _games_ref.queryOrderedByChild("gamecode")
-                            .queryEqualToValue(data[:gamecode])
-    # puts "_this_query: #{_this_query}"
-    _this_query.getDataWithCompletionBlock(
-      lambda do | error, snapshot |
-        snapshot.children.each do |child|
-          puts "\nchild: #{child.ref.URL}"
-          # This seems really crude
-          # and probably problematic
-          _game.firebase_ref = child.ref
-          # SET UP OBSERVERS
-          # It would be nice to do this in the controller?
-          # _game.firebase_ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
-          #   withBlock: proc do |data|
-          #     puts "New pylon data: #{data}"
-          #     App.notification_center.post("PylonNew", data)
-          #   end)
-          #
-          # _pylons = child.value[:pylons]
-          # _pylons.each do |p|
-          #   _new_pylon = Pylon.initWithHash(p[1])
-          #   # this is awkward, should be part of natural init
-          #   _new_pylon.set_uuid(p[0])
-          #   # puts "\n_new_pylon: #{_new_pylon}"
-          #   _game.pylons << _new_pylon
-          # end
-        end
-        # puts "@pylons:\n#{_game.pylons}"
+  # def self.init_from_firebase(data)
+  #   puts "GAME: INIT_FROM_FIREBASE".green if DEBUGGING
+  #   _game = Game.new
+  #   _game.gamecode = data[:gamecode] || "abc123"
+  #   _game.pylons = []
+  #   _pylons = {}
+  #   # _this_ref = Machine.instance.db.child("games").orderByChild("gamecode").equalTo(data[:gamecode]).on("value")
+  #   _games_ref = Machine.instance.db.referenceWithPath("games")
+  #   _this_query = _games_ref.queryOrderedByChild("gamecode")
+  #                           .queryEqualToValue(data[:gamecode])
+  #   # puts "_this_query: #{_this_query}"
+  #   _this_query.getDataWithCompletionBlock(
+  #     lambda do | error, snapshot |
+  #       snapshot.children.each do |child|
+  #         puts "\nchild: #{child.ref.URL}".red
+  #         # This seems really crude
+  #         # and probably problematic
+  #         _game.firebase_ref = child.ref
+  #         _game.set_ref(child.ref)
+  #         puts "new firebase ref: #{_game.firebase_ref}".red
+  #         # SET UP OBSERVERS
+  #         # It would be nice to do this in the controller?
+  #         # _game.firebase_ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
+  #         #   withBlock: proc do |data|
+  #         #     puts "New pylon data: #{data}"
+  #         #     App.notification_center.post("PylonNew", data)
+  #         #   end)
+  #         #
+  #         # _pylons = child.value[:pylons]
+  #         # _pylons.each do |p|
+  #         #   _new_pylon = Pylon.initWithHash(p[1])
+  #         #   # this is awkward, should be part of natural init
+  #         #   _new_pylon.set_uuid(p[0])
+  #         #   # puts "\n_new_pylon: #{_new_pylon}"
+  #         #   _game.pylons << _new_pylon
+  #         # end
+  #       end
+  #       # puts "@pylons:\n#{_game.pylons}"
+  #
+  #       _game.firebase_ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
+  #         withBlock: proc do |data|
+  #           puts "New pylon data: #{data}"
+  #           puts "#{data.childrenCount}"
+  #           puts "#{data.value}"
+  #           App.notification_center.post("PylonNew", data)
+  #         end)
+  #     end
+  #   )
+  #
+  #   return _game
+  # end
 
-        _game.firebase_ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
-          withBlock: proc do |data|
-            puts "New pylon data: #{data}"
-            puts "#{data.childrenCount}"
-            puts "#{data.value}"
-            App.notification_center.post("PylonNew", data)
-          end)
-      end
-    )
-
-    return _game
+  def set_ref(ref)
+    puts "GAME: SET_REF".blue if DEBUGGING
+    @firebase_ref = ref
   end
 
   def generate_new_id
@@ -102,10 +117,12 @@ class Game
 
     # CREATE NEW PYLON OBJECT
     _new_pylon = Pylon.initWithHash({:location => location})
+    puts "_new_pylon: #{_new_pylon}"
+    puts "firebase_ref: #{@firebase_ref}"
 
     # SEND THE NEW PYLON TO FIREBASE
     # this should probably be threaded
-    @firebase_ref.child("pylons/#{_new_pylon.uuID.UUIDString}").setValue(_new_pylon.to_hash) if @firebase_ref
+    @firebase_ref.child("pylons/#{_new_pylon.uuID.UUIDString}").setValue(_new_pylon.to_hash) # if @firebase_ref
 
     # ONCE ITS POSTED, THE MODEL SHOULD COLLECT IT
   end
@@ -119,11 +136,10 @@ class Game
   end
 
   def start_observing_pylons
-    ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
+    puts "GAME: START_OBSERVING_PYLONS".blue if DEBUGGING
+
+    @firebase_ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
       withBlock: proc do |data|
-        puts "New pylon data: #{data}"
-        puts "#{data.childrenCount}"
-        puts "#{data.value}"
         App.notification_center.post("PylonNew", data)
       end
     )

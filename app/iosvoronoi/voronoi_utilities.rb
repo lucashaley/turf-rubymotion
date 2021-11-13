@@ -1,10 +1,10 @@
 # https://github.com/DevRhys/iosvoronoi/blob/master/Example/iosvoronoi/BHEUtilities.m
 module VoronoiUtilities
 
-  DEBUGGING = false
+  DEBUGGING = true
 
   def vertices_from_cell(cell)
-    # puts "\nVoronoiUtilities::vertices_from_cell: #{cell} halfedges: #{cell.halfedges}"
+    puts "VORONOI_UTILITIES: VERTICES_FROM_CELL".blue if DEBUGGING
     vertices = []
 
     cell.halfedges.each do |halfedge|
@@ -24,6 +24,10 @@ module VoronoiUtilities
       unless vertices.containsObject(end_point)
         vertices.addObject(end_point)
       end
+    end
+    puts "vertices:".red
+    vertices.each do |v|
+      puts v
     end
     vertices
   end

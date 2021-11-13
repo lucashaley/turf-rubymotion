@@ -4,9 +4,10 @@ class VoronoiMap
   # This will be translated into Firebase structure.
   attr_accessor :pylons
 
-  DEBUGGING = false
+  DEBUGGING = true
 
   def initialize
+    puts "VORONOI_MAP INITIALIZE".green if DEBUGGING
     # what is the structure of this hash?
     @pylons = Hash.new
   end
@@ -56,5 +57,16 @@ class VoronoiMap
     end
 
     annotations
+  end
+
+  def add_pylon(pylon)
+    puts "VORONOI_MAP ADD_PYLON".blue if DEBUGGING
+    puts "pylon: #{pylon}"
+    @pylons.setObject(pylon, forKey:pylon.uuID)
+
+    puts "pylons: "
+    @pylons.each do |k, v|
+      puts v
+    end
   end
 end

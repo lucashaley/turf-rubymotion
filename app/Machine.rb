@@ -121,6 +121,7 @@ class Machine
   #####################
   # SINGLETON
   def self.instance
+    # puts "MACHINE: INSTANCE"
     @instance ||= self.new
   end
 

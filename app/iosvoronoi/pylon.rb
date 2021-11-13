@@ -1,5 +1,6 @@
 # https://github.com/DevRhys/iosvoronoi/blob/master/Example/iosvoronoi/BHEVoronoiCellTower.h
 class Pylon < Site # move away from the Site superclass?
+  extend Debugging
   attr_accessor :location,
                 :annotation,
                 :color,
@@ -9,35 +10,37 @@ class Pylon < Site # move away from the Site superclass?
                 :lifespan_multiplier,
                 :machine
 
-  DEBUGGING = false
+  DEBUGGING = true
 
   def self.initWithHash(args = {})
     puts "PYLON: INITWITHHASH".green if DEBUGGING
     puts "args: #{args}".green if DEBUGGING
+    symbol_args = recursive_symbolize_keys(args)
+    puts symbol_args
 
     p = Pylon.alloc.init
 
     # But sometimes we do pass a Location
-    case args[:location]
+    case symbol_args[:location]
       when CLLocationCoordinate2D
-        # puts "CLLocationCoordinate2D"
-        p.location = args[:location]
+        puts "CLLocationCoordinate2D"
+        p.location = symbol_args[:location]
       when Hash
-        # puts "Hash"
+        puts "Hash"
         p.location = CLLocationCoordinate2DMake(
-          args[:location][:latitude],
-          args[:location][:longitude])
+          symbol_args[:location][:latitude],
+          symbol_args[:location][:longitude])
       else
-        # puts "Empty?"
-        p.location = CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
+        puts "Empty?"
+        p.location = CLLocationCoordinate2DMake(37.3318933, -122.03128724)
     end
     # switching to CIColor
     # p.color = args[:color]? UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(args[:color])) : UIColor.systemYellowColor
-    p.color = args[:color]? CIColor.alloc.initWithString(args[:color]) : CIColor.alloc.initWithColor(UIColor.systemYellowColor)
-    p.title = args[:title] || "MungMung"
-    p.lifespan = args[:lifespan] || 10
+    p.color = symbol_args[:color]? CIColor.alloc.initWithString(args[:color]) : CIColor.alloc.initWithColor(UIColor.systemYellowColor)
+    p.title = symbol_args[:title] || "MungMung"
+    p.lifespan = symbol_args[:lifespan] || 0
     p.lifespan_multiplier = 0.3
-    p.birthdate = args[:birthdate] || Time.now
+    p.birthdate = symbol_args[:birthdate] || Time.now
     # p.uuID = args[:uuid] || NSUUID.alloc.init # don't need this, Site super takes care of it?
 
     _map_point = MKMapPointForCoordinate(p.location)
@@ -144,7 +147,10 @@ class Pylon < Site # move away from the Site superclass?
   end
 
   def set_uuid(new_uuid)
+    puts "PYLON SET_UUID".blue if DEBUGGING
+    puts "new_uuid: #{new_uuid}"
     self.uuID = NSUUID.alloc.initWithUUIDString(new_uuid)
+    puts "uuid: #{self.uuID}"
   end
 
   def set_annotation(new_annotation)

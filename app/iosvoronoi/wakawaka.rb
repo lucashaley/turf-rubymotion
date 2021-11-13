@@ -3,7 +3,7 @@ class Wakawaka # < Cell
 
   attr_accessor :cell, :pylon, :site
 
-  DEBUGGING = false
+  DEBUGGING = true
 
   def initialize(in_cell, in_pylon)
     puts "WAKAWAKA: INITIALIZE" if DEBUGGING
@@ -26,7 +26,7 @@ class Wakawaka # < Cell
   end
 
   def vertices
-    # puts "\n\nWakawaka::vertices"
+    puts "WAKAWAKA: VERTICES" if DEBUGGING
     verts = vertices_from_cell(@cell)
     # puts "Verts: #{verts}"
     verts
@@ -34,7 +34,7 @@ class Wakawaka # < Cell
 
   def overlay
     puts "WAKAWAKA: OVERLAY" if DEBUGGING
-    # THIS IS OTHER PLACES
+    # THIS IS OTHER PLACES TOO?
     overlay = overlay_from_vertices(vertices)
     # puts "#{overlay}, #{@pylon.title}"
     overlay.overlayColor = color

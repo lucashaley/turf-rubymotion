@@ -21,9 +21,9 @@ class GameController < UIViewController
     add_overlays_and_annotations
 
 
-    # Machine.instance.set_game(Game.init_from_firebase({:gamecode => "cqb9g7"}))
-    puts "Machine trying to create a new game"
-    Machine.instance.create_new_game
+    # Start observing
+    puts "Trying to start observing"
+    Machine.instance.game.start_observing_pylons
 
     @local_player = Player.new
 
@@ -32,23 +32,15 @@ class GameController < UIViewController
 
     # THIS WORKED
     # Machine.instance.db_game_ref.child("pylons/pylon-03").setValue("Hairline")
-    Machine.instance.db_game_ref.observeEventType(FIRDataEventTypeValue,
-      withBlock: Machine.instance.handleDataResult)
+    # Machine.instance.db_game_ref.observeEventType(FIRDataEventTypeValue,
+    #   withBlock: Machine.instance.handleDataResult)
 
     # Testing NSNotifications
     # PYLON NEW
     @pylon_new_observer = App.notification_center.observe "PylonNew" do |notification|
       puts "PYLON NEW".yellow
-      puts "notification: #{notification}"
-      puts "notification.name: #{notification.name}"
-      puts "notification.object: #{notification.object}"
-      puts "notification.userInfo: #{notification.userInfo}"
-      puts "notification.object.URL: #{notification.object.ref.URL}"
-      puts "notification.object.key: #{notification.object.key}"
-      puts "#{notification.object.value}"
-      puts "#{notification.object.childrenCount}"
 
-      handle_new_pylon({:uuiD => notification.object.key}.merge notification.object.value)
+      handle_new_pylon({:uuID => notification.object.key}.merge notification.object.value)
     end
     # PYLON CHANGE
     @pylon_observer = App.notification_center.observe "PylonChange" do |notification|
@@ -154,36 +146,39 @@ class GameController < UIViewController
     @button_fsm.start!
 
     # TEST PYLONS
-    puts "Setting up test pylons" if DEBUGGING
-    test_dict = Hash.new
-    test_pylon_01 = Pylon.initWithHash({:location=>{:latitude=>37.33374960204376, :longitude=>-122.03019990835675}, :color=>"0.1 0.1 1.0 0.3", :title=>"test_01"})
-    test_pylon_02 = Pylon.initWithHash({:location=>{:latitude=>37.333062054067, :longitude=>-122.03113705459889}, :color=>"0.1 0.1 1.0 0.3", :title=>"test_02", :lifespan=>0})
-    test_pylon_03 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33224134831166, -122.03311472880185), :color=>"0.1 0.1 1.0 0.3", :title=>"test_03")
-    test_pylon_04 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33077886077367, -122.03048131661657), :color=>"0.1 0.1 1.0 0.3", :title=>"test_04")
-    test_pylon_05 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33316896808407, -122.02850863291272), :title=>"test_05", :lifespan=>0)
-    test_pylon_06 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33085252713372, -122.02833842959912), :color=>"0.1 0.1 1.0 0.3", :title=>"test_06")
-    test_pylon_07 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33432727342505, -122.03242334715573), :title=>"test_07")
-    test_pylon_08 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33096123684747, -122.03426217107544), :title=>"test_08", :lifespan=>20)
-    test_pylon_09 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.3357776539391, -122.02908752007481), :title=>"test_09")
-    test_dict[test_pylon_01.uuID] = test_pylon_01
-    test_dict[test_pylon_02.uuID] = test_pylon_02
-    test_dict[test_pylon_03.uuID] = test_pylon_03
-    test_dict[test_pylon_04.uuID] = test_pylon_04
-    test_dict[test_pylon_05.uuID] = test_pylon_05
-    test_dict[test_pylon_06.uuID] = test_pylon_06
-    test_dict[test_pylon_07.uuID] = test_pylon_07
-    test_dict[test_pylon_08.uuID] = test_pylon_08
-    test_dict[test_pylon_09.uuID] = test_pylon_09
-
+    # puts "Setting up test pylons" if DEBUGGING
+    # ---
+    # test_dict = Hash.new
+    # test_pylon_01 = Pylon.initWithHash({:location=>{:latitude=>37.33374960204376, :longitude=>-122.03019990835675}, :color=>"0.1 0.1 1.0 0.3", :title=>"test_01"})
+    # test_pylon_02 = Pylon.initWithHash({:location=>{:latitude=>37.333062054067, :longitude=>-122.03113705459889}, :color=>"0.1 0.1 1.0 0.3", :title=>"test_02", :lifespan=>0})
+    # test_pylon_03 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33224134831166, -122.03311472880185), :color=>"0.1 0.1 1.0 0.3", :title=>"test_03")
+    # test_pylon_04 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33077886077367, -122.03048131661657), :color=>"0.1 0.1 1.0 0.3", :title=>"test_04")
+    # test_pylon_05 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33316896808407, -122.02850863291272), :title=>"test_05", :lifespan=>0)
+    # test_pylon_06 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33085252713372, -122.02833842959912), :color=>"0.1 0.1 1.0 0.3", :title=>"test_06")
+    # test_pylon_07 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33432727342505, -122.03242334715573), :title=>"test_07")
+    # test_pylon_08 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.33096123684747, -122.03426217107544), :title=>"test_08", :lifespan=>20)
+    # test_pylon_09 = Pylon.initWithHash(:location=>CLLocationCoordinate2DMake(37.3357776539391, -122.02908752007481), :title=>"test_09")
+    # test_dict[test_pylon_01.uuID] = test_pylon_01
+    # test_dict[test_pylon_02.uuID] = test_pylon_02
+    # test_dict[test_pylon_03.uuID] = test_pylon_03
+    # test_dict[test_pylon_04.uuID] = test_pylon_04
+    # test_dict[test_pylon_05.uuID] = test_pylon_05
+    # test_dict[test_pylon_06.uuID] = test_pylon_06
+    # test_dict[test_pylon_07.uuID] = test_pylon_07
+    # test_dict[test_pylon_08.uuID] = test_pylon_08
+    # test_dict[test_pylon_09.uuID] = test_pylon_09
+    # ---
     # test_dict.each do |k, v|
     #   puts "\ntest_dict::pylon: #{k.UUIDString}\n#{v}"
     # end
     # @pylon_annotation_view = MKAnnotationView.initWithAnnotation(PylonAnnotation, reuseIdentifier: "PylonAnnotationView")
     # map_view.registerClass(PylonAnnotation, forAnnotationViewWithReuseIdentifier: "PylonAnnotation")
-    test_dict.each do |k, v|
-      @voronoi_map.pylons.setObject(v, forKey:k)
-    end
-    vcells = @voronoi_map.voronoi_cells_from_pylons(test_dict)
+    # ---
+    # test_dict.each do |k, v|
+    #   @voronoi_map.pylons.setObject(v, forKey:k)
+    # end
+    # vcells = @voronoi_map.voronoi_cells_from_pylons(test_dict)
+    # ---
 
     add_overlays_and_annotations
 
@@ -292,9 +287,15 @@ class GameController < UIViewController
 
   # REFACTOR with method below?
   def renderOverlays
-    # puts "\n\nrenderOverlays"
-    overlaysToRemove = map_view.overlays.mutableCopy
-    map_view.removeOverlays(overlaysToRemove)
+    puts "GAME_CONTROLLER RENDEROVERLAYS".blue if DEBUGGING
+
+    if map_view.overlays then
+      overlaysToRemove = map_view.overlays.mutableCopy
+      map_view.removeOverlays(overlaysToRemove)
+    end
+
+    # This is a hack to get past having one pylon
+    return if @voronoi_map.pylons.length < 2
 
     vcells = @voronoi_map.voronoiCells
 
@@ -373,13 +374,13 @@ class GameController < UIViewController
   end
 
   def handle_new_pylon(data)
-    puts "GAME_CONTROLLER: HANDLE_NEW_PYLON" if DEBUGGING
+    puts "GAME_CONTROLLER: HANDLE_NEW_PYLON".blue if DEBUGGING
 
     _p = Pylon.initWithHash(data)
-    puts "_p: #{_p}"
-    _p.uuID = data[:uuID]
+    _p.set_uuid data[:uuID]
 
-    @voronoi_map.pylons.setObject(_p, forKey:_p.uuID)
+    @voronoi_map.add_pylon(_p)
+
     renderOverlays
   end
 end
