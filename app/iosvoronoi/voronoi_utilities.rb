@@ -65,12 +65,16 @@ module VoronoiUtilities
 
     a = MKMapPointForCoordinate(CLLocationCoordinate2DMake( \
       region.center.latitude + region.span.latitudeDelta / 2, \
-      region.center.longitude - region.span.longitudeDelta / 2 ))
+      region.center.longitude - region.span.longitudeDelta / 2
+      )
+    )
     # puts "a: #{a.x}, #{a.y}"
     b = MKMapPointForCoordinate(CLLocationCoordinate2DMake( \
       region.center.latitude - region.span.latitudeDelta / 2, \
-      region.center.longitude + region.span.longitudeDelta / 2 ))
+      region.center.longitude + region.span.longitudeDelta / 2
+      )
+    )
     # puts "b: #{b.x}, #{b.y}"
-    rect = MKMapRectMake([a.x, b.x].min, [a.y, b.y].min, (a.x - b.x).abs, (a.y - b.y).abs)
+    MKMapRectMake([a.x, b.x].min, [a.y, b.y].min, (a.x - b.x).abs, (a.y - b.y).abs)
   end
 end

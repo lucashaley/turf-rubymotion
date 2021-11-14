@@ -18,13 +18,13 @@ class LoginController < UIViewController
     puts "viewDidAppear"
 
     config = GIDConfiguration.alloc.initWithClientID(FIRApp.defaultApp.options.clientID)
-    puts 'config: ' + config.clientID
+    puts "config: #{config.clientID}"
 
     # This signs in anew every time.
     # It would be good to check if they're already logged in.
     GIDSignIn.sharedInstance.signInWithConfiguration(config,
               presentingViewController: self,
-              callback: lambda do | user, error |
+              callback: lambda do |user, error|
                 puts 'mungbeans'
                 unless error.nil?
                   puts error.localizedDescription
@@ -35,20 +35,20 @@ class LoginController < UIViewController
                 credential = FIRGoogleAuthProvider.credentialWithIDToken(authentication.idToken,
                                      accessToken: authentication.accessToken)
 
-                Dispatch::Queue.new('turf-test-db').async do
-                  FIRAuth.auth.signInWithCredential(credential, completion: lambda do | authResult, error |
+                Dispatch::Queue.new("turf-test-db").async do
+                  FIRAuth.auth.signInWithCredential(credential, completion: lambda do |authResult, error|
                     puts user.profile.name
                     Machine.instance.user = user
                     dismiss_modal
                   end)
                 end
               end
-            )
+    )
 
     # performSegueWithIdentifier("LoginToMenu", sender: nil)
   end
 
   def dismiss_modal
-    self.presentingViewController.dismissViewControllerAnimated(true, completion:nil)
+    self.presentingViewController.dismissViewControllerAnimated(true, completion: nil)
   end
 end

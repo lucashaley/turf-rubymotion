@@ -8,7 +8,7 @@ class JoinController < UIViewController
   outlet :cancel_button, UIButton
 
   def viewDidLoad
-
+    # Do some stuff in here
   end
 
   def cancel_new_game

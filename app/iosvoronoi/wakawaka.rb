@@ -16,7 +16,7 @@ class Wakawaka # < Cell
   # end
   def color
     puts "WAKAWAKA: COLOR" if DEBUGGING
-    puts "#{pylon}" if DEBUGGING
+    puts @pylon if DEBUGGING
     @pylon.lifespan_color
   end
 
@@ -28,8 +28,6 @@ class Wakawaka # < Cell
   def vertices
     puts "WAKAWAKA: VERTICES" if DEBUGGING
     verts = vertices_from_cell(@cell)
-    # puts "Verts: #{verts}"
-    verts
   end
 
   def overlay
