@@ -2,7 +2,7 @@
 class PylonCell # < NSObject
   include VoronoiUtilities
 
-  attr_accessor :cell, :pylon #, :color
+  attr_accessor :cell, :pylon
 
   def initialize(cell, pylon)
     # this wraps around cell, because we need to add a color?
@@ -24,8 +24,8 @@ class PylonCell # < NSObject
   end
 
   def overlay
-    puts "PylonCell::overlay"
-    overlay = overlay_from_vertices(self.vertices)
+    puts "PYLONCELL OVVERLAY".blue
+    overlay = overlay_from_vertices(vertices)
     overlay.overlayColor = pylon.get_uicolor
     overlay
   end

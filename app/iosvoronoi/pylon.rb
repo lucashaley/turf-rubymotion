@@ -29,22 +29,23 @@ class Pylon < Site # move away from the Site superclass?
         puts "Hash"
         p.location = CLLocationCoordinate2DMake(
           symbol_args[:location][:latitude],
-          symbol_args[:location][:longitude])
+          symbol_args[:location][:longitude]
+        )
       else
         puts "Empty?"
         p.location = CLLocationCoordinate2DMake(37.3318933, -122.03128724)
     end
     # switching to CIColor
     # p.color = args[:color]? UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(args[:color])) : UIColor.systemYellowColor
-    p.color = symbol_args[:color]? CIColor.alloc.initWithString(args[:color]) : CIColor.alloc.initWithColor(UIColor.systemYellowColor)
+    p.color = symbol_args[:color] ? CIColor.alloc.initWithString(args[:color]) : CIColor.alloc.initWithColor(UIColor.systemYellowColor)
     p.title = symbol_args[:title] || "MungMung"
     p.lifespan = symbol_args[:lifespan] || 0
     p.lifespan_multiplier = 0.3
     p.birthdate = symbol_args[:birthdate] || Time.now
     # p.uuID = args[:uuid] || NSUUID.alloc.init # don't need this, Site super takes care of it?
 
-    _map_point = MKMapPointForCoordinate(p.location)
-    p.setCoord(CGPointMake(_map_point.x, _map_point.y))
+    map_point = MKMapPointForCoordinate(p.location)
+    p.setCoord(CGPointMake(map_point.x, map_point.y))
 
     p.machine= StateMachine::Base.new start_state: :active, verbose: DEBUGGING
     p.machine.when :active do |state|
@@ -53,20 +54,20 @@ class Pylon < Site # move away from the Site superclass?
       state.transition_to :dying,
         after: p.lifespan * 0.5,
         if: proc { p.lifespan > 0 },
-        action: Proc.new { App.notification_center.post 'PylonChange' }
+        action: proc { App.notification_center.post "PylonChange" }
     end
     p.machine.when :dying do |state|
       state.on_entry { p.lifespan_multiplier = 0.15 }
       state.transition_to :inactive,
         after: p.lifespan * 0.5,
-        action: Proc.new { App.notification_center.post 'PylonChange' }
+        action: proc { App.notification_center.post "PylonChange" }
     end
     p.machine.when :inactive do |state|
       # state.on_entry { p.lifespan_multiplier = 0.01 }
       state.on_entry do
         p.lifespan_multiplier = 0.01
         puts "\nPylon Death: #{p}\n"
-        App.notification_center.post('PylonDeath', object:p)
+        App.notification_center.post("PylonDeath", object:p)
       end
     end
     p.machine.start!
@@ -125,15 +126,14 @@ class Pylon < Site # move away from the Site superclass?
   end
 
   def to_hash
-    _hue, _saturation, _brightness, _alpha = Pointer.new(:double)
-    _r, _g, _b, _a = Pointer.new(:double)
-    _h = Hash.new
-    _h[:title] = @title
+    # _hue, _saturation, _brightness, _alpha = Pointer.new(:double)
+    # _r, _g, _b, _a = Pointer.new(:double)
+    h = {}
+    h[:title] = @title
     # _h[:color] = @color.CIColor.stringRepresentation
-    _h[:color] = @color.stringRepresentation
-    _h[:location] = { "latitude"=>@location.latitude, "longitude"=>@location.longitude }
-    _h[:birthdate] = @birthdate.utc.to_a
-    _h
+    h[:color] = @color.stringRepresentation
+    h[:location] = { "latitude" => @location.latitude, "longitude" => @location.longitude }
+    h[:birthdate] = @birthdate.utc.to_a
   end
 
   def lifespan_color
@@ -142,8 +142,8 @@ class Pylon < Site # move away from the Site superclass?
     # return @color.colorWithAlphaComponent(@lifespan_multiplier)
 
     # Switching to CIColor
-    _color = UIColor.alloc.initWithCIColor(@color)
-    return @lifespan_multiplier? _color.colorWithAlphaComponent(@lifespan_multiplier) : _color
+    color = UIColor.alloc.initWithCIColor(@color)
+    return @lifespan_multiplier? color.colorWithAlphaComponent(@lifespan_multiplier) : color
   end
 
   def set_uuid(new_uuid)

@@ -9,7 +9,7 @@ class VoronoiMap
   def initialize
     puts "VORONOI_MAP INITIALIZE".green if DEBUGGING
     # what is the structure of this hash?
-    @pylons = Hash.new
+    @pylons = {}
   end
 
   def voronoi_cells_from_pylons(in_pylons)
@@ -35,13 +35,13 @@ class VoronoiMap
       voronoi_cells << c
     end
 
-    return voronoi_cells
+    voronoi_cells
   end
   alias :voronoiCellsFromPylons :voronoi_cells_from_pylons
 
   def voronoi_cells
     puts "VORONOI_MAP: VORONOI_CELLS".blue if DEBUGGING
-    return voronoi_cells_from_pylons(@pylons)
+    voronoi_cells_from_pylons(@pylons)
   end
   alias :voronoiCells :voronoi_cells
 
@@ -62,7 +62,7 @@ class VoronoiMap
   def add_pylon(pylon)
     puts "VORONOI_MAP ADD_PYLON".blue if DEBUGGING
     puts "pylon: #{pylon}"
-    @pylons.setObject(pylon, forKey:pylon.uuID)
+    @pylons.setObject(pylon, forKey: pylon.uuID)
 
     puts "pylons: "
     @pylons.each do |k, v|

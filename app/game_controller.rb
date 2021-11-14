@@ -17,9 +17,8 @@ class GameController < UIViewController
     # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
     map_view.showsUserLocation = true
     map_view.showsPitchControl = true
-    initialize_location_manager
+    # initialize_location_manager
     add_overlays_and_annotations
-
 
     # Start observing
     puts "Trying to start observing"
@@ -40,7 +39,7 @@ class GameController < UIViewController
     @pylon_new_observer = App.notification_center.observe "PylonNew" do |notification|
       puts "PYLON NEW".yellow
 
-      handle_new_pylon({:uuID => notification.object.key}.merge notification.object.value)
+      handle_new_pylon({uuID: notification.object.key}.merge(notification.object.value))
     end
     # PYLON CHANGE
     @pylon_observer = App.notification_center.observe "PylonChange" do |notification|
@@ -54,10 +53,10 @@ class GameController < UIViewController
       puts "notification: #{notification.object[:object]}"
       # remove the pylon from the array
       # test_dict.delete(notification.object.uuid)
-      _removed_pylon = @voronoi_map.pylons.delete(notification.object[:object].uuID)
-      puts "_removed_pylon: #{_removed_pylon}"
+      removed_pylon = @voronoi_map.pylons.delete(notification.object[:object].uuID)
+      puts "removed_pylon: #{removed_pylon}".red
       # redraw everything
-      puts "\nRemoving annotation? #{notification.object[:object].annotation}"
+      puts "\nRemoving annotation? #{notification.object[:object].annotation}".red
       map_view.removeAnnotation(notification.object[:object].annotation)
       renderOverlays
       add_overlays_and_annotations
@@ -117,7 +116,7 @@ class GameController < UIViewController
     Machine.instance.current_view = self
 
     region = create_play_region
-    map_view.setRegion(region, animated:false)
+    map_view.setRegion(region, animated: false)
     # map_view.regionThatFits(region) # this adjusts the region to fir the current view
     Machine.instance.bounding_box = mkmaprect_for_coord_region(region)
     @voronoi_map = VoronoiMap.new
@@ -146,9 +145,7 @@ class GameController < UIViewController
     @button_fsm.start!
 
     add_overlays_and_annotations
-
   end
-
 
   ### LOCATION MANAGER DELEGATES ###
 
@@ -197,18 +194,17 @@ class GameController < UIViewController
   #   # map_view.setCenterCoordinate(loc)
   # end
 
-  PylonViewIdentifier = 'PylonViewIdentifier'
+  PYLON_VIEW_IDENTIFIER = "PylonViewIdentifier"
 
   ### Makes an annotation image for the map ###
-  def mapView(map_view, viewForAnnotation:annotation)
-
+  def mapView(map_view, viewForAnnotation: annotation)
     if annotation == map_view.userLocation
       puts "PLAYER"
       return nil
     end
     # puts "viewForAnnotation: #{annotation.class}"
     # check to see if it exists and has been queued
-    if annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PylonViewIdentifier)
+    if annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PYLON_VIEW_IDENTIFIER)
       # puts "using existing view"
       # annotation_view.annotation = pylon # what does this line do?
     else
@@ -216,7 +212,7 @@ class GameController < UIViewController
       # MKPinAnnotationView is depreciated
       # puts "create new view"
       # annotation_view = MKMarkerAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier:PylonViewIdentifier)
-      annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier:PylonViewIdentifier)
+      annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: PYLON_VIEW_IDENTIFIER)
 
       # use png
       # annotation_view.image = UIImage.imageNamed("pylon_test_01.png")
@@ -238,11 +234,11 @@ class GameController < UIViewController
   end
 
   ### Called after annotations have been added ###
-  def mapView(map_view, didAddAnnotationViews:views)
+  def mapView(map_view, didAddAnnotationViews: views)
     # puts "didAddAnnotationViews!!"
   end
 
-  def mapView(map_view, rendererForOverlay:overlay)
+  def mapView(map_view, rendererForOverlay: overlay)
     # puts "GAME_CONTROLLER: MAPVIEW.RENDERFOROVERLAY"
     rend = MKPolygonRenderer.alloc.initWithOverlay(overlay)
     rend.lineWidth = 0.75
@@ -253,15 +249,13 @@ class GameController < UIViewController
       rend.fillColor = UIColor.colorWithCGColor(overlay.overlayColor.CGColor)
     end
     rend.lineJoin = KCGLineJoinMiter
-
-    return rend
   end
 
   # REFACTOR with method below?
   def renderOverlays
     puts "GAME_CONTROLLER RENDEROVERLAYS".blue if DEBUGGING
 
-    if map_view.overlays then
+    if map_view.overlays
       overlaysToRemove = map_view.overlays.mutableCopy
       map_view.removeOverlays(overlaysToRemove)
     end
@@ -300,12 +294,14 @@ class GameController < UIViewController
     add_overlays
     add_annotations
   end
+
   def add_overlays
     puts "GAME_CONTROLLER: ADD_OVERLAYS".blue if DEBUGGING
     @voronoi_map.voronoi_cells.each do |cell|
       map_view.addOverlay(cell.overlay)
     end
   end
+
   def add_annotations
     puts "GAME_CONTROLLER: ADD_ANNOTATIIONS".blue if DEBUGGING
     map_view.addAnnotations(@voronoi_map.annotations)
@@ -319,12 +315,11 @@ class GameController < UIViewController
   end
 
   def player_for_audio(filename)
-    sound_path = NSBundle.mainBundle.pathForResource(filename, ofType:"mp3")
+    sound_path = NSBundle.mainBundle.pathForResource(filename, ofType: "mp3")
     sound_url = NSURL.fileURLWithPath(sound_path)
     error_ptr = Pointer.new(:object)
-    player_audio = AVAudioPlayer.alloc.initWithContentsOfURL(sound_url, error:error_ptr)
+    player_audio = AVAudioPlayer.alloc.initWithContentsOfURL(sound_url, error: error_ptr)
     puts "AVAudioPlayer error: #{error_ptr[0]}" if error_ptr[0]
-    return player_audio
   end
 
   def create_new_pylon
@@ -338,10 +333,10 @@ class GameController < UIViewController
   def handle_new_pylon(data)
     puts "GAME_CONTROLLER: HANDLE_NEW_PYLON".blue if DEBUGGING
 
-    _p = Pylon.initWithHash(data)
-    _p.set_uuid data[:uuID]
+    p = Pylon.initWithHash(data)
+    p.set_uuid data[:uuID]
 
-    @voronoi_map.add_pylon(_p)
+    @voronoi_map.add_pylon(p)
 
     renderOverlays
   end

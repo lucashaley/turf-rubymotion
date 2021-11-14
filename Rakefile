@@ -6,45 +6,45 @@ $:.unshift("~/.rubymotion/rubymotion-templates")
 # 1. Be sure to read `readme.md`.
 # ===========================================================================================
 
-require 'motion/project/template/ios'
+require "motion/project/template/ios"
 
 begin
-  require 'bundler'
+  require "bundler"
   Bundler.require
 rescue LoadError
 end
 
 # https://github.com/rubymotion-community/BubbleWrap
-require 'bubble-wrap'
+require "bubble-wrap"
 # https://github.com/rubymotion-community/ib
-require 'ib'
+require "ib"
 
 # Uncomment the following line to add an icon generate capacity to your build
-#task 'build:icons' => 'resources/app-icon.icon_asset'
+# task "build:icons" => "resources/app-icon.icon_asset"
 
 Motion::Project::App.setup do |app|
-  # Use `rake config' to see complete project settings.
+  # Use `rake config" to see complete project settings.
   define_icon_defaults!(app)
 
   # ===========================================================================================
   # 2. Set your app name (this is what will show up under the icon when your app is installed).
   # ===========================================================================================
-  app.name = 'turf-rubymotion'
+  app.name = "turf-rubymotion"
 
   # version for your app
-  app.version = '0.1'
+  app.version = "0.1"
 
   # ===========================================================================================
   # 3. Set your deployment target (it's recommended that you at least target 10.0 and above).
   #    If you're using RubyMotion Starter Edition. You cannot set this value (the latest
   #    version of iOS will be used).
   # ===========================================================================================
-  app.deployment_target = '14.5'
+  app.deployment_target = "14.5"
 
   # ===========================================================================================
   # 4. Set the architectures for which to build.
   # ===========================================================================================
-  app.archs['iPhoneOS'] = ['arm64']
+  app.archs["iPhoneOS"] = ["arm64"]
 
   # ===========================================================================================
   # 5. Your app identifier is needed to deploy to an actual device. You do not need to set this
@@ -55,8 +55,8 @@ Motion::Project::App.setup do |app|
 
   # this is set for keychain shit
   # info is from dev console identifier
-  app.identifier = 'com.animatology.test-rubymotionfirebase-01'
-  app.seed_id = '3DZ7KWNU9A'
+  app.identifier = "com.animatology.test-rubymotionfirebase-01"
+  app.seed_id = "3DZ7KWNU9A"
 
   # ===========================================================================================
   # 6. If you need to reference any additional iOS libraries, use the config array below.
@@ -67,14 +67,14 @@ Motion::Project::App.setup do |app|
   # reasonable defaults
   app.device_family = [:iphone, :ipad]
   app.interface_orientations = [:portrait]
-  app.info_plist['UIRequiresFullScreen'] = true
-  app.info_plist['ITSAppUsesNonExemptEncryption'] = false
+  app.info_plist["UIRequiresFullScreen"] = true
+  app.info_plist["ITSAppUsesNonExemptEncryption"] = false
 
-  app.frameworks += ['CoreLocation','MessageUI', 'MapKit', 'AudioToolbox']
+  app.frameworks += ["CoreLocation", "MessageUI", "MapKit", "AudioToolbox"]
 
-  # app.vendor_project('vendor/objcvoronoi-master', :xcode,
-  #     :headers_dir => 'objcvoronoi')
-  # app.frameworks << 'Cocoa'
+  # app.vendor_project("vendor/objcvoronoi-master", :xcode,
+  #     :headers_dir => "objcvoronoi")
+  # app.frameworks << "Cocoa"
 
   # ===========================================================================================
   # 7. To deploy to an actual device, you will need to create a developer certificate at:
@@ -83,8 +83,8 @@ Motion::Project::App.setup do |app|
   #    see there below.
   # ===========================================================================================
   app.codesign_certificate = MotionProvisioning.certificate(platform: :ios,
-                               type: :development,
-                               free: false)
+    type: :development,
+    free: false)
 
   # ===========================================================================================
   # 8. To deploy to an actual device, you will need to create a provisioning profile. First:
@@ -97,10 +97,10 @@ Motion::Project::App.setup do |app|
   #    Download the profile and set the path to the download location below.
   # ===========================================================================================
   app.provisioning_profile = MotionProvisioning.profile(bundle_identifier: "com.animatology.test-rubymotionfirebase-01",
-                           app_name: "Test RubyMotion Firebase",
-                           platform: :ios,
-                           type: :development,
-                           free: false)
+    app_name: "Test RubyMotion Firebase",
+    platform: :ios,
+    type: :development,
+    free: false)
 
   # ===========================================================================================
   # 9. Similar to Step 8. Production, create a production certificate at:
@@ -109,35 +109,35 @@ Motion::Project::App.setup do |app|
   #    using `rake clean archive:distribution` and upload the .ipa under ./build using
   #    Application Loader.
   # ===========================================================================================
-  # app.codesign_certificate = ''
-  # app.provisioning_profile = ''
+  # app.codesign_certificate = ""
+  # app.provisioning_profile = ""
 
   # ===========================================================================================
   # 10. If you want to create a beta build. Uncomment the line below and set your profile to
   #     point to your production provisions (Step 9).
   # ===========================================================================================
-  # app.entitlements['beta-reports-active'] = true
+  # app.entitlements["beta-reports-active"] = true
 
   # we need to set this for keychain shit
   # http://www.rubymotion.com/developers/guides/manuals/cocoa/project-management/
-  app.entitlements['keychain-access-groups'] = [
-    app.seed_id + '.' + app.identifier
+  app.entitlements["keychain-access-groups"] = [
+    app.seed_id + "." + app.identifier
   ]
 
   # Description for the Location service allow dialog
-  app.info_plist['NSLocationAlwaysUsageDescription'] = 'Description'
-  app.info_plist['NSLocationWhenInUseUsageDescription'] = 'Description'
+  app.info_plist["NSLocationAlwaysUsageDescription"] = "Description"
+  app.info_plist["NSLocationWhenInUseUsageDescription"] = "Description"
 
   # https://azukidigital.com/blog/2014/rubymotion-and-google-ios-sdk/
-  app.info_plist['CFBundleURLTypes'] = [{
-    # s'CFBundleURLName' => 'com.companyname.appname',
-    'CFBundleURLSchemes' => ['com.googleusercontent.apps.858979761808-s8em2ueobqgnhi6905jcrifshedb4r61']
+  app.info_plist["CFBundleURLTypes"] = [{
+    # "CFBundleURLName" => "com.companyname.appname",
+    "CFBundleURLSchemes" => ["com.googleusercontent.apps.858979761808-s8em2ueobqgnhi6905jcrifshedb4r61"]
   }]
   # https://github.com/amirrajan/rubymotion-applied/issues/127
-  app.info_plist['FirebaseAppDelegateProxyEnabled'] = false
+  app.info_plist["FirebaseAppDelegateProxyEnabled"] = false
 
   app.pods do
-    source 'https://cdn.cocoapods.org/'
+    source "https://cdn.cocoapods.org/"
     # The Swift pod `FacebookCore` depends upon `FBSDKCoreKit`, which does not define modules.
     # To opt into those targets generating module maps (which is necessary to import them from
     # Swift when building as static libraries), you may set `use_modular_headers!` globally
@@ -149,10 +149,10 @@ Motion::Project::App.setup do |app|
     # pod 'FacebookLogin', :modular_headers => true
     # pod 'FacebookShare', :modular_headers => true
 
-    pod 'Firebase', '~> 8.7.0'
-    pod 'Firebase/Auth', '~> 8.7.0'
-    pod 'Firebase/Database'
-    pod 'GoogleSignIn'
+    pod "Firebase", "~> 8.7.0"
+    pod "Firebase/Auth", "~> 8.7.0"
+    pod "Firebase/Database"
+    pod "GoogleSignIn"
     # pod 'FirebaseUI', '~> 12.0.2'
     # pod 'FirebaseUI/Auth'
     # pod 'FirebaseUI/Google'
@@ -161,7 +161,7 @@ Motion::Project::App.setup do |app|
     # pod 'FirebaseUI/Phone'
 
     # https://github.com/DevRhys/iosvoronoi
-    pod 'iosvoronoi'
+    pod "iosvoronoi"
   end
 end
 
@@ -170,17 +170,17 @@ def define_icon_defaults!(app)
   # define icons or your app will be rejected. More information in
   # located in the readme.
 
-  app.info_plist['CFBundleIcons'] = {
-    'CFBundlePrimaryIcon' => {
-      'CFBundleIconName' => 'AppIcon',
-      'CFBundleIconFiles' => ['AppIcon60x60']
+  app.info_plist["CFBundleIcons"] = {
+    "CFBundlePrimaryIcon" => {
+      "CFBundleIconName" => "AppIcon",
+      "CFBundleIconFiles" => ["AppIcon60x60"]
     }
   }
 
-  app.info_plist['CFBundleIcons~ipad'] = {
-    'CFBundlePrimaryIcon' => {
-      'CFBundleIconName' => 'AppIcon',
-      'CFBundleIconFiles' => ['AppIcon60x60', 'AppIcon76x76']
+  app.info_plist["CFBundleIcons~ipad"] = {
+    "CFBundlePrimaryIcon" => {
+      "CFBundleIconName" => "AppIcon",
+      "CFBundleIconFiles" => ["AppIcon60x60", "AppIcon76x76"]
     }
   }
 end

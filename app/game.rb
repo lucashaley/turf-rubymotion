@@ -13,36 +13,34 @@ class Game
     @uuID = NSUUID.UUID
     @gamecode = generate_new_id
 
-    @update_handler = Proc.new do |error, snapshot|
+    @update_handler = proc do |error, snapshot|
       puts "update_handler: #{snapshot}"
     end
   end
 
   def self.init_new_game
     puts "GAME: INIT_NEW_GAME".green if DEBUGGING
-    _game = Game.new
-    puts "Gamecode: #{_game.gamecode}"
+    new_game = Game.new
+    puts "Gamecode: #{new_game.gamecode}"
 
     # Create new game on Firebase
     Machine.instance.db.referenceWithPath("games")
-      .child("#{_game.uuID.UUIDString}")
-      .setValue({:gamecode => _game.gamecode},
-      withCompletionBlock:
-        lambda do | error, ref |
-          _game.firebase_ref = ref
-          _game.set_ref(ref)
-          puts "\nNew game reference: #{ref}".red
-          # ref.child("pylons/plug").setValue("foo")
-          # _game.firebase_ref.child("pylons/plug").setValue("foo")
+      .child(new_game.uuID.UUIDString)
+      .setValue({gamecode: new_game.gamecode},
+      withCompletionBlock: lambda do |error, ref|
+        new_game.firebase_ref = ref
+        new_game.set_ref(ref)
+        puts "\nNew game reference: #{ref}".red
+        # ref.child("pylons/plug").setValue("foo")
+        # _game.firebase_ref.child("pylons/plug").setValue("foo")
 
-          # Add some pylons in for testing
-          # These should end up being the starting positions
-          puts ("Creating test pylons")
-          _game.create_new_pylon(CLLocationCoordinate2DMake(37.33350562755614, -122.02849767766669))
-          _game.create_new_pylon(CLLocationCoordinate2DMake(37.33063930240253, -122.03102976399545))
-        end
-    )
-    return _game
+        # Add some pylons in for testing
+        # These should end up being the starting positions
+        puts "Creating test pylons".red
+        new_game.create_new_pylon(CLLocationCoordinate2DMake(37.33350562755614, -122.02849767766669))
+        new_game.create_new_pylon(CLLocationCoordinate2DMake(37.33063930240253, -122.03102976399545))
+      end)
+    return new_game
   end
 
   # def self.init_from_firebase(data)
@@ -110,19 +108,21 @@ class Game
 
     # check if it exists already
     # puts @db_ref.child("games")
+
+    # TODO firebase call to find existing, just to make sure?
   end
 
   def create_new_pylon(location)
     puts "GAME: CREATE NEW PYLON".blue if DEBUGGING
 
     # CREATE NEW PYLON OBJECT
-    _new_pylon = Pylon.initWithHash({:location => location})
-    puts "_new_pylon: #{_new_pylon}"
+    new_pylon = Pylon.initWithHash({:location => location})
+    puts "_new_pylon: #{new_pylon}"
     puts "firebase_ref: #{@firebase_ref}"
 
     # SEND THE NEW PYLON TO FIREBASE
-    # this should probably be threaded
-    @firebase_ref.child("pylons/#{_new_pylon.uuID.UUIDString}").setValue(_new_pylon.to_hash) # if @firebase_ref
+    # TODO this should probably be threaded
+    @firebase_ref.child("pylons/#{new_pylon.uuID.UUIDString}").setValue(new_pylon.to_hash) # if @firebase_ref
 
     # ONCE ITS POSTED, THE MODEL SHOULD COLLECT IT
   end
@@ -141,7 +141,6 @@ class Game
     @firebase_ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
       withBlock: proc do |data|
         App.notification_center.post("PylonNew", data)
-      end
-    )
+    end)
   end
 end

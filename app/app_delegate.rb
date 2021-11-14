@@ -1,7 +1,7 @@
 class AppDelegate
   attr_accessor :window
 
-  def application(application, didFinishLaunchingWithOptions:launchOptions)
+  def application(application, didFinishLaunchingWithOptions: launchOptions)
     @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
     storyboard = UIStoryboard.storyboardWithName("main", bundle: nil)
     @window.rootViewController = storyboard.instantiateInitialViewController

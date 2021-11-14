@@ -1,18 +1,18 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-gem 'rake'
+gem "rake"
 # Add your dependencies here:
 
-gem 'motion-cocoapods'
-gem 'motion-provisioning'
+gem "motion-cocoapods"
+gem "motion-provisioning"
 
-gem 'bubble-wrap'
+gem "bubble-wrap"
 
 # https://code.tutsplus.com/tutorials/lets-write-a-rubymotion-app-part-1--cms-20612
-gem 'ib'
+gem "ib"
 
 # https://github.com/opyh/motion-state-machine
-gem 'motion-state-machine'
+gem "motion-state-machine"
 
 # https://github.com/archan937/motion-bundler
 # gem 'motion-bundler', git:'https://github.com/archan937/motion-bundler'
@@ -23,4 +23,4 @@ gem 'motion-state-machine'
 #   # gem 'rubyvor'
 # end
 
-gem 'standard'
+gem "standard"

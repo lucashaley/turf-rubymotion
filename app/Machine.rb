@@ -31,13 +31,13 @@ class Machine
     ####################
     # FIREBASE
     FIRApp.configure
-    @db_app = FIRApp.defaultApp()
+    @db_app = FIRApp.defaultApp
     puts "app:#{@db_app.name}"
     @db = FIRDatabase.databaseForApp(@db_app)
     @db_ref = @db.reference
-    @db_game_ref = @db.referenceWithPath('games/test-game-01')
+    @db_game_ref = @db.referenceWithPath("games/test-game-01")
 
-    @handleDataResult = Proc.new do | data |
+    @handle_data_result = proc do |data|
       # puts "\n----\nhandleDataResult\n----\n"
       # puts "Data: #{data}"
       # data.children.each do |c|
@@ -52,15 +52,15 @@ class Machine
     # https://www.rubyguides.com/2016/02/ruby-procs-and-lambdas/
     # also
     # http://www.zenruby.info/2016/05/procs-and-lambdas-closures-in-ruby.html
-    handleAuthStateChanged = Proc.new do | auth, b |
-      puts "handleAuthStateChanged"
+    handle_auth_state_changed = proc do |auth, b|
+      puts "handle_auth_state_changed".red
       # puts auth
       # puts auth.inspect
       # @fsm.event(:log_in)
     end
 
     # Not sure if this is even used any more
-    handleAuthDataResult = Proc.new do | authResult, error |
+    handleAuthDataResult = proc do |authResult, error|
       unless error.nil?
         puts error.localizedDescription
         puts error.userInfo
@@ -76,8 +76,8 @@ class Machine
     # FIREBASE AUTH
     @user = nil
     @auth = FIRAuth.authWithApp(@db_app)
-    puts "User: #{@auth.currentUser}"
-    FIRAuth.auth.addAuthStateDidChangeListener(handleAuthStateChanged)
+    puts "User: #{@auth.currentUser}".red
+    FIRAuth.auth.addAuthStateDidChangeListener(handle_auth_state_changed)
 
     ####################
     # STATEMACHINE
