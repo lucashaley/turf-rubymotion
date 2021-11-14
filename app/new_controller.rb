@@ -20,7 +20,6 @@ class NewController < UIViewController
 
     # set player in db
 
-
     Machine.instance.segue("ToCharacter")
   end
 
@@ -37,11 +36,11 @@ class NewController < UIViewController
       sms.messageComposeDelegate = self
       sms.recipients = ["+6420410908922", "+15037361234"]
       sms.body = "You've been invited to a game of Turf. The game code is #{@new_id}. Open your Turf app on your device and select 'Join Game'."
-      self.presentModalViewController(sms, animated:true)
+      presentModalViewController(sms, animated: true)
     end if MFMessageComposeViewController.canSendText
   end
 
-  def messageComposeViewController(controller, didFinishWithResult:result)
+  def messageComposeViewController(controller, didFinishWithResult: result)
     puts "didFinishWithResult"
     NSLog("SMS Result: #{result}")
     controller.dismissModalViewControllerAnimated(true)

@@ -60,17 +60,17 @@ class Machine
     end
 
     # Not sure if this is even used any more
-    handleAuthDataResult = proc do |authResult, error|
-      unless error.nil?
-        puts error.localizedDescription
-        puts error.userInfo
-      end
-      # puts authResult.user
-      @user = authResult.user
-
-      # remember that with objective-c, boolean proprties must have the ?
-      puts @user.anonymous?
-    end
+    # handleAuthDataResult = proc do |authResult, error|
+    #   unless error.nil?
+    #     puts error.localizedDescription
+    #     puts error.userInfo
+    #   end
+    #   # puts authResult.user
+    #   @user = authResult.user
+    #
+    #   # remember that with objective-c, boolean proprties must have the ?
+    #   puts @user.anonymous?
+    # end
 
     ####################
     # FIREBASE AUTH
@@ -93,7 +93,7 @@ class Machine
         after: 10,
         on: :splashToMenu,
         # on: :ready_for_splash,
-        action: Proc.new { segue("ToMenu") }
+        action: proc { segue("ToMenu") }
         # action: Proc.new { UIApplication.sharedApplication.delegate.window.rootViewController.performSegueWithIdentifier("ToMenu", sender: self) }
     end
 
@@ -126,11 +126,11 @@ class Machine
   end
 
   def set_state(state)
-    puts ("set_state")
+    puts "MACHINE SET_STATE".blue if DEBUGGING
     @fsm.event(state)
   end
 
-  def segue (name)
+  def segue(name)
     @delegate.window.rootViewController.performSegueWithIdentifier(name, sender: self)
 
     # this doesn't work!
@@ -161,24 +161,24 @@ class Machine
   end
 
   # https://github.com/HipByte/RubyMotionSamples/blob/a387842594fd0ac9d8560d2dc64eff4d87534093/ios/Locations/app/locations_controller.rb
-  def locationManager(manager, didUpdateToLocation:newLocation, fromLocation:oldLocation)
+  def locationManager(manager, didUpdateToLocation: new_location, fromLocation: old_location)
     puts "MACHINE: DIDUPDATETOLOCATION".blue if DEBUGGING
     return unless @tracking
-    if MKMapRectContainsPoint(@bounding_box, MKMapPointForCoordinate(newLocation.coordinate))
+    if MKMapRectContainsPoint(@bounding_box, MKMapPointForCoordinate(new_location.coordinate))
       @player.machine.event(:enter_bounds)
     else
       @player.machine.event(:exit_bounds)
     end
-    locationUpdate(newLocation)
+    locationUpdate(new_location)
   end
 
-  def locationManager(manager, didFailWithError:error)
+  def locationManager(manager, didFailWithError: error)
     puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
     App.notification_center.post "PlayerDisappear"
   end
 
   def locationUpdate(location)
-    loc = location.coordinate
+    # loc = location.coordinate
     # @player_location = location.coordinate
     @layer.location = location
     # map_view.setCenterCoordinate(loc)
@@ -196,7 +196,7 @@ class Machine
 
   def set_game(game)
     puts "MACHINE: SET_GAME".blue if DEBUGGING
-    puts "#{game}"
+    puts game
     @game = game
   end
 

@@ -6,6 +6,6 @@ class SettingsController < UIViewController
 
   def dismiss_modal
     # https://stackoverflow.com/questions/21593770/ios-unwind-back-in-a-chain-of-modal-segues
-    self.presentingViewController.dismissViewControllerAnimated(true, completion:nil)
+    presentingViewController.dismissViewControllerAnimated(true, completion: nil)
   end
 end
