@@ -47,7 +47,7 @@ class Pylon < Site # move away from the Site superclass?
     map_point = MKMapPointForCoordinate(p.location)
     p.setCoord(CGPointMake(map_point.x, map_point.y))
 
-    p.machine= StateMachine::Base.new start_state: :active, verbose: DEBUGGING
+    p.machine = StateMachine::Base.new start_state: :active, verbose: DEBUGGING
     p.machine.when :active do |state|
       # state.on_entry { puts "PYLON MACHINE ENTRY" }
       # state.on_exit { puts "PYLON MACHINE EXIT" }
@@ -67,12 +67,12 @@ class Pylon < Site # move away from the Site superclass?
       state.on_entry do
         p.lifespan_multiplier = 0.01
         puts "\nPylon Death: #{p}\n"
-        App.notification_center.post("PylonDeath", object:p)
+        App.notification_center.post("PylonDeath", object: p)
       end
     end
     p.machine.start!
 
-    return p
+    p
   end
 
   # REFACTOR convert to *args
@@ -93,24 +93,26 @@ class Pylon < Site # move away from the Site superclass?
     p.setCoord(CGPointMake(map_point.x, map_point.y))
     p.birthdate = Time.now
     p.lifespan = 10
-    return p
+    p
   end
 
   def distance_from_pylon(pylon)
     # puts "Pylon::distance_from_pylon"
-    unless @location.nil?
-      return distance_from_location(pylon.location)
-    end
-    return -1
+    # unless @location.nil?
+    #   return distance_from_location(pylon.location)
+    # end
+    return distance_from_location(pylon.location) unless @location.nil?
+    -1
   end
   alias :distanceFromPylon :distance_from_pylon
 
   def distance_from_location(location)
     # puts "Pylon::distance_from_location"
-    unless @location.nil?
-      return @location.distance_from_location(location)
-    end
-    return -1
+    # unless @location.nil?
+    #   return @location.distance_from_location(location)
+    # end
+    return @location.distance_from_location(location) unless @location.nil?
+    -1
   end
   alias :distanceFromLocation :distance_from_location
 
@@ -132,7 +134,7 @@ class Pylon < Site # move away from the Site superclass?
     h[:title] = @title
     # _h[:color] = @color.CIColor.stringRepresentation
     h[:color] = @color.stringRepresentation
-    h[:location] = { "latitude" => @location.latitude, "longitude" => @location.longitude }
+    h[:location] = {"latitude" => @location.latitude, "longitude" => @location.longitude}
     h[:birthdate] = @birthdate.utc.to_a
   end
 
@@ -143,13 +145,13 @@ class Pylon < Site # move away from the Site superclass?
 
     # Switching to CIColor
     color = UIColor.alloc.initWithCIColor(@color)
-    return @lifespan_multiplier? color.colorWithAlphaComponent(@lifespan_multiplier) : color
+    return @lifespan_multiplier ? color.colorWithAlphaComponent(@lifespan_multiplier) : color
   end
 
   def set_uuid(new_uuid)
     puts "PYLON SET_UUID".blue if DEBUGGING
     puts "new_uuid: #{new_uuid}"
-    self.uuID = NSUUID.alloc.initWithUUIDString(new_uuid)
+    uuID = NSUUID.alloc.initWithUUIDString(new_uuid)
     puts "uuid: #{self.uuID}"
   end
 

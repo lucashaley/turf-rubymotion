@@ -2,6 +2,8 @@ class LoginController < UIViewController
   # https://code.tutsplus.com/tutorials/lets-write-a-rubymotion-app-part-1--cms-20612
   extend IB
 
+  DEBUGGING = true
+
   # @handleSignedIn = Proc.new do | user, error |
   #   puts 'handleSignedIn'
   #   unless error.nil?
@@ -25,12 +27,12 @@ class LoginController < UIViewController
     GIDSignIn.sharedInstance.signInWithConfiguration(config,
               presentingViewController: self,
               callback: lambda do |user, error|
-                puts 'mungbeans'
+                puts "LOGINCONTROLLER GIDSIGNIN".blue if DEBUGGING
                 unless error.nil?
                   puts error.localizedDescription
                   puts error.userInfo
                 end
-                puts 'User: ' + user.userID
+                puts "User: #{user.userID}".red if DEBUGGING
                 authentication = user.authentication
                 credential = FIRGoogleAuthProvider.credentialWithIDToken(authentication.idToken,
                                      accessToken: authentication.accessToken)
