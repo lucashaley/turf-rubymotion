@@ -34,25 +34,35 @@ module VoronoiUtilities
 
   def overlay_from_vertices(vertices)
     puts "VORONOI_UTILITIES: OVERLAY_FROM_VERTICES".blue if DEBUGGING
-    # puts "vertices: #{vertices.length}"
+    puts "vertices: #{vertices.length}".red
+    
     points = []
 
     # can we use map here?
     # do we have to do the whole pointer array thing here?
-    vertices.each do |vertex|
-      mp = MKMapPointMake(vertex.x, vertex.y)
-      # puts "mp: #{mp.x}, #{mp.y}".red
-      # points << MKMapPointMake(vertex.x, vertex.y)
-      points << mp
-    end
+    # vertices.each do |vertex|
+    #   mp = MKMapPointMake(vertex.x, vertex.y)
+    #   # puts "mp: #{mp.x}, #{mp.y}".red
+    #   # points << MKMapPointMake(vertex.x, vertex.y)
+    #   new_array = Array.new(points)
+    #   new_array << mp
+    #   points = new_array
+    # end
+    #
+    # points_ptr = Pointer.new(MKMapPoint.type, points.length)
+    # points.each_with_index do |p, i|
+    #   points_ptr[i] = p
+    # end
 
-    points_ptr = Pointer.new(MKMapPoint.type, points.length)
-    points.each_with_index do |p, i|
-      points_ptr[i] = p
+    # New, more efficient way
+    new_ptr = Pointer.new(MKMapPoint.type, vertices.length)
+    vertices.each_with_index do |vertex, index|
+      new_ptr[index] = MKMapPointMake(vertex.x, vertex.y)
     end
 
     # return MKPolygon.polygonWithPoints(points, count: vertices.length)
-    MKPolygon.polygonWithPoints(points_ptr, count: points.length)
+    # MKPolygon.polygonWithPoints(points_ptr, count: points.length)
+    MKPolygon.polygonWithPoints(new_ptr, count: vertices.length)
   end
   alias :overlayFromVertices :overlay_from_vertices
 

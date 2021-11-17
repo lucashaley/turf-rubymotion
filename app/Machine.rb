@@ -11,10 +11,11 @@ class Machine
                 :db_ref,
                 :db,
                 :current_view,
-                :location_manager
+                :location_manager,
+                :tracking
 
   attr_reader :handleDataResult,
-    :game
+              :game
 
   DEBUGGING = true
 
@@ -27,6 +28,8 @@ class Machine
     @tracking = false
     # @game = Game.new
     # @bounding_box = UIScreen.mainScreen.bounds
+
+    @player = Player.new
 
     ####################
     # FIREBASE
@@ -131,6 +134,7 @@ class Machine
   end
 
   def segue(name)
+    puts "MACHINE SEGUE".blue if DEBUGGING
     @delegate.window.rootViewController.performSegueWithIdentifier(name, sender: self)
 
     # this doesn't work!
@@ -164,11 +168,13 @@ class Machine
   def locationManager(manager, didUpdateToLocation: new_location, fromLocation: old_location)
     puts "MACHINE: DIDUPDATETOLOCATION".blue if DEBUGGING
     return unless @tracking
+
     if MKMapRectContainsPoint(@bounding_box, MKMapPointForCoordinate(new_location.coordinate))
       @player.machine.event(:enter_bounds)
     else
       @player.machine.event(:exit_bounds)
     end
+    puts "Updating location to: #{new_location.coordinate.longitude}, #{new_location.coordinate.latitude}".red
     locationUpdate(new_location)
   end
 
@@ -178,9 +184,11 @@ class Machine
   end
 
   def locationUpdate(location)
+    puts "MACHINE LOCATIONUPDATE".blue if DEBUGGING
     # loc = location.coordinate
     # @player_location = location.coordinate
-    @layer.location = location
+    puts "Location: #{location.coordinate.longitude}, #{location.coordinate.latitude}".red
+    @player.location = location
     # map_view.setCenterCoordinate(loc)
   end
 
@@ -200,8 +208,32 @@ class Machine
     @game = game
   end
 
-  def create_new_pylon(location)
+  # def create_new_pylon(location=@player.location)
+  def create_new_pylon
     puts "MACHINE: CREATE_NEW_PYLON".blue if DEBUGGING
-    @game.create_new_pylon(location)
+    # new_location = location || @player.location
+    puts "Player location: #{@player.location.coordinate.longitude}, #{@player.location.coordinate.latitude}".red
+    @game.create_new_pylon(@player.location.coordinate)
+  end
+
+  def check_for_game(gamecode)
+    puts "MACHINE CHECK_FOR_GAME".blue if DEBUGGING
+    puts gamecode.red if DEBUGGING
+    games_ref = @db.referenceWithPath("games")
+    puts games_ref.URL
+    this_query = games_ref.queryOrderedByChild("gamecode").queryEqualToValue(gamecode).queryLimitedToLast(1)
+    puts this_query.ref.URL
+    # puts "_this_query: #{_this_query}"
+    this_query.getDataWithCompletionBlock(
+      lambda do | error, snapshot |
+        puts "#{snapshot.key}: #{snapshot.value}".red
+        next_ref = snapshot.children.nextObject # rename this, not a ref
+        game = Game.init_with_hash({key: next_ref.key}.merge(next_ref.value))
+        game.set_ref(next_ref.ref)
+        set_game(game)
+
+        return true
+      end
+    )
   end
 end

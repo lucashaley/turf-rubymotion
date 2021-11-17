@@ -57,6 +57,9 @@
 @implementation NewController
 @end
 
+@implementation Player
+@end
+
 @implementation Scout
 @end
 
@@ -66,21 +69,6 @@
 @implementation SplashController
 @end
 
-@implementation IEDGE
-@end
-
-@implementation Delaunaycore
-@end
-
-@implementation Edge
-@end
-
-@implementation Geodata
-@end
-
-@implementation Point
-@end
-
-@implementation Triangle
+@implementation String
 @end
 

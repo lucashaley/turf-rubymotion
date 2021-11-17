@@ -13,6 +13,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <MessageUI/MessageUI.h>
 #import <MapKit/MapKit.h>
+#import <AudioToolbox/AudioToolbox.h>
 #import <CoreTelephony/CoreTelephony.h>
 #import <CoreText/CoreText.h>
 #import <FirebaseAnalytics/FirebaseAnalytics.h>
@@ -50,9 +51,11 @@
 
 @interface Game: NSObject
 -(IBAction) initialize;
--(IBAction) init_new_game;
+-(IBAction) set_ref:(id) ref;
 -(IBAction) generate_new_id;
--(IBAction) add_pylon:(id) pylon;
+-(IBAction) create_new_pylon:(id) location;
+-(IBAction) modify_pylon;
+-(IBAction) start_observing_pylons;
 
 @end
 
@@ -63,13 +66,18 @@
 
 -(IBAction) viewWillAppear:(id) animated;
 -(IBAction) viewDidLoad;
--(IBAction) locationUpdate:(id) location;
 -(IBAction) renderOverlays;
--(IBAction) create_new_pylon;
 -(IBAction) touch_down;
 -(IBAction) touch_up;
 -(IBAction) touch_out;
 -(IBAction) set_button_color:(id) color;
+-(IBAction) add_overlays_and_annotations;
+-(IBAction) add_overlays;
+-(IBAction) add_annotations;
+-(IBAction) create_play_region:(id) args;
+-(IBAction) player_for_audio:(id) filename;
+-(IBAction) create_new_pylon;
+-(IBAction) handle_new_pylon:(id) data;
 
 @end
 
@@ -82,6 +90,10 @@
 -(IBAction) to_s;
 -(IBAction) setLocation:(id) location;
 -(IBAction) to_hash;
+-(IBAction) lifespan_color;
+-(IBAction) set_uuid:(id) new_uuid;
+-(IBAction) set_annotation:(id) new_annotation;
+-(IBAction) get_uicolor;
 
 @end
 
@@ -107,6 +119,7 @@
 -(IBAction) voronoi_cells_from_pylons:(id) in_pylons;
 -(IBAction) voronoi_cells;
 -(IBAction) annotations;
+-(IBAction) add_pylon:(id) pylon;
 
 @end
 
@@ -121,13 +134,14 @@
 
 @interface JoinController: UIViewController
 
-@property IBOutlet UILabel * gamecode;
+@property IBOutlet UITextField * gamecode;
 @property IBOutlet CharacterController * character_view;
 @property IBOutlet UIButton * cancel_button;
+@property IBOutlet UIButton * continue_button;
 
 -(IBAction) viewDidLoad;
--(IBAction) cancel_new_game;
--(IBAction) dismiss_new;
+-(IBAction) cancel_new_game:(id) sender;
+-(IBAction) dismiss_join:(id) sender;
 
 @end
 
@@ -141,8 +155,12 @@
 -(IBAction) initialize;
 -(IBAction) set_state:(id) state;
 -(IBAction) segue:(id) name;
--(IBAction) generate_new_id;
+-(IBAction) initialize_location_manager;
+-(IBAction) locationUpdate:(id) location;
 -(IBAction) set_player:(id) player;
+-(IBAction) create_new_game;
+-(IBAction) set_game:(id) game;
+-(IBAction) create_new_pylon:(id) location;
 
 @end
 
@@ -177,6 +195,11 @@
 
 @end
 
+@interface Player: NSObject
+-(IBAction) initialize;
+
+@end
+
 @interface Scout: Character
 -(IBAction) initialize;
 
@@ -193,38 +216,15 @@
 
 @end
 
-@interface IEDGE: Struct
--(IBAction) triangulate:(id) verts;
--(IBAction) main;
--(IBAction) bm;
--(IBAction) run_random:(id) nv;
--(IBAction) output_random:(id) nv;
-
-@end
-
-@interface Delaunaycore: NSObject
--(IBAction) super_triangle:(id) points;
-
-@end
-
-@interface Edge: NSObject
--(IBAction) contains_vertex:(id) point;
-
-@end
-
-@interface Geodata: NSObject
-@end
-
-@interface Point: NSObject
--(IBAction) to_s;
--(IBAction) dot:(id) other;
-
-@end
-
-@interface Triangle: NSObject
--(IBAction) contains_in_circumcircle:(id) point;
--(IBAction) shares_vertex_with:(id) triangle;
--(IBAction) find_common_edge_with:(id) triangle;
+@interface String: NSObject
+-(IBAction) colorize:(id) color_code;
+-(IBAction) red;
+-(IBAction) green;
+-(IBAction) yellow;
+-(IBAction) blue;
+-(IBAction) pink;
+-(IBAction) light_blue;
+-(IBAction) recursive_symbolize_keys:(id) h;
 
 @end
 

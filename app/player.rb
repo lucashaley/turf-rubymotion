@@ -1,6 +1,6 @@
 class Player
-  attr_reader :machine
-  attr_accessor :location
+  attr_accessor :machine,
+                :location
 
   DEBUGGING = true
 

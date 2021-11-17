@@ -17,10 +17,14 @@ class Pylon < Site # move away from the Site superclass?
     puts "args: #{args}".green if DEBUGGING
     symbol_args = recursive_symbolize_keys(args)
     puts symbol_args
+    symbol_args.first do |child|
+      puts child.first
+    end
 
     p = Pylon.alloc.init
 
     # But sometimes we do pass a Location
+    puts symbol_args[:location]
     case symbol_args[:location]
       when CLLocationCoordinate2D
         puts "CLLocationCoordinate2D"
@@ -136,6 +140,7 @@ class Pylon < Site # move away from the Site superclass?
     h[:color] = @color.stringRepresentation
     h[:location] = {"latitude" => @location.latitude, "longitude" => @location.longitude}
     h[:birthdate] = @birthdate.utc.to_a
+    h
   end
 
   def lifespan_color

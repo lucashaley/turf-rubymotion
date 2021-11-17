@@ -23,6 +23,7 @@ class GameController < UIViewController
     # Start observing
     puts "Trying to start observing"
     Machine.instance.game.start_observing_pylons
+    Machine.instance.tracking = true
 
     @local_player = Player.new
 
@@ -39,6 +40,9 @@ class GameController < UIViewController
     @pylon_new_observer = App.notification_center.observe "PylonNew" do |notification|
       puts "PYLON NEW".yellow
 
+      puts notification.object.value
+
+      # This should probably happen in the notification call
       handle_new_pylon({uuID: notification.object.key}.merge(notification.object.value))
     end
     # PYLON CHANGE
@@ -67,7 +71,8 @@ class GameController < UIViewController
 
       # trying sounds
       puts "Playing Sound"
-      boundary_audio.play
+      # TODO make this work again
+      # boundary_audio.play
 
       # set the player state
 
@@ -198,6 +203,7 @@ class GameController < UIViewController
 
   ### Makes an annotation image for the map ###
   def mapView(map_view, viewForAnnotation: annotation)
+    puts "GAME_CONTROLLER: MAPVIEW.VIEWFORANNOTATION".blue if DEBUGGING
     if annotation == map_view.userLocation
       puts "PLAYER"
       return nil
@@ -239,7 +245,7 @@ class GameController < UIViewController
   end
 
   def mapView(map_view, rendererForOverlay: overlay)
-    # puts "GAME_CONTROLLER: MAPVIEW.RENDERFOROVERLAY"
+    puts "GAME_CONTROLLER: MAPVIEW.RENDERFOROVERLAY".blue if DEBUGGING
     rend = MKPolygonRenderer.alloc.initWithOverlay(overlay)
     rend.lineWidth = 0.75
     rend.strokeColor = UIColor.colorWithHue(0.5, saturation: 0.9, brightness: 0.9, alpha: 1.0)
@@ -249,6 +255,7 @@ class GameController < UIViewController
       rend.fillColor = UIColor.colorWithCGColor(overlay.overlayColor.CGColor)
     end
     rend.lineJoin = KCGLineJoinMiter
+    rend
   end
 
   # REFACTOR with method below?
@@ -327,7 +334,9 @@ class GameController < UIViewController
 
     # this gets it into the DB, but not on screen
     # @fb_game.create_new_pylon(@player_location)
-    Machine.instance.create_new_pylon(@player_location)
+    # Machine.instance.create_new_pylon(@player_location)
+    # Machine.instance.create_new_pylon(Machine.instance.player.location)
+    Machine.instance.create_new_pylon
   end
 
   def handle_new_pylon(data)

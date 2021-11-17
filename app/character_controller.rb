@@ -5,7 +5,7 @@ class CharacterController < UIViewController
   outlet :scout_button, UIButton
 
   def select_scout
-    Machine.instance.set_player("scout")
+    # Machine.instance.set_player("scout")
     dismiss_modal
   end
 

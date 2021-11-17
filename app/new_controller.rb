@@ -15,8 +15,10 @@ class NewController < UIViewController
     Machine.instance.initialize_location_manager
 
     # create a new game in Firebase and retrieve its ID
+    # TODO perhaps move this into viewWillAppear?
     Machine.instance.create_new_game
     puts "New game uuID: #{Machine.instance.game.uuID.UUIDString}"
+    gamecode.text = Machine.instance.game.gamecode
 
     # set player in db
 

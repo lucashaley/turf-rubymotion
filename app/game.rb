@@ -1,4 +1,5 @@
 class Game
+  extend Debugging
   attr_accessor :uuID,
                 :gamecode,
                 :update_handler,
@@ -12,10 +13,29 @@ class Game
 
     @uuID = NSUUID.UUID
     @gamecode = generate_new_id
+    @pylons = []
 
     @update_handler = proc do |error, snapshot|
       puts "update_handler: #{snapshot}"
     end
+  end
+
+  def self.init_with_hash(args)
+    puts "GAME INIT_WITH_HASH".green if DEBUGGING
+
+    puts "args: #{args}".green if DEBUGGING
+    symbol_args = recursive_symbolize_keys(args)
+
+    new_game = Game.new
+    new_game.uuID = symbol_args[:key]
+    symbol_args[:pylons].each do |pylon|
+      h = {key: pylon[0]}.merge(pylon[1])
+      new_game.pylons << Pylon.initWithHash(h)
+    end
+    # new_game.color = symbol_args[:color] ? CIColor.alloc.initWithString(args[:color]) : CIColor.alloc.initWithColor(UIColor.systemYellowColor)
+    # new_game.title = symbol_args[:title] || "MungMung"
+    # new_game.lifespan = symbol_args[:lifespan] || 0
+    new_game
   end
 
   def self.init_new_game
@@ -112,11 +132,13 @@ class Game
     # TODO firebase call to find existing, just to make sure?
   end
 
-  def create_new_pylon(location)
+  def create_new_pylon(coord)
     puts "GAME: CREATE NEW PYLON".blue if DEBUGGING
 
+    puts "Input location: #{coord.longitude}, #{coord.latitude}".red
+
     # CREATE NEW PYLON OBJECT
-    new_pylon = Pylon.initWithHash({:location => location})
+    new_pylon = Pylon.initWithHash({:location => coord})
     puts "_new_pylon: #{new_pylon}"
     puts "firebase_ref: #{@firebase_ref}"
 
@@ -140,7 +162,13 @@ class Game
 
     @firebase_ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
       withBlock: proc do |data|
+        # Should we turn it into a better-formed hash here?
         App.notification_center.post("PylonNew", data)
     end)
+  end
+
+  def check_for_game(gamecode)
+    puts "GAME CHECK_FOR_GAME".blue if DEBUGGING
+
   end
 end
