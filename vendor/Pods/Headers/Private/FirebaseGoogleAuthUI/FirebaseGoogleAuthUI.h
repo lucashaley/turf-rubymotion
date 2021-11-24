@@ -1,0 +1,1 @@
+../../../FirebaseGoogleAuthUI/FirebaseGoogleAuthUI/Sources/Public/FirebaseGoogleAuthUI/FirebaseGoogleAuthUI.h

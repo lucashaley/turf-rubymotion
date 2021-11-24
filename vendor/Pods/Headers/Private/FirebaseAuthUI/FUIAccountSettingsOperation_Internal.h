@@ -1,0 +1,1 @@
+../../../FirebaseAuthUI/FirebaseAuthUI/Sources/FUIAccountSettingsOperation_Internal.h

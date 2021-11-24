@@ -27,6 +27,9 @@
 @implementation MKPolygon
 @end
 
+@implementation Pouwhenua
+@end
+
 @implementation Pylon
 @end
 
@@ -43,9 +46,6 @@
 @end
 
 @implementation JoinController
-@end
-
-@implementation LoginController
 @end
 
 @implementation Machine

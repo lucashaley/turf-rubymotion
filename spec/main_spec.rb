@@ -1,4 +1,4 @@
-describe "Application 'Test_RubyMotionFirebase_01'" do
+describe "Application 'turf-rubymotion'" do
   before do
     @app = UIApplication.sharedApplication
   end

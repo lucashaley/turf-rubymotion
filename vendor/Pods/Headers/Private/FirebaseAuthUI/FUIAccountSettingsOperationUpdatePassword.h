@@ -1,0 +1,1 @@
+../../../FirebaseAuthUI/FirebaseAuthUI/Sources/FUIAccountSettingsOperationUpdatePassword.h

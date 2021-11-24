@@ -251,7 +251,7 @@
             <objects>
                 <viewController storyboardIdentifier="LoginController" id="vYC-MB-KOT" customClass="LoginController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cWB-kz-Ny9">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Logging In…" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CFD-vA-xzY">
@@ -303,9 +303,7 @@
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="30"/>
                                 <state key="normal" title="Login"/>
                                 <connections>
-                                    <action selector="action_login:" destination="8aw-7i-1GL" eventType="touchUpInside" id="sDS-d3-Ij5"/>
-                                    <action selector="controlTouched:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="tTH-eR-psU"/>
-                                    <segue destination="vYC-MB-KOT" kind="presentation" identifier="MenuToLogin" modalTransitionStyle="coverVertical" id="YAO-h4-6KW"/>
+                                    <action selector="action_login:" destination="8aw-7i-1GL" eventType="touchUpInside" id="xHn-Vk-8UC"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CgZ-4X-Ile">
@@ -349,7 +347,7 @@
                         <outlet property="button_characters" destination="zaA-2e-wRn" id="DVm-Qy-nE5"/>
                         <outlet property="button_game_join" destination="1qN-iL-YZT" id="LOK-4R-Ylg"/>
                         <outlet property="button_game_new" destination="CgZ-4X-Ile" id="jhH-7y-K7M"/>
-                        <outlet property="button_login" destination="xey-4C-gU5" id="xpp-lW-cXR"/>
+                        <outlet property="button_login" destination="xey-4C-gU5" id="mbo-O5-oZp"/>
                         <outlet property="button_settings" destination="rrg-Qe-RcH" id="3o2-Ne-Xxo"/>
                     </connections>
                 </viewController>

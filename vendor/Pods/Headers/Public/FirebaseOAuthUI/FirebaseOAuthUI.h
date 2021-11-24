@@ -1,0 +1,1 @@
+../../../FirebaseOAuthUI/FirebaseOAuthUI/Sources/Public/FirebaseOAuthUI/FirebaseOAuthUI.h

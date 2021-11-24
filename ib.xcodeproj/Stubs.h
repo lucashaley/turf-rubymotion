@@ -53,9 +53,14 @@
 -(IBAction) initialize;
 -(IBAction) set_ref:(id) ref;
 -(IBAction) generate_new_id;
--(IBAction) create_new_pylon:(id) location;
+-(IBAction) add_player:(id) player;
+-(IBAction) create_new_pylon:(id) coord;
+-(IBAction) create_new_pouwhenua:(id) coord;
 -(IBAction) modify_pylon;
 -(IBAction) start_observing_pylons;
+-(IBAction) start_observing_pouwhenua;
+-(IBAction) check_for_game:(id) gamecode;
+-(IBAction) start_observing_players;
 
 @end
 
@@ -84,7 +89,33 @@
 @interface MKPolygon: NSObject
 @end
 
-@interface Pylon: Site
+@interface Pouwhenua: NSObject
+-(IBAction) distance_from_pylon:(id) pylon;
+-(IBAction) distance_from_location:(id) location;
+-(IBAction) set_location:(id) location;
+-(IBAction) lifespan_color;
+-(IBAction) set_uuid:(id) new_uuid;
+-(IBAction) uuid;
+-(IBAction) uuid_string;
+-(IBAction) set_annotation:(id) new_annotation;
+-(IBAction) get_uicolor;
+-(IBAction) to_hash;
+-(IBAction) init_with_coord:(id) tempCoord;
+-(IBAction) init_with_value:(id) valueWithCoord;
+-(IBAction) set_coord:(id) tempCoord;
+-(IBAction) coord;
+-(IBAction) set_coord_as_value:(id) value_with_coord;
+-(IBAction) coord_as_value;
+-(IBAction) set_x:(id) temp_x;
+-(IBAction) x;
+-(IBAction) set_y:(id) temp_y;
+-(IBAction) y;
+-(IBAction) sort_sites:(id) site_array;
+-(IBAction) compare:(id) s;
+
+@end
+
+@interface Pylon: NSObject
 -(IBAction) distance_from_pylon:(id) pylon;
 -(IBAction) distance_from_location:(id) location;
 -(IBAction) to_s;
@@ -140,14 +171,12 @@
 @property IBOutlet UIButton * continue_button;
 
 -(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
 -(IBAction) cancel_new_game:(id) sender;
 -(IBAction) dismiss_join:(id) sender;
-
-@end
-
-@interface LoginController: UIViewController
--(IBAction) viewDidAppear:(id) animated;
--(IBAction) dismiss_modal;
+-(IBAction) textFieldDidBeginEditing:(id) text_field;
+-(IBAction) textFieldShouldEndEditing:(id) text_field;
+-(IBAction) check_input_text;
 
 @end
 
@@ -160,7 +189,8 @@
 -(IBAction) set_player:(id) player;
 -(IBAction) create_new_game;
 -(IBAction) set_game:(id) game;
--(IBAction) create_new_pylon:(id) location;
+-(IBAction) create_new_pylon;
+-(IBAction) check_for_game:(id) gamecode;
 
 @end
 
@@ -196,7 +226,7 @@
 @end
 
 @interface Player: NSObject
--(IBAction) initialize;
+-(IBAction) initialize:(id) args;
 
 @end
 

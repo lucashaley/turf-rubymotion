@@ -1,4 +1,0 @@
-repository "Turf@Massey_CMP@cloud"
-  path "/"
-    smartbranch "/main/Test" 
-     

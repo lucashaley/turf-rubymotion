@@ -72,6 +72,10 @@ Motion::Project::App.setup do |app|
 
   app.frameworks += ["CoreLocation", "MessageUI", "MapKit", "AudioToolbox"]
 
+  # This is a force, as for some reason the pods weren't including the resources
+  app.resources_dirs += ["vendor/Pods/FirebaseAuthUI/FirebaseAuthUI/Sources/Resources/"]
+  app.resources_dirs += ["vendor/Pods/FirebaseOAuthUI/FirebaseOAuthUI/Sources/Resources/"]
+
   # app.vendor_project("vendor/objcvoronoi-master", :xcode,
   #     :headers_dir => "objcvoronoi")
   # app.frameworks << "Cocoa"
@@ -123,12 +127,17 @@ Motion::Project::App.setup do |app|
   app.entitlements["keychain-access-groups"] = [
     app.seed_id + "." + app.identifier
   ]
+  # https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_developer_applesignin?language=objc
+  app.entitlements["com.apple.developer.applesignin"] = [
+    "Default"
+  ]
 
   # Description for the Location service allow dialog
   app.info_plist["NSLocationAlwaysUsageDescription"] = "Description"
   app.info_plist["NSLocationWhenInUseUsageDescription"] = "Description"
 
   # https://azukidigital.com/blog/2014/rubymotion-and-google-ios-sdk/
+  # https://firebase.google.com/docs/auth/ios/google-signin#2_implement_google_sign-in
   app.info_plist["CFBundleURLTypes"] = [{
     # "CFBundleURLName" => "com.companyname.appname",
     "CFBundleURLSchemes" => ["com.googleusercontent.apps.858979761808-s8em2ueobqgnhi6905jcrifshedb4r61"]
@@ -137,27 +146,17 @@ Motion::Project::App.setup do |app|
   app.info_plist["FirebaseAppDelegateProxyEnabled"] = false
 
   app.pods do
+    # use_frameworks! :linkage => :static
     source "https://cdn.cocoapods.org/"
-    # The Swift pod `FacebookCore` depends upon `FBSDKCoreKit`, which does not define modules.
-    # To opt into those targets generating module maps (which is necessary to import them from
-    # Swift when building as static libraries), you may set `use_modular_headers!` globally
-    # in your Podfile, or specify `:modular_headers => true` for particular dependencies.
-    # pod 'FBSDKCoreKit', '~> 11.2.0', :modular_headers => true
-    # pod 'FBSDKLoginKit', '~> 11.2.0', :modular_headers => true
-    # pod 'FBSDKShareKit', '~> 11.2.0', :modular_headers => true
-    # pod 'FacebookCore', :modular_headers => true
-    # pod 'FacebookLogin', :modular_headers => true
-    # pod 'FacebookShare', :modular_headers => true
-
     pod "Firebase", "~> 8.7.0"
     pod "Firebase/Auth", "~> 8.7.0"
     pod "Firebase/Database"
     pod "GoogleSignIn"
     # pod 'FirebaseUI', '~> 12.0.2'
-    # pod 'FirebaseUI/Auth'
-    # pod 'FirebaseUI/Google'
+    pod "FirebaseUI/Auth", "~> 12.0.2"
+    pod "FirebaseUI/Google"
     # # pod 'FirebaseUI/Twitter'
-    # pod 'FirebaseUI/OAuth' # Used for Sign in with Apple, Twitter, etc
+    pod 'FirebaseUI/OAuth' # Used for Sign in with Apple, Twitter, etc
     # pod 'FirebaseUI/Phone'
 
     # https://github.com/DevRhys/iosvoronoi
