@@ -4,7 +4,10 @@ class PylonCell # < NSObject
 
   attr_accessor :cell, :pylon
 
+  DEBUGGING = true
+
   def initialize(cell, pylon)
+    puts "PYLONCELL INITIALIZE".green if DEBUGGING
     # this wraps around cell, because we need to add a color?
     # but why can't we subclass?
     # puts "PylonCell::initialize: cell: #{cell}; pylon: #{pylon}"
@@ -24,7 +27,7 @@ class PylonCell # < NSObject
   end
 
   def overlay
-    puts "PYLONCELL OVVERLAY".blue
+    puts "PYLONCELL OVVERLAY".blue if DEBUGGING
     overlay = overlay_from_vertices(vertices)
     overlay.overlayColor = pylon.get_uicolor
     overlay

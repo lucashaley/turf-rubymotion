@@ -4,7 +4,9 @@ class Game
                 :gamecode,
                 :update_handler,
                 :pylons,
-                :firebase_ref
+                :pouwhenua,
+                :firebase_ref,
+                :nga_kapa
 
   DEBUGGING = true
 
@@ -14,6 +16,7 @@ class Game
     @uuID = NSUUID.UUID
     @gamecode = generate_new_id
     @pylons = []
+    @pouwhenua = []
 
     @update_handler = proc do |error, snapshot|
       puts "update_handler: #{snapshot}"
@@ -31,6 +34,9 @@ class Game
     symbol_args[:pylons].each do |pylon|
       h = {key: pylon[0]}.merge(pylon[1])
       new_game.pylons << Pylon.initWithHash(h)
+    end
+    symbol_args[:pouwhenua].each do |pouwhenua|
+      new_game.pouwhenua << Pouwhenua.init_with_hash(pouwhenua)
     end
     # new_game.color = symbol_args[:color] ? CIColor.alloc.initWithString(args[:color]) : CIColor.alloc.initWithColor(UIColor.systemYellowColor)
     # new_game.title = symbol_args[:title] || "MungMung"
@@ -56,9 +62,15 @@ class Game
 
         # Add some pylons in for testing
         # These should end up being the starting positions
-        puts "Creating test pylons".red
-        new_game.create_new_pylon(CLLocationCoordinate2DMake(37.33350562755614, -122.02849767766669))
-        new_game.create_new_pylon(CLLocationCoordinate2DMake(37.33063930240253, -122.03102976399545))
+        ### PYLON FIX
+        # puts "Creating test pylons".red
+        # new_game.create_new_pylon(CLLocationCoordinate2DMake(37.33350562755614, -122.02849767766669))
+        # new_game.create_new_pylon(CLLocationCoordinate2DMake(37.33063930240253, -122.03102976399545))
+        puts "Creating test pouwhenua".red
+        new_game.create_new_pouwhenua(CLLocationCoordinate2DMake(37.33350562755614, -122.02849767766669))
+        new_game.create_new_pouwhenua(CLLocationCoordinate2DMake(37.33063930240253, -122.03102976399545))
+
+        new_game.add_player(Machine.instance.user) if Machine.instance.user
       end)
     return new_game
   end
@@ -132,6 +144,18 @@ class Game
     # TODO firebase call to find existing, just to make sure?
   end
 
+  def add_player(player)
+    puts "GAME ADD_PLAYER".blue if DEBUGGING
+
+    puts "adding player: #{player}".red if DEBUGGING
+
+    new_player = Player.new({user_id: player.userID, given_name: player.profile.givenName, email: player.profile.email})
+    puts "new_player: #{new_player}".red if DEBUGGING
+
+    @firebase_ref.child("players/#{new_player.uuid.UUIDString}").setValue(new_player.to_hash) # if @firebase_ref
+    @firebase_ref.child("teams/00/user_id").setValue(new_player.uuid.UUIDString)
+  end
+
   def create_new_pylon(coord)
     puts "GAME: CREATE NEW PYLON".blue if DEBUGGING
 
@@ -147,6 +171,12 @@ class Game
     @firebase_ref.child("pylons/#{new_pylon.uuID.UUIDString}").setValue(new_pylon.to_hash) # if @firebase_ref
 
     # ONCE ITS POSTED, THE MODEL SHOULD COLLECT IT
+  end
+
+  def create_new_pouwhenua(coord)
+    puts "GAME CREATE_NEW_POUWHENUA".blue if DEBUGGING
+    new_pouwhenua = Pouwhenua.new(coord)
+    @firebase_ref.child("pouwhenua/#{new_pouwhenua.uuid_string}").setValue(new_pouwhenua.to_hash)
   end
 
   def modify_pylon
@@ -167,8 +197,27 @@ class Game
     end)
   end
 
+  def start_observing_pouwhenua
+    puts "GAME: START_OBSERVING_POUWHENUA".blue if DEBUGGING
+
+    @firebase_ref.child("pouwhenua").observeEventType(FIRDataEventTypeChildAdded,
+      withBlock: proc do |data|
+        # Should we turn it into a better-formed hash here?
+        App.notification_center.post("PouwhenuaNew", data)
+    end)
+  end
+
   def check_for_game(gamecode)
     puts "GAME CHECK_FOR_GAME".blue if DEBUGGING
 
+  end
+
+  def start_observing_players
+    puts "GAME START_OBSERVING_PLAYERS".blue if DEBUGGING
+
+    @firebase_ref.child("players").observeEventType(FIRDataEventTypeChildAdded,
+      withBlock: proc do |data|
+        App.notification.center.post("PlayerNew", data)
+    end)
   end
 end

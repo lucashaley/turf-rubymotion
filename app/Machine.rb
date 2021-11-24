@@ -12,7 +12,8 @@ class Machine
                 :db,
                 :current_view,
                 :location_manager,
-                :tracking
+                :tracking,
+                :auth_view_controller
 
   attr_reader :handleDataResult,
               :game
@@ -35,7 +36,7 @@ class Machine
     # FIREBASE
     FIRApp.configure
     @db_app = FIRApp.defaultApp
-    puts "app:#{@db_app.name}"
+    puts "Machine App:#{@db_app.name}"
     @db = FIRDatabase.databaseForApp(@db_app)
     @db_ref = @db.reference
     @db_game_ref = @db.referenceWithPath("games/test-game-01")
@@ -77,10 +78,26 @@ class Machine
 
     ####################
     # FIREBASE AUTH
+
     @user = nil
     @auth = FIRAuth.authWithApp(@db_app)
     puts "User: #{@auth.currentUser}".red
     FIRAuth.auth.addAuthStateDidChangeListener(handle_auth_state_changed)
+
+    authUI = FUIAuth.defaultAuthUI
+    authUI.delegate = self
+    puts "Machine AuthUI: #{authUI}".red
+    provider_apple = FUIOAuth.appleAuthProvider
+    puts "Machine provider: #{provider_apple}".red
+
+    # https://firebaseopensource.com/projects/firebase/firebaseui-ios/auth/readme/
+    providers = []
+    providers << FUIGoogleAuth.alloc.init
+    providers << FUIOAuth.appleAuthProvider
+    authUI.providers = providers
+
+    @auth_view_controller = authUI.authViewController
+    puts "Machine auth_view_controller: #{auth_view_controller}"
 
     ####################
     # STATEMACHINE
@@ -152,6 +169,11 @@ class Machine
   #   # puts @db_ref.child("games")
   # end
 
+  def authUI(authUI, didSignInWithAuthDataResult: result, error: error)
+    puts "MACHINE DID_SIGN_IN".blue if DEBUGGING
+    puts "insane".red
+  end
+
   def initialize_location_manager
     puts "MACHINE: INITIALIZE_LOCATION_MANAGER".blue if DEBUGGING
     @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
@@ -200,6 +222,7 @@ class Machine
   def create_new_game
     puts "MACHINE: CREATE_NEW_GAME".blue if DEBUGGING
     @game = Game.init_new_game
+    # @game.add_player(@user)
   end
 
   def set_game(game)

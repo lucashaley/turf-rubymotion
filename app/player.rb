@@ -1,11 +1,21 @@
 class Player
   attr_accessor :machine,
-                :location
+                :location,
+                :uuid,
+                :user_id,
+                :display_name,
+                :team_uuid
 
   DEBUGGING = true
 
-  def initialize
+  def initialize(args = {})
     puts "PLAYER INITIALIZE".green if DEBUGGING
+    puts "Player args: #{args}".red if DEBUGGING
+
+    @uuid = NSUUID.UUID
+    @user_id = args[:user_id] || "ABC123"
+    @display_name = args[:given_name] || "Hemi"
+
     @machine = StateMachine::Base.new start_state: :inactive, verbose: true
 
     @machine.when :inactive do |state|
@@ -30,5 +40,11 @@ class Player
 
     @machine.start!
     @machine.event(:activate)
+  end
+
+  def to_hash
+    output = {user_id: @user_id, display_name: @display_name}
+
+    return output
   end
 end

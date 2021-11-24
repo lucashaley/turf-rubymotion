@@ -1,5 +1,5 @@
 # https://github.com/DevRhys/iosvoronoi/blob/master/Example/iosvoronoi/BHEVoronoiCellTower.h
-class Pylon < Site # move away from the Site superclass?
+class Pylon # < Site # move away from the Site superclass?
   extend Debugging
   attr_accessor :location,
                 :annotation,
@@ -169,4 +169,9 @@ class Pylon < Site # move away from the Site superclass?
     UIColor.colorWithCIColor(@color)
     # UIColor.alloc.initWithCIColor(@color)
   end
+
+  def set_coord(coord)
+
+  end
+  alias :setCoord :set_coord
 end

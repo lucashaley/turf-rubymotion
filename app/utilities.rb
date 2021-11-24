@@ -31,6 +31,8 @@ class String
 end
 
 module Debugging
+  module_function
+  
   DEBUGGING = false
 
   def recursive_symbolize_keys(h)

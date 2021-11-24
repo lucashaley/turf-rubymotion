@@ -19,13 +19,53 @@ class MenuController < UIViewController
   end
 
   def controlTouched(sender)
-    puts "touched"
+    puts "touched".pink
   end
 
   def action_login(sender)
     puts "MENUCONTROLLER ACTION_LOGIN".blue if DEBUGGING
     Machine.instance.set_state(:log_in)
+
+    # # Stuff for FirebaseAuthUI
+    # # Never got this to work
+    # presentViewController(Machine.instance.auth_view_controller, animated: true, completion: nil)
+
+    # Old google-only way
+    config = GIDConfiguration.alloc.initWithClientID(FIRApp.defaultApp.options.clientID)
+    puts "config: #{config.clientID}"
+
+    # This signs in anew every time.
+    # It would be good to check if they're already logged in.
+    GIDSignIn.sharedInstance.signInWithConfiguration(config,
+      presentingViewController: self,
+      callback: lambda do |user, error|
+        puts "LOGINCONTROLLER GIDSIGNIN".blue if DEBUGGING
+        unless error.nil?
+          puts error.localizedDescription
+          puts error.userInfo
+        end
+        puts "User: #{user.userID}".red if DEBUGGING
+        authentication = user.authentication
+        credential = FIRGoogleAuthProvider.credentialWithIDToken(authentication.idToken,
+                             accessToken: authentication.accessToken)
+
+        Dispatch::Queue.new("turf-test-db").async do
+          FIRAuth.auth.signInWithCredential(credential, completion: lambda do |authResult, error|
+            puts user.profile.name
+            Machine.instance.user = user
+            # dismiss_modal
+          end)
+        end
+      end
+    )
   end
+
+  # # Stuff for FirebaseAuthUI
+  # # Never got this to work
+  # def authUI(authUI, didSignInWithAuthDataResult: result, error: error)
+  #   puts "MENUCONTROLLER DID_SIGN_IN".blue if DEBUGGING
+  #   puts "insane".red
+  # end
 
   def action_settings(sender)
     # TODO

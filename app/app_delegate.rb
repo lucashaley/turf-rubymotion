@@ -13,4 +13,14 @@ class AppDelegate
 
     true
   end
+
+  # # Stuff for FirebaseAuthUI
+  # def application(application, openURL: url, options: options)
+  #   puts 'APPDELEGATE application:openURL'.blue
+  #   return GIDSignIn.sharedInstance.handleUrl url
+  # end
+  #
+  # def authUI(authUI, didSignInWithAuthDataResult: result, error: error)
+  #   puts 'APPDELEGATE authUI:didSignIn'.blue
+  # end
 end

@@ -40,7 +40,7 @@ class GameController < UIViewController
     @pylon_new_observer = App.notification_center.observe "PylonNew" do |notification|
       puts "PYLON NEW".yellow
 
-      puts notification.object.value
+      # puts notification.object.value
 
       # This should probably happen in the notification call
       handle_new_pylon({uuID: notification.object.key}.merge(notification.object.value))
@@ -64,6 +64,9 @@ class GameController < UIViewController
       map_view.removeAnnotation(notification.object[:object].annotation)
       renderOverlays
       add_overlays_and_annotations
+    end
+    @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
+      puts "NEW PLAYER"
     end
     # BOUNDARY EXIT
     @exit_observer = App.notification_center.observe "BoundaryExit" do |notification|
