@@ -1,5 +1,5 @@
 # https://github.com/DevRhys/iosvoronoi/blob/master/Example/iosvoronoi/BHEVoronoiCellTower.h
-class Pylon # < Site # move away from the Site superclass?
+class Pylon < Site # move away from the Site superclass?
   extend Debugging
   attr_accessor :location,
                 :annotation,
@@ -121,7 +121,7 @@ class Pylon # < Site # move away from the Site superclass?
   alias :distanceFromLocation :distance_from_location
 
   def to_s
-    "Pylon: UUID: #{uuID.UUIDString}; Location: #{@location.latitude}, #{@location.longitude}; Coord: #{coord.x}, #{coord.y}; Color: #{@color}; Annotation: #{annotation}"
+    "Pylon: UUID: #{uuID.UUIDString}; Location: #{@location.latitude}, #{@location.longitude}; Color: #{@color}; Annotation: #{annotation}"
   end
 
   def setLocation(location)
@@ -138,6 +138,7 @@ class Pylon # < Site # move away from the Site superclass?
     h[:title] = @title
     # _h[:color] = @color.CIColor.stringRepresentation
     h[:color] = @color.stringRepresentation
+    # TODO sort out whether we're using symbols or strings
     h[:location] = {"latitude" => @location.latitude, "longitude" => @location.longitude}
     h[:birthdate] = @birthdate.utc.to_a
     h
@@ -170,8 +171,8 @@ class Pylon # < Site # move away from the Site superclass?
     # UIColor.alloc.initWithCIColor(@color)
   end
 
-  def set_coord(coord)
-
-  end
-  alias :setCoord :set_coord
+  # def set_coord(coord)
+  #
+  # end
+  # alias :setCoord :set_coord
 end

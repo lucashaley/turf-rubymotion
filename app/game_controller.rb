@@ -23,9 +23,10 @@ class GameController < UIViewController
     # Start observing
     puts "Trying to start observing"
     Machine.instance.game.start_observing_pylons
+    Machine.instance.game.start_observing_pouwhenua
     Machine.instance.tracking = true
 
-    @local_player = Player.new
+    # @local_player = Player.new
 
     # AUDIO SETUP
     boundary_audio = player_for_audio("boundary")
@@ -36,7 +37,15 @@ class GameController < UIViewController
     #   withBlock: Machine.instance.handleDataResult)
 
     # Testing NSNotifications
-    # PYLON NEW
+    @pouwhenua_new_observer = App.notification_center.observe "PouwhenuaNew" do |notification|
+      puts "POUWHENUA NEW".yellow
+
+      # puts notification.object.value
+
+      # This should probably happen in the notification call
+      handle_new_pouwhenua({uuID: notification.object.key}.merge(notification.object.value))
+    end
+    # # PYLON NEW
     @pylon_new_observer = App.notification_center.observe "PylonNew" do |notification|
       puts "PYLON NEW".yellow
 
@@ -146,7 +155,8 @@ class GameController < UIViewController
       state.on_entry { set_button_color(UIColor.systemGreenColor) }
       state.transition_to :up,
         on: :button_up,
-        action: proc { create_new_pylon }
+        # action: proc { create_new_pylon } # CREATE NEW PYLON!
+        action: proc { Machine.instance.game.create_new_pouwhenua }
     end
 
     puts "Starting button state machine\n\n"
@@ -332,14 +342,18 @@ class GameController < UIViewController
     puts "AVAudioPlayer error: #{error_ptr[0]}" if error_ptr[0]
   end
 
-  def create_new_pylon
-    puts "GAME_CONTROLLER: CREATE_NEW_PYLON".blue if DEBUGGING
+  # def create_new_pylon
+  #   puts "GAME_CONTROLLER: CREATE_NEW_PYLON".blue if DEBUGGING
+  #
+  #   # this gets it into the DB, but not on screen
+  #   # @fb_game.create_new_pylon(@player_location)
+  #   # Machine.instance.create_new_pylon(@player_location)
+  #   # Machine.instance.create_new_pylon(Machine.instance.player.location)
+  #   Machine.instance.create_new_pylon
+  # end
 
-    # this gets it into the DB, but not on screen
-    # @fb_game.create_new_pylon(@player_location)
-    # Machine.instance.create_new_pylon(@player_location)
-    # Machine.instance.create_new_pylon(Machine.instance.player.location)
-    Machine.instance.create_new_pylon
+  def create_new_pouwhenua
+
   end
 
   def handle_new_pylon(data)
@@ -349,6 +363,24 @@ class GameController < UIViewController
     p.set_uuid data[:uuID]
 
     @voronoi_map.add_pylon(p)
+
+    renderOverlays
+  end
+
+  def handle_new_pouwhenua(data)
+    puts "GAME_CONTROLLER: HANDLE_NEW_POUWHENUA".blue if DEBUGGING
+    data.each do |k, v|
+      puts "#{k}: #{v}"
+    end
+    puts data["title"]
+
+    p = Pouwhenua.new(data["location"], {color: data["color"], title: data["title"], birthdate: data["birthdate"]})
+    puts data[:uuID]
+    puts data["uuID"]
+    p.set_uuid data[:uuID]
+
+    # @voronoi_map.add_pylon(p)
+    @voronoi_map.add_pouwhenua(p)
 
     renderOverlays
   end
