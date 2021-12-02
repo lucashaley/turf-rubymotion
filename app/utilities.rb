@@ -28,11 +28,53 @@ class String
   def light_blue # Apple
     colorize(36)
   end
+
+  def to_firebase
+    self
+  end
+end
+
+class Fixnum
+  def to_firebase
+    self
+  end
+end
+
+class CIColor
+  def to_firebase
+    stringRepresentation
+  end
+end
+
+class CGPoint
+  def to_s
+    puts "CGPOINT x: #{x}, y: #{y}"
+  end
+
+  def self.average(arr)
+
+  end
+end
+
+# class CLLocationPoint
+#   def to_s
+#     puts "CLLOCATIONPOINT"
+#   end
+# end
+
+class CLLocationCoordinate2D
+  def to_s
+    to_firebase.to_s
+  end
+
+  def to_firebase
+    {latitude: latitude, longitude: longitude}
+  end
 end
 
 module Debugging
   module_function
-  
+
   DEBUGGING = false
 
   def recursive_symbolize_keys(h)
