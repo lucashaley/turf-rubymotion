@@ -1,0 +1,3 @@
+class ClayPathMaker
+
+end
