@@ -1,7 +1,9 @@
 class Wakawaka # < Cell
   include VoronoiUtilities
 
-  attr_accessor :cell, :pylon, :site
+  attr_accessor :cell,
+                :pylon,
+                :site
 
   DEBUGGING = true
 
