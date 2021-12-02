@@ -49,11 +49,21 @@
 
 @end
 
+@interface FirebaseObject: NSObject
+-(IBAction) initialize:(id) in_ref;
+-(IBAction) set_uuid_with_string:(id) in_uuid_string;
+-(IBAction) update_all;
+-(IBAction) update:(id) node;
+-(IBAction) uuid_string;
+-(IBAction) to_s;
+
+@end
+
 @interface Game: NSObject
 -(IBAction) initialize;
 -(IBAction) set_ref:(id) ref;
 -(IBAction) generate_new_id;
--(IBAction) add_player:(id) player;
+-(IBAction) add_local_player:(id) player;
 -(IBAction) create_new_pylon:(id) coord;
 -(IBAction) create_new_pouwhenua:(id) coord;
 -(IBAction) modify_pylon;
@@ -61,6 +71,7 @@
 -(IBAction) start_observing_pouwhenua;
 -(IBAction) check_for_game:(id) gamecode;
 -(IBAction) start_observing_players;
+-(IBAction) start_observing_kapa;
 
 @end
 
@@ -81,41 +92,29 @@
 -(IBAction) add_annotations;
 -(IBAction) create_play_region:(id) args;
 -(IBAction) player_for_audio:(id) filename;
--(IBAction) create_new_pylon;
+-(IBAction) create_new_pouwhenua;
 -(IBAction) handle_new_pylon:(id) data;
+-(IBAction) handle_new_pouwhenua:(id) data;
 
 @end
 
 @interface MKPolygon: NSObject
 @end
 
-@interface Pouwhenua: NSObject
+@interface Pouwhenua: Site
 -(IBAction) distance_from_pylon:(id) pylon;
 -(IBAction) distance_from_location:(id) location;
 -(IBAction) set_location:(id) location;
 -(IBAction) lifespan_color;
 -(IBAction) set_uuid:(id) new_uuid;
--(IBAction) uuid;
--(IBAction) uuid_string;
 -(IBAction) set_annotation:(id) new_annotation;
 -(IBAction) get_uicolor;
 -(IBAction) to_hash;
--(IBAction) init_with_coord:(id) tempCoord;
--(IBAction) init_with_value:(id) valueWithCoord;
--(IBAction) set_coord:(id) tempCoord;
--(IBAction) coord;
--(IBAction) set_coord_as_value:(id) value_with_coord;
--(IBAction) coord_as_value;
--(IBAction) set_x:(id) temp_x;
--(IBAction) x;
--(IBAction) set_y:(id) temp_y;
--(IBAction) y;
--(IBAction) sort_sites:(id) site_array;
--(IBAction) compare:(id) s;
+-(IBAction) recursive_symbolize_keys:(id) h;
 
 @end
 
-@interface Pylon: NSObject
+@interface Pylon: Site
 -(IBAction) distance_from_pylon:(id) pylon;
 -(IBAction) distance_from_location:(id) location;
 -(IBAction) to_s;
@@ -151,6 +150,7 @@
 -(IBAction) voronoi_cells;
 -(IBAction) annotations;
 -(IBAction) add_pylon:(id) pylon;
+-(IBAction) add_pouwhenua:(id) pouwhenua;
 
 @end
 
@@ -180,6 +180,15 @@
 
 @end
 
+@interface Kapa: NSObject
+-(IBAction) initialize:(id) in_title;
+-(IBAction) update_average_location;
+-(IBAction) count;
+-(IBAction) player_names;
+-(IBAction) to_s;
+
+@end
+
 @interface Machine: NSObject
 -(IBAction) initialize;
 -(IBAction) set_state:(id) state;
@@ -190,6 +199,7 @@
 -(IBAction) create_new_game;
 -(IBAction) set_game:(id) game;
 -(IBAction) create_new_pylon;
+-(IBAction) create_new_pouwhenua;
 -(IBAction) check_for_game:(id) gamecode;
 
 @end
@@ -217,16 +227,57 @@
 @property IBOutlet UILabel * gamecode;
 @property IBOutlet CharacterController * character_view;
 @property IBOutlet UIButton * cancel_button;
+@property IBOutlet UITableView * table_team_a;
+@property IBOutlet UITableView * table_team_b;
+@property IBOutlet UITableView * tableView;
+@property IBOutlet UILabel * not_close_enough;
 
 -(IBAction) viewDidLoad;
+-(IBAction) handle_new_player;
 -(IBAction) cancel_new_game;
 -(IBAction) compose_sms;
 -(IBAction) dismiss_new;
 
 @end
 
-@interface Player: NSObject
+@interface PlayerCell: UITableViewCell
+
+@property IBOutlet UILabel * player_name;
+
+@end
+
+@interface Player: FirebaseObject
 -(IBAction) initialize:(id) args;
+-(IBAction) to_hash;
+-(IBAction) to_s;
+
+@end
+
+@interface BeachSection: NSObject
+-(IBAction) initialize:(id) in_site;
+
+@end
+
+@interface CircleEvent: NSObject
+-(IBAction) set_coord_as_value:(id) in_value;
+-(IBAction) coord_as_value;
+-(IBAction) set_x:(id) in_x;
+-(IBAction) x;
+-(IBAction) set_y:(id) in_y;
+-(IBAction) y;
+
+@end
+
+@interface ClayPathMaker: NSObject
+@end
+
+@interface Edge: NSObject
+@end
+
+@interface Halfedge: NSObject
+-(IBAction) get_start_point;
+-(IBAction) get_end_point;
+-(IBAction) compare:(id) in_halfedge;
 
 @end
 
@@ -254,6 +305,18 @@
 -(IBAction) blue;
 -(IBAction) pink;
 -(IBAction) light_blue;
+-(IBAction) to_s;
+
+@end
+
+@interface CGPoint: NSObject
+-(IBAction) to_s;
+-(IBAction) recursive_symbolize_keys:(id) h;
+
+@end
+
+@interface CLLocationPoint: NSObject
+-(IBAction) to_s;
 -(IBAction) recursive_symbolize_keys:(id) h;
 
 @end

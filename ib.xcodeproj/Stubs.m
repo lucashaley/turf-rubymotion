@@ -18,6 +18,9 @@
 @implementation DbViewController
 @end
 
+@implementation FirebaseObject
+@end
+
 @implementation Game
 @end
 
@@ -48,6 +51,9 @@
 @implementation JoinController
 @end
 
+@implementation Kapa
+@end
+
 @implementation Machine
 @end
 
@@ -57,7 +63,25 @@
 @implementation NewController
 @end
 
+@implementation PlayerCell
+@end
+
 @implementation Player
+@end
+
+@implementation BeachSection
+@end
+
+@implementation CircleEvent
+@end
+
+@implementation ClayPathMaker
+@end
+
+@implementation Edge
+@end
+
+@implementation Halfedge
 @end
 
 @implementation Scout
@@ -70,5 +94,11 @@
 @end
 
 @implementation String
+@end
+
+@implementation CGPoint
+@end
+
+@implementation CLLocationPoint
 @end
 
