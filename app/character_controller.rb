@@ -4,8 +4,18 @@ class CharacterController < UIViewController
 
   outlet :scout_button, UIButton
 
+  DEBUGGING = true
+
   def select_scout
-    # Machine.instance.set_player("scout")
+    puts "CHARACTERCONTROLLER SELECT_SCOUT".blue if DEBUGGING
+
+    Machine.instance.player.role = "scout"
+    Machine.instance.player.refresh = 5 # in seconds
+    Machine.instance.player.pouwhenua_count = 5
+
+    puts Machine.instance.player.to_s.red
+    Machine.instance.player.update_all
+
     dismiss_modal
   end
 
