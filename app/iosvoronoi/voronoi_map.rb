@@ -14,6 +14,9 @@ class VoronoiMap
 
   def voronoi_cells_from_pylons(in_pylons)
     puts "VORONOI_MAP: VORONOI_CELLS_FROM_PYLONS".blue if DEBUGGING
+
+    puts "in_pylons: #{in_pylons}".red if DEBUGGING
+
     voronoi_cells = []
     voronoi = Voronoi.alloc.init
     voronoi.boundingBox = Machine.instance.bounding_box
@@ -24,8 +27,12 @@ class VoronoiMap
     # puts "pylons.allValues: #{pylons.allValues}"
 
     pylons_array = NSArray.arrayWithArray(pylons.allValues)
-    # puts "#{pylons_array}"
+    puts "#{pylons_array}".red
+
+    puts "COMPUTEWITHSITES".red if DEBUGGING
+    # TODO make this prettier
     result = voronoi.computeWithSites(pylons_array, andBoundingBox: CGRectMake(voronoi.boundingBox.origin.x, voronoi.boundingBox.origin.y, voronoi.boundingBox.size.height, voronoi.boundingBox.size.width))
+    puts "COMPUTEWITHSITES FINISHED".red if DEBUGGING
 
     result.cells.each_with_index do |cell, index|
       pylon = pylons.objectForKey(cell.site.uuID)
@@ -35,9 +42,11 @@ class VoronoiMap
       voronoi_cells << c
     end
 
+    puts "FINISHNG VORONOI_CELLS_FROM_PYLONS".blue if DEBUGGING
     voronoi_cells
   end
   alias :voronoiCellsFromPylons :voronoi_cells_from_pylons
+  alias :voronoi_cells_from_pouwhenua :voronoi_cells_from_pylons
 
   def voronoi_cells
     puts "VORONOI_MAP: VORONOI_CELLS".blue if DEBUGGING
@@ -62,11 +71,23 @@ class VoronoiMap
   def add_pylon(pylon)
     puts "VORONOI_MAP ADD_PYLON".blue if DEBUGGING
     puts "pylon: #{pylon}"
-    @pylons.setObject(pylon, forKey: pylon.uuID)
+    @pylons.setObject(pylon, forKey: pylon.uuID.UUIDString)
 
     puts "pylons: "
     @pylons.each do |k, v|
-      puts v
+      puts "#{k}: #{v}"
+    end
+  end
+
+  def add_pouwhenua(pouwhenua)
+    puts "VORONOI_MAP ADD_POUWHENUA".blue if DEBUGGING
+    puts "Pouwhenua: #{pouwhenua}"
+    puts pouwhenua.uuid_string
+    @pylons.setObject(pouwhenua, forKey: pouwhenua.uuid_string)
+
+    puts "pylons: "
+    @pylons.each do |k, v|
+      puts "#{k}: #{v}"
     end
   end
 end

@@ -12,6 +12,7 @@ class MenuController < UIViewController
   def viewDidLoad
     puts "MENUCONTROLLER VIEWDIDLOAD".blue if DEBUGGING
     if Machine.instance.user
+      puts Machine.instance.user.email
       button_login.setTitle("Logout", forState: UIControlStateNormal)
     else
       button_login.setTitle("Login", forState: UIControlStateNormal)

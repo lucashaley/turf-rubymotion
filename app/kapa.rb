@@ -8,7 +8,8 @@ class Kapa < FirebaseObject
                 :uuid,
                 :nga_kaitakaro,
                 :location,
-                :title
+                :title,
+                :game
 
   DEBUGGING = true
   FIREBASE_CLASSPATH = "kapa"
@@ -16,10 +17,11 @@ class Kapa < FirebaseObject
   def initialize(in_ref, in_title)
     super(in_ref.child(FIREBASE_CLASSPATH)).tap do |k|
       puts "KAPA INITIALIZE".green if DEBUGGING
-      k.nga_kaitakaro = {}
+      k.nga_kaitakaro = []
       k.title = in_title
       k.uuid = NSUUID.UUID
       k.color = CIColor.alloc.initWithColor(UIColor.whiteColor)
+      k.game = Machine.instance.game
 
       k.variables_to_save = ["color",
                              "title"]
@@ -30,13 +32,14 @@ class Kapa < FirebaseObject
   def update_average_location
     puts "KAPA UPDATE_AVERAGE_LOCATION".blue if DEBUGGING
     @nga_kaitakaro.each do |kaitakaro|
-
+      puts kaitakaro
+      puts kaitakaro.value["location"]
     end
   end
 
-  def add_player_to_kapa(uuid, name)
+  def add_player_to_kapa(player)
     puts "KAPA ADD_PLAYER_TO_KAPA".blue if DEBUGGING
-    @nga_kaitakaro[uuid] = name
+    @nga_kaitakaro << player
     puts self.count
     # this is handled in game
     # App.notification_center.post("PlayerNewInKapa", object: self)
@@ -45,13 +48,17 @@ class Kapa < FirebaseObject
     update_average_location
   end
 
+  def nga_kaitakaro_to_firebase
+    nga_kaitakaro.map {|player| {player.uuid => player.name}}
+  end
+
   def count
     puts "KAPA COUNT".blue if DEBUGGING
     @nga_kaitakaro.length
   end
 
   def player_names
-    @nga_kaitakaro.values
+    @nga_kaitakaro.map {|player| player.display_name}
   end
 
   def to_s

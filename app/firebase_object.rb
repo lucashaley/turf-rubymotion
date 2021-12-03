@@ -5,13 +5,27 @@ class FirebaseObject
 
   DEBUGGING = true
 
-  def initialize(in_ref)
-    puts "#{__FILE__} #{__method__}: #{__LINE__}\a"
+  def initialize(in_ref, in_uuid = NSUUID.UUID)
+    puts "#{__FILE__} #{__method__} line: #{__LINE__}".green if DEBUGGING
     puts "FIREBASEOBJECT INITIALIZE".green if DEBUGGING
-    @uuid = NSUUID.UUID
+    # @uuid = NSUUID.UUID
+    @uuid = in_uuid
     @ref = in_ref.child(uuid_string)
     @variables_to_save = []
 
+    self
+  end
+
+  def pull
+    puts "FIREBASEOBJECT PULL".green if DEBUGGING
+    @ref.getDataWithCompletionBlock(proc do | error, snapshot |
+      @variables_to_save.each do |v|
+        self.setValue(snapshot.getSnapshotForPath(v).value , forKey: v)
+      end
+    end)
+  end
+
+  def start_observing
     @ref.observeEventType(FIRDataEventTypeChildChanged,
       withBlock: proc do |data|
         puts "FIREBASEOBJECT CHILDCHANGED".red if DEBUGGING
@@ -24,13 +38,13 @@ class FirebaseObject
         # Should we turn it into a better-formed hash here?
         App.notification_center.post("#{self.class.name.upcase}New", data)
     end)
-
-    self
   end
 
   def set_uuid_with_string(in_uuid_string)
     @uuid = NSUUID.alloc.initWithUUIDString(in_uuid_string)
   end
+
+
 
   def update_all
     puts "FIREBASEOBJECT UPDATE_ALL".blue if DEBUGGING
@@ -38,8 +52,8 @@ class FirebaseObject
     @variables_to_save.each do |v|
       # puts self.valueForKey(v)
       val = self.valueForKey(v)
-      puts val.class
-      puts val.class.method_defined? :to_firebase
+      # puts val.class
+      # puts val.class.method_defined? :to_firebase
       # output[v] = val.to_firebase
       # output[v] = val.is_a? ":String" ? val : val.to_firebase # this doesn't work
       # why the hell does this not work for Strings
@@ -54,7 +68,9 @@ class FirebaseObject
       end
     end
     puts "Updating all: #{output}"
-    @ref.setValue(output)
+    @ref.setValue(output, withCompletionBlock: lambda do |error, ref|
+      puts "FIREBASEOBJECT UPDATED\a"
+    end)
   end
 
   def update(node)

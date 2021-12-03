@@ -27,7 +27,15 @@ class NewController < UIViewController
     # get the current player's location
     Machine.instance.initialize_location_manager
 
-    # set player in db
+    # create a new game in Firebase and retrieve its ID
+    # TODO perhaps move this into viewWillAppear?
+    # Machine.instance.create_new_game
+    Machine.instance.create_new_game.tap do |game|
+      puts "New game uuid: #{game.uuID.UUIDString}"
+      gamecode.text = game.gamecode
+    end
+
+    # Listen for new players
     @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
       puts "PLAYER NEW".yellow
 
@@ -35,18 +43,6 @@ class NewController < UIViewController
 
       handle_new_player
     end
-
-    # @player_new_in_kapa_observer = App.notification_center.observe "PlayerNewInKapa" do |notification|
-    #   puts "PLAYER NEW IN KAPA".yellow
-    #   puts notification.object.value
-    #   handle_new_player_in_kapa
-    # end
-
-    # create a new game in Firebase and retrieve its ID
-    # TODO perhaps move this into viewWillAppear?
-    Machine.instance.create_new_game
-    puts "New game uuID: #{Machine.instance.game.uuID.UUIDString}"
-    gamecode.text = Machine.instance.game.gamecode
 
     Machine.instance.segue("ToCharacter")
   end

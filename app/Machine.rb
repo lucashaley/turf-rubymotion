@@ -1,14 +1,13 @@
 class Machine
-  attr_accessor :name,
-                :fsm,
+  attr_accessor :fsm,
                 :delegate,
                 :rootview,
                 :db_app,
                 :user,
                 :player,
                 :bounding_box,
-                :db_game_ref,
-                :db_ref,
+                # :db_game_ref,
+                # :db_ref,
                 :db,
                 :current_view,
                 :location_manager,
@@ -30,7 +29,8 @@ class Machine
     # @game = Game.new
     # @bounding_box = UIScreen.mainScreen.bounds
 
-    @player = Player.new
+    # @player = Player.new
+    @player
 
     ####################
     # FIREBASE
@@ -38,17 +38,17 @@ class Machine
     @db_app = FIRApp.defaultApp
     puts "Machine App:#{@db_app.name}"
     @db = FIRDatabase.databaseForApp(@db_app)
-    @db_ref = @db.reference
-    @db_game_ref = @db.referenceWithPath("games/test-game-01")
+    # @db_ref = @db.reference
+    # @db_game_ref = @db.referenceWithPath("games/test-game-01")
 
-    @handle_data_result = proc do |data|
-      # puts "\n----\nhandleDataResult\n----\n"
-      # puts "Data: #{data}"
-      # data.children.each do |c|
-      #   puts "\n#{c.value}"
-      # end
-      # _test_game = Game.init_from_firebase(data) # what is this doing here
-    end
+    # @handle_data_result = proc do |data|
+    #   # puts "\n----\nhandleDataResult\n----\n"
+    #   # puts "Data: #{data}"
+    #   # data.children.each do |c|
+    #   #   puts "\n#{c.value}"
+    #   # end
+    #   # _test_game = Game.init_from_firebase(data) # what is this doing here
+    # end
 
     #####################
     # AUTHENTICATION
@@ -56,26 +56,17 @@ class Machine
     # https://www.rubyguides.com/2016/02/ruby-procs-and-lambdas/
     # also
     # http://www.zenruby.info/2016/05/procs-and-lambdas-closures-in-ruby.html
-    handle_auth_state_changed = proc do |auth, b|
+    handle_auth_state_changed = proc do |auth, user|
       puts "handle_auth_state_changed".red
-      # puts auth
-      # puts auth.inspect
-      # @fsm.event(:log_in)
+
+      if auth.currentUser
+        puts "User already logged in".pink
+        @user = auth.currentUser
+      else
+        puts "No user logged in".pink
+        @user = nil
+      end
     end
-
-    # Not sure if this is even used any more
-    # handleAuthDataResult = proc do |authResult, error|
-    #   unless error.nil?
-    #     puts error.localizedDescription
-    #     puts error.userInfo
-    #   end
-    #   # puts authResult.user
-    #   @user = authResult.user
-    #
-    #   # remember that with objective-c, boolean proprties must have the ?
-    #   puts @user.anonymous?
-    # end
-
     ####################
     # FIREBASE AUTH
 
@@ -142,7 +133,9 @@ class Machine
   # SINGLETON
   def self.instance
     # puts "MACHINE: INSTANCE"
-    @instance ||= self.new
+    # @instance ||= self.new
+    Dispatch.once { @instance ||= new }
+    @instance
   end
 
   def set_state(state)
@@ -152,10 +145,9 @@ class Machine
 
   def segue(name)
     puts "MACHINE SEGUE".blue if DEBUGGING
-    @delegate.window.rootViewController.performSegueWithIdentifier(name, sender: self)
 
-    # this doesn't work!
-    # @rootview.performSegueWithIdentifier(name, sender: self)
+    # Can't we just use the current view controller shortcut?
+    @delegate.window.rootViewController.performSegueWithIdentifier(name, sender: self)
   end
 
   # def generate_new_id
@@ -221,8 +213,11 @@ class Machine
 
   def create_new_game
     puts "MACHINE: CREATE_NEW_GAME".blue if DEBUGGING
-    @game = Game.init_new_game
-    # @game.add_player(@user)
+    # Old version not FirebaseObject
+    # @game = Game.init_new_game
+
+    # New version FirebaseObject
+    @game = Game.new
   end
 
   def set_game(game)
@@ -237,6 +232,10 @@ class Machine
     # new_location = location || @player.location
     puts "Player location: #{@player.location.coordinate.longitude}, #{@player.location.coordinate.latitude}".red
     @game.create_new_pylon(@player.location.coordinate)
+  end
+  def create_new_pouwhenua
+    puts "MACHINE: CREATE_NEW_POUWHENUA".blue if DEBUGGING
+    @game.create_new_pouwhenua(@player.location.coordinate)
   end
 
   def check_for_game(gamecode)
