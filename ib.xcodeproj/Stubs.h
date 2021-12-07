@@ -50,7 +50,8 @@
 @end
 
 @interface FirebaseObject: NSObject
--(IBAction) initialize:(id) in_ref;
+-(IBAction) pull;
+-(IBAction) start_observing;
 -(IBAction) set_uuid_with_string:(id) in_uuid_string;
 -(IBAction) update_all;
 -(IBAction) update:(id) node;
@@ -59,11 +60,10 @@
 
 @end
 
-@interface Game: NSObject
+@interface Game: FirebaseObject
 -(IBAction) initialize;
--(IBAction) set_ref:(id) ref;
 -(IBAction) generate_new_id;
--(IBAction) add_local_player:(id) player;
+-(IBAction) add_local_player:(id) user;
 -(IBAction) create_new_pylon:(id) coord;
 -(IBAction) create_new_pouwhenua:(id) coord;
 -(IBAction) modify_pylon;
@@ -95,6 +95,22 @@
 -(IBAction) create_new_pouwhenua;
 -(IBAction) handle_new_pylon:(id) data;
 -(IBAction) handle_new_pouwhenua:(id) data;
+
+@end
+
+@interface GameOld: NSObject
+-(IBAction) initialize;
+-(IBAction) set_ref:(id) ref;
+-(IBAction) generate_new_id;
+-(IBAction) add_local_player:(id) user;
+-(IBAction) create_new_pylon:(id) coord;
+-(IBAction) create_new_pouwhenua:(id) coord;
+-(IBAction) modify_pylon;
+-(IBAction) start_observing_pylons;
+-(IBAction) start_observing_pouwhenua;
+-(IBAction) check_for_game:(id) gamecode;
+-(IBAction) start_observing_players;
+-(IBAction) start_observing_kapa;
 
 @end
 
@@ -169,6 +185,10 @@
 @property IBOutlet CharacterController * character_view;
 @property IBOutlet UIButton * cancel_button;
 @property IBOutlet UIButton * continue_button;
+@property IBOutlet UITableView * table_team_a;
+@property IBOutlet UITableView * table_team_b;
+@property IBOutlet UITableView * tableView;
+@property IBOutlet UILabel * not_close_enough;
 
 -(IBAction) viewDidLoad;
 -(IBAction) viewWillAppear:(id) animated;
@@ -180,9 +200,10 @@
 
 @end
 
-@interface Kapa: NSObject
--(IBAction) initialize:(id) in_title;
+@interface Kapa: FirebaseObject
 -(IBAction) update_average_location;
+-(IBAction) add_player_to_kapa:(id) player;
+-(IBAction) nga_kaitakaro_to_firebase;
 -(IBAction) count;
 -(IBAction) player_names;
 -(IBAction) to_s;
@@ -248,6 +269,7 @@
 
 @interface Player: FirebaseObject
 -(IBAction) initialize:(id) args;
+-(IBAction) update_location:(id) in_location;
 -(IBAction) to_hash;
 -(IBAction) to_s;
 
@@ -305,18 +327,39 @@
 -(IBAction) blue;
 -(IBAction) pink;
 -(IBAction) light_blue;
+-(IBAction) to_firebase;
+
+@end
+
+@interface Fixnum: NSObject
+-(IBAction) to_firebase;
+-(IBAction) to_s;
+
+@end
+
+@interface CIColor: NSObject
+-(IBAction) to_firebase;
 -(IBAction) to_s;
 
 @end
 
 @interface CGPoint: NSObject
 -(IBAction) to_s;
+-(IBAction) to_firebase;
 -(IBAction) recursive_symbolize_keys:(id) h;
 
 @end
 
-@interface CLLocationPoint: NSObject
+@interface CLLocation: NSObject
+-(IBAction) to_firebase;
 -(IBAction) to_s;
+-(IBAction) recursive_symbolize_keys:(id) h;
+
+@end
+
+@interface CLLocationCoordinate2D: NSObject
+-(IBAction) to_s;
+-(IBAction) to_firebase;
 -(IBAction) recursive_symbolize_keys:(id) h;
 
 @end

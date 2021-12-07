@@ -76,8 +76,8 @@ class FirebaseObject
   def update(node)
     puts "FIREBASEOBJECT UPDATE #{node}".blue if DEBUGGING
     temp_variable = instance_variable_get("@#{node}")
-    puts "temp_variable: #{temp_variable}"
-    @ref.child("#{uuid_string}/#{node}").setValue(temp_variable)
+    # puts "temp_variable: #{temp_variable}"
+    @ref.child("#{node}").setValue(temp_variable.to_firebase)
   end
 
   def uuid_string

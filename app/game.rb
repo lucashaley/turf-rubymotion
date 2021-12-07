@@ -36,100 +36,38 @@ class Game < FirebaseObject
         g.nga_kapa << Kapa.new(g.ref, "TeamB")
 
         g.add_local_player(Machine.instance.user) if Machine.instance.user
+
+        # TODO this probably shouldn't be here
+        puts "Turning on tracking".light_blue
+        Machine.instance.tracking = true
       end
     end
   end
 
-  # def initialize
-  #   puts "GAME: INITIALIZE".green if DEBUGGING
-  #
-  #   @uuID = NSUUID.UUID
-  #   @gamecode = generate_new_id
-  #   @pylons = []
-  #   @pouwhenua = []
-  #
-  #   # make the teams, and populate with two default teams
-  #   @nga_kapa = []
-  #   @nga_kaitakaro = {}
-  #
-  #   @update_handler = proc do |error, snapshot|
-  #     puts "update_handler: #{snapshot}"
-  #   end
-  # end
-  #
-  # def self.init_with_hash(args)
-  #   puts "GAME INIT_WITH_HASH".green if DEBUGGING
-  #
-  #   puts "args: #{args}".green if DEBUGGING
-  #   symbol_args = recursive_symbolize_keys(args)
-  #
-  #   new_game = Game.new
-  #   new_game.uuID = symbol_args[:key]
-  #   symbol_args[:pylons].each do |pylon|
-  #     h = {key: pylon[0]}.merge(pylon[1])
-  #     new_game.pylons << Pylon.initWithHash(h)
-  #   end
-  #   symbol_args[:pouwhenua].each do |pouwhenua|
-  #     new_game.pouwhenua << Pouwhenua.init_with_hash(pouwhenua)
-  #   end
-  #   # new_game.color = symbol_args[:color] ? CIColor.alloc.initWithString(args[:color]) : CIColor.alloc.initWithColor(UIColor.systemYellowColor)
-  #   # new_game.title = symbol_args[:title] || "MungMung"
-  #   # new_game.lifespan = symbol_args[:lifespan] || 0
-  #   new_game
-  # end
-  #
-  # def self.init_new_game
-  #   # TODO Convert this to a tap
-  #   puts "GAME: INIT_NEW_GAME".green if DEBUGGING
-  #   new_game = Game.new
-  #   puts "Gamecode: #{new_game.gamecode}"
-  #
-  #   # Create new game on Firebase
-  #   Machine.instance.db.referenceWithPath("games")
-  #     .child(new_game.uuID.UUIDString)
-  #     .setValue({gamecode: new_game.gamecode},
-  #     withCompletionBlock: lambda do |error, ref|
-  #       new_game.firebase_ref = ref
-  #       new_game.set_ref(ref)
-  #       puts "\nNew game reference: #{ref}".red
-  #       # ref.child("pylons/plug").setValue("foo")
-  #       # _game.firebase_ref.child("pylons/plug").setValue("foo")
-  #       new_game.start_observing_players
-  #
-  #       # Add some pylons in for testing
-  #       # These should end up being the starting positions
-  #       ### PYLON FIX
-  #       puts "Creating test pylons".red
-  #       new_game.create_new_pylon(CLLocationCoordinate2DMake(37.33350562755614, -122.02849767766669))
-  #       new_game.create_new_pylon(CLLocationCoordinate2DMake(37.33063930240253, -122.03102976399545))
-  #       # puts "Creating test pouwhenua".red
-  #       # new_game.create_new_pouwhenua(CLLocationCoordinate2DMake(37.33350562755614, -122.02849767766669))
-  #       # new_game.create_new_pouwhenua(CLLocationCoordinate2DMake(37.33063930240253, -122.03102976399545))
-  #
-  #       # Can't add until we have a firebase_ref
-  #       new_game.nga_kapa << Kapa.new(new_game.firebase_ref, "TeamA")
-  #       new_game.nga_kapa << Kapa.new(new_game.firebase_ref, "TeamB")
-  #
-  #       # Add the current player
-  #       # TODO should this be here? Issues with observing above
-  #       # What is the user?
-  #       puts Machine.instance.user
-  #       new_game.add_local_player(Machine.instance.user) if Machine.instance.user
-  #     end)
-  #
-  #   return new_game
-  # end
+  def self.init_with_hash(args)
+    Game.new.tap do |g|
+      puts "GAME INIT_FROM_HASH".light_blue if DEBUGGING
+      puts "args: #{args}".green if DEBUGGING
+      symbol_args = recursive_symbolize_keys(args)
+
+      g.set_uuid_with_string = symbol_args[:key]
+      g.gamecode = symbol_args[:gamecode]
+
+      symbol_args[:kapa].each do |kapa|
+        puts "Adding Kapa: #{kapa}"
+      end
+
+      symbol_args[:players].each do |player|
+        puts "Adding player: #{player}"
+      end
+    end
+  end
 
   def generate_new_id
     puts "GAME: GENERATE_NEW_ID".blue if DEBUGGING
     # update the UI with the gamecode
     # https://gist.github.com/mbajur/2aba832a6df3fc31fe7a82d3109cb626
     new_id = rand(36**6).to_s(36)
-
-    # check if it exists already
-    # puts @db_ref.child("games")
-
-    # TODO firebase call to find existing, just to make sure?
   end
 
   def add_local_player(user)
@@ -138,10 +76,17 @@ class Game < FirebaseObject
     puts "adding user: #{user}".red if DEBUGGING
     puts user.providerData
 
-    @local_player = Player.new({ref: @firebase_ref, user_id: user.uid, given_name: user.displayName, email: user.email})
+    @local_player = Player.new({ref: @ref, user_id: user.uid, given_name: user.displayName, email: user.email})
     puts "new_player: #{@local_player}".red if DEBUGGING
+
+    @local_kaitakaro = Kaitarako.new(@ref,{user_id: user.uid, given_name: user.displayName, email: user.email})
+    puts @local_kaitakaro
+
     @nga_kaitakaro[@local_player.uuid => @local_player]
     puts @nga_kaitakaro
+
+    # Add player to first team?
+    nga_kapa[0].add_player_to_kapa(@local_player)
   end
 
   def create_new_pylon(coord)

@@ -27,6 +27,9 @@
 @implementation GameController
 @end
 
+@implementation GameOld
+@end
+
 @implementation MKPolygon
 @end
 
@@ -96,9 +99,18 @@
 @implementation String
 @end
 
+@implementation Fixnum
+@end
+
+@implementation CIColor
+@end
+
 @implementation CGPoint
 @end
 
-@implementation CLLocationPoint
+@implementation CLLocation
+@end
+
+@implementation CLLocationCoordinate2D
 @end
 

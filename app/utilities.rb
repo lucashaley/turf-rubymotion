@@ -50,10 +50,6 @@ class CGPoint
   def to_s
     puts "CGPOINT x: #{x}, y: #{y}"
   end
-
-  def self.average(arr)
-
-  end
 end
 
 # class CLLocationPoint
@@ -62,6 +58,12 @@ end
 #   end
 # end
 
+class CLLocation
+  def to_firebase
+    coordinate.to_firebase
+  end
+end
+
 class CLLocationCoordinate2D
   def to_s
     to_firebase.to_s
@@ -69,6 +71,14 @@ class CLLocationCoordinate2D
 
   def to_firebase
     {latitude: latitude, longitude: longitude}
+  end
+
+  def +(loc)
+    CLLocationCoordinate2DMake(latitude + loc.latitude, longitude + loc.longitude)
+  end
+
+  def /(denom)
+    CLLocationCoordinate2DMake(latitude/denom, longitude/denom)
   end
 end
 

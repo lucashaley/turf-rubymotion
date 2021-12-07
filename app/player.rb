@@ -58,6 +58,11 @@ class Player < FirebaseObject
     end
   end
 
+  def update_location(in_location)
+    @location = in_location
+    update("location")
+  end
+
   def to_hash
     # output = {user_id: @user_id, display_name: @display_name, location: @location}
     h = {}

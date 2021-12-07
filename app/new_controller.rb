@@ -31,7 +31,7 @@ class NewController < UIViewController
     # TODO perhaps move this into viewWillAppear?
     # Machine.instance.create_new_game
     Machine.instance.create_new_game.tap do |game|
-      puts "New game uuid: #{game.uuID.UUIDString}"
+      puts "Created new game: #{game.uuid_string}".pink
       gamecode.text = game.gamecode
     end
 

@@ -15,3 +15,6 @@ gem "ib"
 gem "motion-state-machine"
 
 gem "standard"
+
+# https://github.com/clayallsopp/geomotion
+gem "geomotion"

@@ -38,6 +38,7 @@ class Machine
     @db_app = FIRApp.defaultApp
     puts "Machine App:#{@db_app.name}"
     @db = FIRDatabase.databaseForApp(@db_app)
+    # @db.persistenceEnabled = true
     # @db_ref = @db.reference
     # @db_game_ref = @db.referenceWithPath("games/test-game-01")
 
@@ -183,11 +184,13 @@ class Machine
     puts "MACHINE: DIDUPDATETOLOCATION".blue if DEBUGGING
     return unless @tracking
 
-    if MKMapRectContainsPoint(@bounding_box, MKMapPointForCoordinate(new_location.coordinate))
-      @player.machine.event(:enter_bounds)
-    else
-      @player.machine.event(:exit_bounds)
-    end
+    # Check if the local player has left the play area
+    # We don't need to do this in the NewController
+    # if MKMapRectContainsPoint(@bounding_box, MKMapPointForCoordinate(new_location.coordinate))
+    #   @player.machine.event(:enter_bounds)
+    # else
+    #   @player.machine.event(:exit_bounds)
+    # end
     puts "Updating location to: #{new_location.coordinate.longitude}, #{new_location.coordinate.latitude}".red
     locationUpdate(new_location)
   end
@@ -199,11 +202,15 @@ class Machine
 
   def locationUpdate(location)
     puts "MACHINE LOCATIONUPDATE".blue if DEBUGGING
-    # loc = location.coordinate
-    # @player_location = location.coordinate
-    puts "Location: #{location.coordinate.longitude}, #{location.coordinate.latitude}".red
-    @player.location = location
-    # map_view.setCenterCoordinate(loc)
+
+    # puts "Location: #{location.coordinate.longitude}, #{location.coordinate.latitude}".red
+
+    # commented out for Takaro testing
+    # @game.local_player.update_location(location)
+
+    App.notification_center.post("UpdateLocalPlayerPosition",
+      {"longitude" => location.coordinate.longitude,
+        "latitude" => location.coordinate.latitude})
   end
 
   def set_player(player)
@@ -242,9 +249,9 @@ class Machine
     puts "MACHINE CHECK_FOR_GAME".blue if DEBUGGING
     puts gamecode.red if DEBUGGING
     games_ref = @db.referenceWithPath("games")
-    puts games_ref.URL
+    puts "Games ref: #{games_ref.URL}"
     this_query = games_ref.queryOrderedByChild("gamecode").queryEqualToValue(gamecode).queryLimitedToLast(1)
-    puts this_query.ref.URL
+    # puts this_query.ref.URL
     # puts "_this_query: #{_this_query}"
     this_query.getDataWithCompletionBlock(
       lambda do | error, snapshot |

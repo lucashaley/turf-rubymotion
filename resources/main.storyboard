@@ -384,6 +384,10 @@
                         <outlet property="cancel_button" destination="lIx-pz-Dmn" id="n9H-S8-4By"/>
                         <outlet property="continue_button" destination="DnS-vh-auM" id="Kh9-0k-Igy"/>
                         <outlet property="gamecode" destination="DJd-Ms-8Ex" id="3at-Rr-cax"/>
+                        <outlet property="not_close_enough" destination="lBb-o7-YTJ" id="w7O-mU-L4z"/>
+                        <outlet property="tableView" destination="cyb-i2-3St" id="noe-Su-afP"/>
+                        <outlet property="table_team_a" destination="cyb-i2-3St" id="KcB-t9-WBg"/>
+                        <outlet property="table_team_b" destination="kh1-mc-79A" id="Gbg-ec-KVu"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2if-JT-Ztx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

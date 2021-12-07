@@ -31,10 +31,14 @@ class Kapa < FirebaseObject
 
   def update_average_location
     puts "KAPA UPDATE_AVERAGE_LOCATION".blue if DEBUGGING
+    total = CLLocationCoordinate2DMake(0, 0)
     @nga_kaitakaro.each do |kaitakaro|
-      puts kaitakaro
-      puts kaitakaro.value["location"]
+      puts "Player location: #{kaitakaro.location}"
+      puts kaitakaro.location.class
+      total += kaitakaro.location
     end
+    puts "Total: #{total}"
+    puts total / @nga_kaitakaro.length
   end
 
   def add_player_to_kapa(player)

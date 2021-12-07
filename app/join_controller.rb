@@ -8,11 +8,53 @@ class JoinController < UIViewController
   outlet :cancel_button, UIButton
   outlet :continue_button, UIButton
 
+  outlet :table_team_a, UITableView
+  outlet :table_team_b, UITableView
+  outlet :tableView, UITableView
+
+  outlet :not_close_enough, UILabel
+
   DEBUGGING = true
 
   def viewDidLoad
-    puts "JOINCONTROLLER VIEWDIDLOAD".blue if DEBUGGING
+    puts "JOINCONTROLLER VIEWDIDLOAD".light_blue if DEBUGGING
     # Do some stuff in here
+
+    # super
+    table_team_a.delegate = self
+    # table_team_a.dataSource = something
+
+    Machine.instance.current_view = self
+
+    # get the current player's location
+    Machine.instance.initialize_location_manager
+
+    # Listen for new players
+    @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
+      puts "PLAYER NEW".yellow
+
+      puts notification.object.value
+
+      handle_new_player
+    end
+
+    Machine.instance.tracking = true
+
+    # Trying out Takaro
+    puts "Trying takaro"
+    takaro = Takaro.new("9C29270C-4BD3-4297-92E5-66A1E2701111")
+    puts "Takaro: #{takaro}"
+
+    puts "Adding local player"
+    @local_Player = takaro.add_local_player
+    puts "local_player: #{@local_player}"
+    takaro.start_syncing
+
+    takaro.list_player_names_for_team(0)
+
+    Machine.instance.segue("ToCharacter")
+
+    # Machine.instance.tracking = true
   end
 
   def viewWillAppear animated
