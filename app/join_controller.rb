@@ -50,7 +50,7 @@ class JoinController < UIViewController
     puts "local_player: #{@local_player}"
     takaro.start_syncing
 
-    takaro.list_player_names_for_team(0)
+    # takaro.list_player_names_for_team(0)
 
     Machine.instance.segue("ToCharacter")
 

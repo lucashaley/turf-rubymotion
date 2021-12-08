@@ -126,25 +126,64 @@ class Takaro
   def update_kapa_location(kapa_ref)
     puts "TAKARO UPDATE_KAPA_LOCATION".blue if DEBUGGING
     loc = CLLocationCoordinate2DMake(0, 0)
-    puts "Players url: #{@ref.child('players').URL}"
+    # puts "Players url: #{@ref.child('players').URL}"
     @ref.child('players/').queryOrderedByChild("team").queryEqualToValue(kapa_ref.key).getDataWithCompletionBlock(
       proc do | error, new_snapshot |
-        puts "new_snapshot: #{new_snapshot.value}"
+        # puts "new_snapshot: #{new_snapshot.value}"
         new_snapshot.children.each do |child|
-          puts child.childSnapshotForPath("location").value
+          # puts child.childSnapshotForPath("location").value
           loc += format_to_location_coord(child.childSnapshotForPath("location").value)
         end
         loc /= new_snapshot.childrenCount
-        puts "new loc: #{loc}"
+        # puts "new loc: #{loc}"
         kapa_ref.updateChildValues({"location" => {"latitude" => loc.latitude, "longitude" => loc.longitude}})
+
+        # Just testing
+        list_player_names
+        # list_player_names_for_kapa_ref(kapa_ref)
       end
     )
   end
 
-  def list_player_names_for_team(index)
-    puts "TAKARO LIST_PLAYER_NAMES_FOR_TEAM".blue if DEBUGGING
-    team_ref = @ref.child("kapa").queryOrderedByChild("title").queryEqualToValue("TeamA")
-    puts "team_ref: #{team_ref}".yellow if DEBUGGING
+  # def list_player_names_for_index(index)
+  #   puts "TAKARO LIST_PLAYER_NAMES_FOR_INDEX".blue if DEBUGGING
+  #   @ref.child("kapa/").queryStartingAtValue(index).getDataWithCompletionBlock(
+  #     lambda do | error, kapa_snapshot |
+  #       puts "kapa_snapshot: #{kapa_snapshot.ref.URL}"
+  #       puts "kapa_snapshot: #{kapa_snapshot.value}"
+  #       return list_player_names_for_kapa_ref(kapa_snapshot.ref)
+  #     end
+  #   )
+  # end
+
+  def list_player_names
+    puts "TAKARO LIST_PLAYER_NAMES".blue if DEBUGGING
+    @ref.child("kapa").getDataWithCompletionBlock(
+      # Using a lambda allows us to return?!?
+      lambda do | error, kapa_snapshot |
+        puts kapa_snapshot.childrenCount
+        kapa_hash = kapa_snapshot.value
+        puts "kapa_hash: #{kapa_hash}"
+        puts kapa_snapshot.children.each { |c| puts "\nc: #{c.value}" }
+        # player_names = player_hash.map { |k| k.last["display_name"] }
+        # puts player_names
+        # return player_names
+      end
+    )
+  end
+
+  def list_player_names_for_kapa_ref(kapa_ref)
+    puts "TAKARO LIST_PLAYER_NAMES_FOR_KAPA_REF".blue if DEBUGGING
+    puts "kapa_ref: #{kapa_ref.key}".yellow if DEBUGGING
+    @ref.child("players").queryOrderedByChild("team").queryEqualToValue(kapa_ref.key).getDataWithCompletionBlock(
+      # Using a lambda allows us to return?!?
+      lambda do | error, player_snapshot |
+        player_hash = player_snapshot.value
+        player_names = player_hash.map { |k| k.last["display_name"] }
+        puts player_names
+        return player_names
+      end
+    )
   end
 
   def get_distance(coord_a, coord_b)
