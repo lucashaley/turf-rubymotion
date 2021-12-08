@@ -160,6 +160,7 @@ Motion::Project::App.setup do |app|
     pod "FirebaseUI/Google"
     # # pod 'FirebaseUI/Twitter'
     pod 'FirebaseUI/OAuth' # Used for Sign in with Apple, Twitter, etc
+    pod "FirebaseUI/Database"
     # pod 'FirebaseUI/Phone'
 
     # https://github.com/DevRhys/iosvoronoi
