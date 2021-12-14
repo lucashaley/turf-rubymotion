@@ -256,12 +256,13 @@ class Machine
     this_query.getDataWithCompletionBlock(
       lambda do | error, snapshot |
         puts "#{snapshot.key}: #{snapshot.value}".red
-        next_ref = snapshot.children.nextObject # rename this, not a ref
-        game = Game.init_with_hash({key: next_ref.key}.merge(next_ref.value))
-        game.set_ref(next_ref.ref)
-        set_game(game)
+        next_snapshot = snapshot.children.nextObject # rename this, not a ref
+        # game = Game.init_with_hash({key: next_ref.key}.merge(next_ref.value))
+        # game.set_ref(next_ref.ref)
+        # set_game(game)
 
-        return true
+        # return true
+        return next_snapshot.key
       end
     )
   end

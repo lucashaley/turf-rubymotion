@@ -54,6 +54,9 @@
 @implementation JoinController
 @end
 
+@implementation Kaitarako
+@end
+
 @implementation Kapa
 @end
 
@@ -66,10 +69,10 @@
 @implementation NewController
 @end
 
-@implementation PlayerCell
+@implementation Player
 @end
 
-@implementation Player
+@implementation PlayerCell
 @end
 
 @implementation BeachSection
@@ -94,6 +97,9 @@
 @end
 
 @implementation SplashController
+@end
+
+@implementation Takaro
 @end
 
 @implementation String

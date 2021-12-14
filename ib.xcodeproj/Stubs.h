@@ -187,16 +187,21 @@
 @property IBOutlet UIButton * continue_button;
 @property IBOutlet UITableView * table_team_a;
 @property IBOutlet UITableView * table_team_b;
-@property IBOutlet UITableView * tableView;
 @property IBOutlet UILabel * not_close_enough;
 
 -(IBAction) viewDidLoad;
 -(IBAction) viewWillAppear:(id) animated;
+-(IBAction) handle_new_player;
 -(IBAction) cancel_new_game:(id) sender;
 -(IBAction) dismiss_join:(id) sender;
 -(IBAction) textFieldDidBeginEditing:(id) text_field;
 -(IBAction) textFieldShouldEndEditing:(id) text_field;
 -(IBAction) check_input_text;
+
+@end
+
+@interface Kaitarako: NSObject
+-(IBAction) location_coordinates;
 
 @end
 
@@ -250,7 +255,6 @@
 @property IBOutlet UIButton * cancel_button;
 @property IBOutlet UITableView * table_team_a;
 @property IBOutlet UITableView * table_team_b;
-@property IBOutlet UITableView * tableView;
 @property IBOutlet UILabel * not_close_enough;
 
 -(IBAction) viewDidLoad;
@@ -261,17 +265,19 @@
 
 @end
 
-@interface PlayerCell: UITableViewCell
-
-@property IBOutlet UILabel * player_name;
-
-@end
-
 @interface Player: FirebaseObject
 -(IBAction) initialize:(id) args;
 -(IBAction) update_location:(id) in_location;
 -(IBAction) to_hash;
 -(IBAction) to_s;
+
+@end
+
+@interface PlayerCell: UITableViewCell
+
+@property IBOutlet UILabel * player_name;
+
+-(IBAction) viewDidLoad;
 
 @end
 
@@ -316,6 +322,21 @@
 @interface SplashController: UIViewController
 -(IBAction) viewDidLoad;
 -(IBAction) handleSingleTap:(id) recognizer;
+
+@end
+
+@interface Takaro: NSObject
+-(IBAction) initialize:(id) in_uuid;
+-(IBAction) start_syncing;
+-(IBAction) stop_syncing;
+-(IBAction) add_local_player:(id) in_user;
+-(IBAction) update_local_player_location:(id) in_location;
+-(IBAction) update_kapa_location:(id) kapa_ref;
+-(IBAction) list_player_names;
+-(IBAction) list_player_names_for_kapa_ref:(id) kapa_ref;
+-(IBAction) list_player_names_for_index:(id) in_index;
+-(IBAction) player_count_for_index:(id) in_index;
+-(IBAction) format_to_location_coord:(id) input;
 
 @end
 

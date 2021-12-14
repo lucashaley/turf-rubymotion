@@ -9,31 +9,33 @@ class NewController < UIViewController
 
   outlet :table_team_a, UITableView
   outlet :table_team_b, UITableView
-  outlet :tableView, UITableView
+  TABLEVIEW_TEAM_A = 0
+  TABLEVIEW_TEAM_B = 1
 
   outlet :not_close_enough, UILabel
 
+  attr_accessor :takaro
+
   DEBUGGING = true
+  CELL_IDENTIFIER = "PlayerCell"
 
   def viewDidLoad
     puts "NEWCONTROLLER: VIEWDIDLOAD".light_blue
 
-    super
-    table_team_a.delegate = self
-    # table_team_a.dataSource = something
-
     Machine.instance.current_view = self
-
     # get the current player's location
     Machine.instance.initialize_location_manager
 
-    # create a new game in Firebase and retrieve its ID
-    # TODO perhaps move this into viewWillAppear?
-    # Machine.instance.create_new_game
-    Machine.instance.create_new_game.tap do |game|
-      puts "Created new game: #{game.uuid_string}".pink
-      gamecode.text = game.gamecode
-    end
+    # # Old version
+    # # create a new game in Firebase and retrieve its ID
+    # # TODO perhaps move this into viewWillAppear?
+    # # Machine.instance.create_new_game
+    # Machine.instance.create_new_game.tap do |game|
+    #   puts "Created new game: #{game.uuid_string}".pink
+    #   gamecode.text = game.gamecode
+    # end
+
+    @takaro = Takaro.new
 
     # Listen for new players
     @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
@@ -43,6 +45,13 @@ class NewController < UIViewController
 
       handle_new_player
     end
+    @kapa_new_observer = App.notification_center.observe "KapaNew" do |notification|
+      puts "NEWCONTROLLER NEWKAPA".yellow
+      table_team_a.reloadData
+      table_team_b.reloadData
+    end
+
+    Machine.instance.tracking = true
 
     Machine.instance.segue("ToCharacter")
   end
@@ -53,29 +62,41 @@ class NewController < UIViewController
   def tableView(table_view, cellForRowAtIndexPath: index_path)
     puts "NEWCONTROLLER TABLEVIEW CELLFORROW".blue if DEBUGGING
 
-    @reuseIdentifier ||= "PlayerCell"
-    cell = tableView.dequeueReusableCellWithIdentifier(@reuseIdentifier)
-
-    puts Machine.instance.game.nga_kapa[0].player_names[index_path.item]
+    cell = table_view.dequeueReusableCellWithIdentifier(CELL_IDENTIFIER)
+    unless cell
+      cell = UITableViewCell.alloc.initWithStyle(UITableViewCellStyleSubtitle, reuseIdentifier: CELL_IDENTIFIER)
+    end
 
     # How can we tell which table it's from?
     if table_view == @table_team_a
-      cell.player_name.text = Machine.instance.game.nga_kapa[0].player_names[index_path.item]
+      cell.textLabel.text = @takaro.list_player_names_for_index(TABLEVIEW_TEAM_A)[index_path.row]
     elsif table_view == @table_team_b
-      cell.player_name.text = "Georgina"
+      cell.textLabel.text = @takaro.list_player_names_for_index(TABLEVIEW_TEAM_B)[index_path.row]
     end
+
+    # This will eventually be their character role
+    cell.detailTextLabel.text = "Mung beans"
 
     cell
   end
+
   def tableView(table_view, didDeselectRowAtIndexPath: index_path)
     puts "NEWCONTROLLER TABLEVIEW DIDSELECT".blue if DEBUGGING
   end
+
   def tableView(table_view, numberOfRowsInSection: section)
     puts "NEWCONTROLLER TABLEVIEW NUMBEROFROWS".blue if DEBUGGING
-    return 0 if Machine.instance.game.nga_kapa.empty? # This is a terrible concurrency hack
-    return Machine.instance.game.nga_kapa[0].count if table_view == @table_team_a
-    return Machine.instance.game.nga_kapa[1].count if table_view == @table_team_b
+    return 0 unless @takaro
+    if table_view == table_team_a
+      # puts "NumberOfRows rows a: #{@takaro.player_count_for_index(TABLEVIEW_TEAM_A)}"
+      return @takaro.player_count_for_index(TABLEVIEW_TEAM_A)
+    elsif table_view == table_team_b
+      # puts "NumberOfRows rows b: #{@takaro.player_count_for_index(TABLEVIEW_TEAM_B)}"
+      return @takaro.player_count_for_index(TABLEVIEW_TEAM_B)
+    end
+    0
   end
+
   def handle_new_player
     puts "NEWCONTROLLER HANDLE_NEW_PLAYER".blue if DEBUGGING
     # TODO this is a hack
@@ -109,10 +130,4 @@ class NewController < UIViewController
   def dismiss_new
     Machine.instance.segue("ToMenu")
   end
-end
-
-class PlayerCell < UITableViewCell
-  extend IB
-
-  outlet :player_name, UILabel
 end
