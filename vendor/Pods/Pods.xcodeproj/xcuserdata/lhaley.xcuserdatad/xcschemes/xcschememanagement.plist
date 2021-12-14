@@ -49,6 +49,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>FirebaseDatabaseUI.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>FirebaseGoogleAuthUI-FirebaseGoogleAuthUI.xcscheme</key>
 		<dict>
 			<key>isShown</key>

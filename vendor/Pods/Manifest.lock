@@ -55,6 +55,8 @@ PODS:
   - FirebaseDatabase (8.7.0):
     - FirebaseCore (~> 8.0)
     - leveldb-library (~> 1.22)
+  - FirebaseDatabaseUI (12.0.0):
+    - FirebaseDatabase (~> 8.0)
   - FirebaseGoogleAuthUI (12.0.0):
     - FirebaseAuth
     - FirebaseAuthUI
@@ -70,6 +72,8 @@ PODS:
     - FirebaseAuthUI (< 13.0, >= 12.0.2)
   - FirebaseUI/Auth (12.0.2):
     - FirebaseAuthUI (~> 12.0)
+  - FirebaseUI/Database (12.0.2):
+    - FirebaseDatabaseUI (~> 12.0)
   - FirebaseUI/Google (12.0.2):
     - FirebaseGoogleAuthUI (~> 12.0)
   - FirebaseUI/OAuth (12.0.2):
@@ -132,6 +136,7 @@ DEPENDENCIES:
   - Firebase/Auth (~> 8.7.0)
   - Firebase/Database
   - FirebaseUI/Auth (~> 12.0.2)
+  - FirebaseUI/Database
   - FirebaseUI/Google
   - FirebaseUI/OAuth
   - GoogleSignIn
@@ -147,6 +152,7 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseCoreDiagnostics
     - FirebaseDatabase
+    - FirebaseDatabaseUI
     - FirebaseGoogleAuthUI
     - FirebaseInstallations
     - FirebaseOAuthUI
@@ -171,6 +177,7 @@ SPEC CHECKSUMS:
   FirebaseCore: f4804c1d3f4bbbefc88904d15653038f2c99ddf7
   FirebaseCoreDiagnostics: 5daa63f1c1409d981a2d5007daa100b36eac6a34
   FirebaseDatabase: afc82291f9ed94ff949cec1b9505e8c3b944bc0f
+  FirebaseDatabaseUI: 0c16b8e11f58bf9e8644d219fa16b361db142255
   FirebaseGoogleAuthUI: 6981c0c3c054367f9ccd730fbcf483504deb0a68
   FirebaseInstallations: caa7c8e0d3e2345b8829d2fa9ca1b4dfbf2fcc85
   FirebaseOAuthUI: 8dc3d0270781133b10b2666d1163cd298501f453
@@ -186,6 +193,6 @@ SPEC CHECKSUMS:
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
 
-PODFILE CHECKSUM: b78e974baae9d19c474e158bbda2af06d8873c0a
+PODFILE CHECKSUM: 966402ef83b4b27cc3ea56e07b386a674de98942
 
 COCOAPODS: 1.10.0
