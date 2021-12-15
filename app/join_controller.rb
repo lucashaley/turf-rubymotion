@@ -18,7 +18,7 @@ class JoinController < UIViewController
 
   attr_accessor :takaro, :tableSource
 
-  DEBUGGING = true
+  DEBUGGING = false
   CELL_IDENTIFIER = "PlayerCell"
 
   def viewDidLoad

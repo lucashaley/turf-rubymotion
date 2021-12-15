@@ -16,7 +16,7 @@ class NewController < UIViewController
 
   attr_accessor :takaro
 
-  DEBUGGING = true
+  DEBUGGING = false
   CELL_IDENTIFIER = "PlayerCell"
 
   def viewDidLoad

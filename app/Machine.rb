@@ -17,7 +17,7 @@ class Machine
   attr_reader :handleDataResult,
               :game
 
-  DEBUGGING = true
+  DEBUGGING = false
 
   def initialize
     puts "MACHINE: INITIALIZE".green if DEBUGGING
