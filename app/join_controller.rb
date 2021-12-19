@@ -37,7 +37,7 @@ class JoinController < UIViewController
     @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
       puts "PLAYER NEW".yellow
 
-      puts notification.object.value
+      puts notification.object.value # TODO this causes a crash on nil
 
       handle_new_player
     end

@@ -191,26 +191,19 @@ class Machine
     # else
     #   @player.machine.event(:exit_bounds)
     # end
-    puts "Updating location to: #{new_location.coordinate.longitude}, #{new_location.coordinate.latitude}".red
-    locationUpdate(new_location)
+
+    # puts "Updating location to: #{new_location.coordinate.longitude}, #{new_location.coordinate.latitude}".red
+    # puts "old_location: #{old_location.coordinate}" unless old_location.nil?
+
+    # switching to using CLLocation
+    App.notification_center.post("UpdateLocalPlayerPositionAsLocation",
+      {"new_location" => new_location, "old_location" => old_location}
+    )
   end
 
   def locationManager(manager, didFailWithError: error)
     puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
     App.notification_center.post "PlayerDisappear"
-  end
-
-  def locationUpdate(location)
-    puts "MACHINE LOCATIONUPDATE".blue if DEBUGGING
-
-    # puts "Location: #{location.coordinate.longitude}, #{location.coordinate.latitude}".red
-
-    # commented out for Takaro testing
-    # @game.local_player.update_location(location)
-
-    App.notification_center.post("UpdateLocalPlayerPosition",
-      {"longitude" => location.coordinate.longitude,
-        "latitude" => location.coordinate.latitude})
   end
 
   def set_player(player)

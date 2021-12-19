@@ -29,6 +29,10 @@ class String
     colorize(36)
   end
 
+  def focus
+    "\e[37;40;1m#{self}\e[0m"
+  end
+
   def to_firebase
     self
   end

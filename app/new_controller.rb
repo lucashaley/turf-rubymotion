@@ -41,7 +41,7 @@ class NewController < UIViewController
     @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
       puts "PLAYER NEW".yellow
 
-      puts notification.object.value
+      # puts notification.object.value unless notification.object.value.nil?
 
       handle_new_player
     end
