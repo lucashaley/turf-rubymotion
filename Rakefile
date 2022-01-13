@@ -73,11 +73,12 @@ Motion::Project::App.setup do |app|
   app.info_plist["UIRequiresFullScreen"] = true
   app.info_plist["ITSAppUsesNonExemptEncryption"] = false
 
-  app.frameworks += ["CoreLocation", "MessageUI", "MapKit", "AudioToolbox"]
+  app.frameworks += ["CoreLocation", "MessageUI", "MapKit", "AudioToolbox", "JavaScriptCore", "FirebaseAnalytics"]
 
   # This is a force, as for some reason the pods weren't including the resources
   app.resources_dirs += ["vendor/Pods/FirebaseAuthUI/FirebaseAuthUI/Sources/Resources/"]
   app.resources_dirs += ["vendor/Pods/FirebaseOAuthUI/FirebaseOAuthUI/Sources/Resources/"]
+  app.resources_dirs += ["vendor/Pods/FirebaseAnalytics/"]
 
   # app.vendor_project("vendor/objcvoronoi-master", :xcode,
   #     :headers_dir => "objcvoronoi")
@@ -151,16 +152,17 @@ Motion::Project::App.setup do |app|
   app.pods do
     # use_frameworks! :linkage => :static
     source "https://cdn.cocoapods.org/"
-    pod "Firebase", "~> 8.7.0"
-    pod "Firebase/Auth", "~> 8.7.0"
+    pod "Firebase", "~> 8.10.0" #"~> 8.7.0"
+    pod "Firebase/Auth", "~> 8.10.0"
     pod "Firebase/Database"
+    # pod "FirebaseAnalytics"
     pod "GoogleSignIn"
     # pod 'FirebaseUI', '~> 12.0.2'
     pod "FirebaseUI/Auth", "~> 12.0.2"
     pod "FirebaseUI/Google"
     # # pod 'FirebaseUI/Twitter'
     pod 'FirebaseUI/OAuth' # Used for Sign in with Apple, Twitter, etc
-    pod "FirebaseUI/Database"
+    # pod "FirebaseUI/Database"
     # pod 'FirebaseUI/Phone'
 
     # https://github.com/DevRhys/iosvoronoi
