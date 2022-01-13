@@ -14,10 +14,12 @@
 #import <MessageUI/MessageUI.h>
 #import <MapKit/MapKit.h>
 #import <AudioToolbox/AudioToolbox.h>
+#import <JavaScriptCore/JavaScriptCore.h>
+#import <FirebaseAnalytics/FirebaseAnalytics.h>
 #import <CoreTelephony/CoreTelephony.h>
 #import <CoreText/CoreText.h>
-#import <FirebaseAnalytics/FirebaseAnalytics.h>
 #import <GoogleAppMeasurement/GoogleAppMeasurement.h>
+#import <GoogleAppMeasurementIdentitySupport/GoogleAppMeasurementIdentitySupport.h>
 #import <LocalAuthentication/LocalAuthentication.h>
 #import <SafariServices/SafariServices.h>
 #import <Security/Security.h>
@@ -191,6 +193,7 @@
 
 -(IBAction) viewDidLoad;
 -(IBAction) viewWillAppear:(id) animated;
+-(IBAction) reload_data;
 -(IBAction) handle_new_player;
 -(IBAction) cancel_new_game:(id) sender;
 -(IBAction) dismiss_join:(id) sender;
@@ -220,7 +223,6 @@
 -(IBAction) set_state:(id) state;
 -(IBAction) segue:(id) name;
 -(IBAction) initialize_location_manager;
--(IBAction) locationUpdate:(id) location;
 -(IBAction) set_player:(id) player;
 -(IBAction) create_new_game;
 -(IBAction) set_game:(id) game;
@@ -252,6 +254,7 @@
 
 @property IBOutlet UILabel * gamecode;
 @property IBOutlet CharacterController * character_view;
+@property IBOutlet UIButton * continue_button;
 @property IBOutlet UIButton * cancel_button;
 @property IBOutlet UITableView * table_team_a;
 @property IBOutlet UITableView * table_team_b;
@@ -261,6 +264,7 @@
 -(IBAction) handle_new_player;
 -(IBAction) cancel_new_game;
 -(IBAction) compose_sms;
+-(IBAction) continue_button_action:(id) sender;
 -(IBAction) dismiss_new;
 
 @end
@@ -329,14 +333,18 @@
 -(IBAction) initialize:(id) in_uuid;
 -(IBAction) start_syncing;
 -(IBAction) stop_syncing;
--(IBAction) add_local_player:(id) in_user;
+-(IBAction) pull_remote_kapa;
+-(IBAction) set_up_observers;
 -(IBAction) update_local_player_location:(id) in_location;
+-(IBAction) create_new_remote_kapa;
+-(IBAction) add_local_player:(id) in_user;
 -(IBAction) update_kapa_location:(id) kapa_ref;
 -(IBAction) list_player_names;
 -(IBAction) list_player_names_for_kapa_ref:(id) kapa_ref;
 -(IBAction) list_player_names_for_index:(id) in_index;
 -(IBAction) player_count_for_index:(id) in_index;
 -(IBAction) format_to_location_coord:(id) input;
+-(IBAction) generate_new_id;
 
 @end
 
@@ -348,6 +356,7 @@
 -(IBAction) blue;
 -(IBAction) pink;
 -(IBAction) light_blue;
+-(IBAction) focus;
 -(IBAction) to_firebase;
 
 @end
@@ -361,6 +370,7 @@
 @interface CIColor: NSObject
 -(IBAction) to_firebase;
 -(IBAction) to_s;
+-(IBAction) recu;
 
 @end
 

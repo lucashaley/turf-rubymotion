@@ -5,6 +5,7 @@ class NewController < UIViewController
   # outlet :mapview, MKMapView
   outlet :gamecode, UILabel
   outlet :character_view, CharacterController
+  outlet :continue_button, UIButton
   outlet :cancel_button, UIButton
 
   outlet :table_team_a, UITableView
@@ -14,6 +15,8 @@ class NewController < UIViewController
 
   outlet :not_close_enough, UILabel
 
+  # Should this switch to Machine?
+  # Maybe only when we exit?
   attr_accessor :takaro
 
   DEBUGGING = false
@@ -49,6 +52,12 @@ class NewController < UIViewController
       puts "NEWCONTROLLER NEWKAPA".yellow
       table_team_a.reloadData
       table_team_b.reloadData
+    end
+    # Listen for gamecode
+    @gamecode_new_observer = App.notification_center.observe "GamecodeNew" do |notification|
+      puts "GAMECODE NEW".yellow
+
+      gamecode.text = notification.object
     end
 
     Machine.instance.tracking = true
@@ -116,7 +125,7 @@ class NewController < UIViewController
     MFMessageComposeViewController.alloc.init.tap do |sms|
       sms.messageComposeDelegate = self
       sms.recipients = ["+6420410908922", "+15037361234"]
-      sms.body = "You've been invited to a game of Turf. The game code is #{@new_id}. Open your Turf app on your device and select 'Join Game'."
+      sms.body = "You've been invited to a game of Turf. The game code is #{@gamecode.text}. Open your Turf app on your device and select 'Join Game'."
       presentModalViewController(sms, animated: true)
     end if MFMessageComposeViewController.canSendText
   end
@@ -125,6 +134,11 @@ class NewController < UIViewController
     puts "didFinishWithResult"
     NSLog("SMS Result: #{result}")
     controller.dismissModalViewControllerAnimated(true)
+  end
+
+  def continue_button_action sender
+    puts "NEWCONTROLLER CONTINUE_BUTTON_ACTION".light_blue if DEBUGGING
+    Machine.instance.takaro = @takaro
   end
 
   def dismiss_new

@@ -147,6 +147,7 @@
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
                                 <state key="normal" title="Continue"/>
                                 <connections>
+                                    <action selector="continue_button_action:" destination="lpe-LN-HM1" eventType="primaryActionTriggered" id="nMU-Se-doc"/>
                                     <segue destination="Ba5-Em-l6K" kind="show" id="iZS-Jr-ORe"/>
                                 </connections>
                             </button>
@@ -213,6 +214,7 @@
                     <navigationItem key="navigationItem" id="xrk-ks-pwB"/>
                     <connections>
                         <outlet property="cancel_button" destination="NQU-5x-TWF" id="3tI-a0-mQn"/>
+                        <outlet property="continue_button" destination="UmA-Sh-xgH" id="PPY-um-Ao0"/>
                         <outlet property="gamecode" destination="V47-r9-v7Y" id="zbY-mU-uIr"/>
                         <outlet property="not_close_enough" destination="AFw-8c-ST2" id="twh-B8-0Ii"/>
                         <outlet property="table_team_a" destination="AgA-Xk-jr9" id="txv-ZG-ZEt"/>

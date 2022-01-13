@@ -20,11 +20,13 @@ class GameController < UIViewController
     # initialize_location_manager
     add_overlays_and_annotations
 
-    # Start observing
-    puts "Trying to start observing"
-    Machine.instance.game.start_observing_pylons
-    Machine.instance.game.start_observing_pouwhenua
-    Machine.instance.tracking = true
+    # With Takaro, do we still do this?
+    # # Start observing
+    # puts "Trying to start observing"
+    # Machine.instance.game.start_observing_pylons
+    # Machine.instance.game.start_observing_pouwhenua
+    # Machine.instance.tracking = true
+    Machine.instance.takaro.start_observing_pouwhenua
 
     # @local_player = Player.new
 
@@ -156,6 +158,7 @@ class GameController < UIViewController
       state.transition_to :up,
         on: :button_up,
         # action: proc { create_new_pylon } # CREATE NEW PYLON!
+        # TODO switch to Takaro
         action: proc { Machine.instance.game.create_new_pouwhenua }
     end
 

@@ -12,7 +12,7 @@ class Takaro
                 :local_player_name,
                 :local_player_kapa_ref
 
-  DEBUGGING = true
+  DEBUGGING = false
   TEAM_DISTANCE = 5
   MOVE_THRESHOLD = 2
   TEAM_COUNT = 2
@@ -26,6 +26,12 @@ class Takaro
     @uuid = in_uuid
     @ref = Machine.instance.db.referenceWithPath("games/#{uuid}")
     # @ref = Machine.instance.db.referenceWithPath("games").childByAutoId
+    new_gamecode = generate_new_id
+    @ref.updateChildValues({"gamecode" => new_gamecode}, withCompletionBlock:
+      lambda do | error, game_ref |
+        App.notification_center.post("GamecodeNew", new_gamecode)
+      end
+    )
     puts "New takaro: #{@ref.URL}"
 
     # TODO add empty kapa
@@ -111,7 +117,7 @@ class Takaro
           )
         end
         kapa_snapshot.children.each do |kapa|
-          puts "\npull_remote_kapa: #{kapa.value}\n".pink
+          puts "\npull_remote_kapa: #{kapa.value}\n".pink if DEBUGGING
         end unless kapa_snapshot.nil?
         @machine.event :go_to_set_up_observers
       end
@@ -124,11 +130,12 @@ class Takaro
     @ref.child("kapa").observeEventType(FIRDataEventTypeChildAdded,
       withBlock: proc do |kapa_snapshot|
         puts "\nTAKARO KAPA ADDED".red if DEBUGGING
-        puts "Kapa added: #{kapa_snapshot.ref.URL}"
+        puts "Kapa added: #{kapa_snapshot.ref.URL}" if DEBUGGING
 
         # Hash version
         unless @nga_kapa_hash.length >= 2
           # add new array to kapa hash
+          # TODO change this to a set?
           @nga_kapa_hash[kapa_snapshot.key] = []
           # add a new kapa to the hash array?
           puts "new kapa loop hash: #{@nga_kapa_hash.to_s}" if DEBUGGING
@@ -139,7 +146,7 @@ class Takaro
     @ref.child("kapa").observeEventType(FIRDataEventTypeChildChanged,
       withBlock: proc do |kapa_snapshot|
         puts "\nTAKARO KAPA CHANGED".red if DEBUGGING
-        puts "#{kapa_snapshot.ref.URL}"
+        puts "#{kapa_snapshot.ref.URL}" if DEBUGGING
         if kapa_snapshot.childSnapshotForPath("location").exists
           update_kapa_location(kapa_snapshot.ref)
         end
@@ -153,18 +160,29 @@ class Takaro
         puts "TAKARO PLAYERADDED".red if DEBUGGING
 
         # Let's take a look at who the player is
-        puts "new player: #{player_snapshot.value}"
+        puts "new player: #{player_snapshot.value}" if DEBUGGING
       end # player lambda
     ) # player observer
 
     @ref.child("players").observeEventType(FIRDataEventTypeChildChanged,
       withBlock: proc do |player_snapshot|
-        puts "Updated player: #{player_snapshot.value}".focus
-        if player_snapshot.childSnapshotForPath("team").exists
-          puts player_snapshot.childSnapshotForPath("team").value
-          puts "adding player name to hash: #{player_snapshot.childSnapshotForPath("team").value}".focus
-          nga_kapa_hash[player_snapshot.childSnapshotForPath("team").value] << player_snapshot.childSnapshotForPath("display_name").value
-          puts "#{nga_kapa_hash}".focus
+        # TODO this adds an existing player, need to change!
+        puts "Updated player: #{player_snapshot.value}".focus if DEBUGGING
+
+        # Okay what is going on here
+        # if the player _has_ a team, we need to check if they are already in the team
+        player_team = player_snapshot.childSnapshotForPath("team")
+        if player_team.exists
+          player_team_value = player_team.value
+
+          puts "adding player name to hash: #{player_team_value}".focus if DEBUGGING
+          player_display_name = player_snapshot.childSnapshotForPath("display_name").value
+          # TODO whew this can be shorter
+          # TODO maybe this could be a hash instead, using the object id?
+          unless @nga_kapa_hash[player_team_value].include?(player_display_name)
+            @nga_kapa_hash[player_team_value] << player_display_name
+          end
+          puts "#{nga_kapa_hash}".focus if DEBUGGING
           App.notification_center.post "PlayerNew"
         end
       end
@@ -454,9 +472,30 @@ class Takaro
   end
 
   def generate_new_id
-    puts "GAME: GENERATE_NEW_ID".blue if DEBUGGING
+    puts "TAKARO GENERATE_NEW_ID".blue if DEBUGGING
     # update the UI with the gamecode
     # https://gist.github.com/mbajur/2aba832a6df3fc31fe7a82d3109cb626
     rand(36**6).to_s(36)
   end
+
+  #################
+  # Pouwhenua Stuff
+  #################
+
+  def start_observing_pouwhenua
+    puts "TAKARO START_OBSERVING_POUWHENUA".blue if DEBUGGING
+
+    @ref.child("pouwhenua").observeEventType(FIRDataEventTypeChildAdded,
+      withBlock: proc do |data|
+        # Should we turn it into a better-formed hash here?
+        App.notification_center.post("PouwhenuaNew", data)
+    end)
+  end
+
+  def create_new_pouwhenua(coord)
+    puts "TAKARO CREATE_NEW_POUWHENUA".blue if DEBUGGING
+    new_pouwhenua = Pouwhenua.new(coord)
+    @ref.child("pouwhenua/#{new_pouwhenua.uuid_string}").setValue(new_pouwhenua.to_hash)
+  end
+
 end

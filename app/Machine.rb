@@ -12,7 +12,8 @@ class Machine
                 :current_view,
                 :location_manager,
                 :tracking,
-                :auth_view_controller
+                :auth_view_controller,
+                :takaro
 
   attr_reader :handleDataResult,
               :game
