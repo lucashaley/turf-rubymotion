@@ -12,8 +12,8 @@ class Takaro
                 :local_player_name,
                 :local_player_kapa_ref
 
-  DEBUGGING = false
-  TEAM_DISTANCE = 5
+  DEBUGGING = true
+  TEAM_DISTANCE = 3
   MOVE_THRESHOLD = 2
   TEAM_COUNT = 2
 
@@ -167,7 +167,7 @@ class Takaro
     @ref.child("players").observeEventType(FIRDataEventTypeChildChanged,
       withBlock: proc do |player_snapshot|
         # TODO this adds an existing player, need to change!
-        puts "Updated player: #{player_snapshot.value}".focus if DEBUGGING
+        puts "Updated player: #{player_snapshot.value}" if DEBUGGING
 
         # Okay what is going on here
         # if the player _has_ a team, we need to check if they are already in the team
@@ -175,14 +175,14 @@ class Takaro
         if player_team.exists
           player_team_value = player_team.value
 
-          puts "adding player name to hash: #{player_team_value}".focus if DEBUGGING
+          puts "adding player name to hash: #{player_team_value}" if DEBUGGING
           player_display_name = player_snapshot.childSnapshotForPath("display_name").value
           # TODO whew this can be shorter
           # TODO maybe this could be a hash instead, using the object id?
           unless @nga_kapa_hash[player_team_value].include?(player_display_name)
             @nga_kapa_hash[player_team_value] << player_display_name
           end
-          puts "#{nga_kapa_hash}".focus if DEBUGGING
+          puts "#{nga_kapa_hash}" if DEBUGGING
           App.notification_center.post "PlayerNew"
         end
       end
@@ -304,6 +304,8 @@ class Takaro
 
   # This needs to do the hard labour of setting the kapa
   # and it all needs to be local, then sent to server
+  # does this need to be a separate method?
+  # Also, this fails when not connected to the internet
   def add_local_player(in_user = Machine.instance.user)
     puts "TAKARO ADD_LOCAL_PLAYER".blue if DEBUGGING
     @local_player_name = in_user.displayName
@@ -482,6 +484,13 @@ class Takaro
   # Pouwhenua Stuff
   #################
 
+  def set_initial_pouwhenua
+    puts "TAKARO SET_INITIAL_POUWHENUA".blue if DEBUGGING
+    @nga_kapa_hash.each do |k|
+      puts "Current Kapa: #{k}"
+    end
+  end
+
   def start_observing_pouwhenua
     puts "TAKARO START_OBSERVING_POUWHENUA".blue if DEBUGGING
 
@@ -492,10 +501,33 @@ class Takaro
     end)
   end
 
-  def create_new_pouwhenua(coord)
+  def create_new_pouwhenua(coord = @local_player_locationCoords)
     puts "TAKARO CREATE_NEW_POUWHENUA".blue if DEBUGGING
     new_pouwhenua = Pouwhenua.new(coord)
+    puts new_pouwhenua.uuid_string if DEBUGGING
     @ref.child("pouwhenua/#{new_pouwhenua.uuid_string}").setValue(new_pouwhenua.to_hash)
   end
 
+  #################
+  # Bot Stuff
+  #################
+
+  def create_bot_player
+    puts "TAKARO CREATE_BOT_PLAYER".focus if DEBUGGING
+    @ref.child("players").childByAutoId.updateChildValues(
+      {
+        "display_name" => "Test Bot", "email" => "test@test.com"
+      },
+      withCompletionBlock:
+        lambda do | error, p |
+          p.updateChildValues({
+            "location" =>
+            {
+              "latitude" => 37.32889895124122,
+              "longitude" => -122.03668383752265
+            }
+          })
+        end
+    )
+  end
 end

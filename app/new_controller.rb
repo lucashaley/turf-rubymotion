@@ -138,10 +138,20 @@ class NewController < UIViewController
 
   def continue_button_action sender
     puts "NEWCONTROLLER CONTINUE_BUTTON_ACTION".light_blue if DEBUGGING
+
+    # make the first two pouwhenua
+    @takaro.set_initial_pouwhenua
+
+    # set the machine takaro
     Machine.instance.takaro = @takaro
   end
 
   def dismiss_new
     Machine.instance.segue("ToMenu")
+  end
+
+  def add_bot_action sender
+    puts "NEWCONTROLLER ADD_BOT_ACTION".light_blue
+    @takaro.create_bot_player
   end
 end

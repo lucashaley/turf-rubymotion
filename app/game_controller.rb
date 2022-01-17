@@ -159,7 +159,8 @@ class GameController < UIViewController
         on: :button_up,
         # action: proc { create_new_pylon } # CREATE NEW PYLON!
         # TODO switch to Takaro
-        action: proc { Machine.instance.game.create_new_pouwhenua }
+        # action: proc { Machine.instance.game.create_new_pouwhenua }
+        action: proc { Machine.instance.takaro.create_new_pouwhenua }
     end
 
     puts "Starting button state machine\n\n"

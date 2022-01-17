@@ -198,7 +198,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="Team A" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="4iH-LO-1V0">
-                                <rect key="frame" x="205" y="249" width="154" height="225"/>
+                                <rect key="frame" x="205" y="249" width="154" height="171"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <sections/>
@@ -207,6 +207,16 @@
                                     <outlet property="delegate" destination="lpe-LN-HM1" id="rce-4M-oA6"/>
                                 </connections>
                             </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="w5E-QF-9xc">
+                                <rect key="frame" x="247" y="428" width="70" height="34"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="18"/>
+                                <state key="normal" title="Add bot"/>
+                                <connections>
+                                    <action selector="add_bot_action:" destination="lpe-LN-HM1" eventType="touchUpInside" id="S2V-a5-GGm"/>
+                                    <action selector="continue_button_action:" destination="lpe-LN-HM1" eventType="primaryActionTriggered" id="E5f-S7-QJT"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="WUd-Gz-JaK"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>

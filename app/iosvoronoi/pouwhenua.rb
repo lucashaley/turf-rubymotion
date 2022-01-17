@@ -51,39 +51,45 @@ class Pouwhenua < Site # Fake subclass of Site
         else
           puts "Empty?"
           # @location = CLLocation.alloc.initWithLatitude(37.33190, longitude: -122.03129)
-          @location = CLLocationCoordinate2DMake(37.33190, longitude: -122.03129)
+          @location = CLLocationCoordinate2DMake(37.33190, -122.03129)
       end
       map_point = MKMapPointForCoordinate(@location)
-      super(CGPointMake(map_point.x, map_point.y))
 
-      @color = symbol_args[:color] ? CIColor.alloc.initWithString(args[:color]) : CIColor.alloc.initWithColor(UIColor.systemYellowColor)
-      @title = symbol_args[:title] || "Pouwhenua"
-      @lifespan = symbol_args[:lifespan] || 0
-      @lifespan_multiplier = 0.3
-      @birthdate = symbol_args[:birthdate] || Time.now
+      # this is causing a problem?
+      # super(CGPointMake(map_point.x, map_point.y))
+      initWithCoord(CGPointMake(map_point.x, map_point.y)).tap do |t|
+        puts "in the TAP ZONE" if DEBUGGING
+      # end
 
-      # Set up the machine
-      @machine = StateMachine::Base.new start_state: :active, verbose: DEBUGGING
-      @machine.when :active do |state|
-        # state.on_entry { puts "PYLON MACHINE ENTRY" }
-        # state.on_exit { puts "PYLON MACHINE EXIT" }
-        state.transition_to :dying,
-          after: @lifespan * 0.5,
-          if: proc { @lifespan > 0 },
-          action: proc { App.notification_center.post "PylonChange" }
-      end
-      @machine.when :dying do |state|
-        state.on_entry { p.lifespan_multiplier = 0.15 }
-        state.transition_to :inactive,
-          after: @lifespan * 0.5,
-          action: proc { App.notification_center.post "PylonChange" }
-      end
-      @machine.when :inactive do |state|
-        # state.on_entry { p.lifespan_multiplier = 0.01 }
-        state.on_entry do
-          p.lifespan_multiplier = 0.01
-          puts "\nPylon Death: #{self}\n"
-          App.notification_center.post("PylonDeath", object: self)
+        @color = symbol_args[:color] ? CIColor.alloc.initWithString(args[:color]) : CIColor.alloc.initWithColor(UIColor.systemYellowColor)
+        @title = symbol_args[:title] || "Pouwhenua"
+        @lifespan = symbol_args[:lifespan] || 0
+        @lifespan_multiplier = 0.3
+        @birthdate = symbol_args[:birthdate] || Time.now
+
+        # Set up the machine
+        @machine = StateMachine::Base.new start_state: :active, verbose: DEBUGGING
+        @machine.when :active do |state|
+          # state.on_entry { puts "PYLON MACHINE ENTRY" }
+          # state.on_exit { puts "PYLON MACHINE EXIT" }
+          state.transition_to :dying,
+            after: @lifespan * 0.5,
+            if: proc { @lifespan > 0 },
+            action: proc { App.notification_center.post "PylonChange" }
+        end
+        @machine.when :dying do |state|
+          state.on_entry { p.lifespan_multiplier = 0.15 }
+          state.transition_to :inactive,
+            after: @lifespan * 0.5,
+            action: proc { App.notification_center.post "PylonChange" }
+        end
+        @machine.when :inactive do |state|
+          # state.on_entry { p.lifespan_multiplier = 0.01 }
+          state.on_entry do
+            p.lifespan_multiplier = 0.01
+            puts "\nPylon Death: #{self}\n"
+            App.notification_center.post("PylonDeath", object: self)
+          end
         end
       end
       @machine.start!
@@ -138,6 +144,9 @@ class Pouwhenua < Site # Fake subclass of Site
     # def uuid_string
     #   @site.uuID.UUIDString
     # end
+    def uuid_string
+      uuID.UUIDString
+    end
 
     def set_annotation(new_annotation)
       puts "POUWHENUA SET_ANNOTATION".blue if DEBUGGING

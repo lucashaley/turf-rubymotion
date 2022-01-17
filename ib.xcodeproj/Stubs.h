@@ -125,6 +125,7 @@
 -(IBAction) set_location:(id) location;
 -(IBAction) lifespan_color;
 -(IBAction) set_uuid:(id) new_uuid;
+-(IBAction) uuid_string;
 -(IBAction) set_annotation:(id) new_annotation;
 -(IBAction) get_uicolor;
 -(IBAction) to_hash;
@@ -266,6 +267,7 @@
 -(IBAction) compose_sms;
 -(IBAction) continue_button_action:(id) sender;
 -(IBAction) dismiss_new;
+-(IBAction) add_bot_action:(id) sender;
 
 @end
 
@@ -345,6 +347,9 @@
 -(IBAction) player_count_for_index:(id) in_index;
 -(IBAction) format_to_location_coord:(id) input;
 -(IBAction) generate_new_id;
+-(IBAction) set_initial_pouwhenua;
+-(IBAction) start_observing_pouwhenua;
+-(IBAction) create_new_pouwhenua:(id) coord;
 
 @end
 
