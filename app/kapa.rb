@@ -1,71 +1,41 @@
-# == Kapa
-# The kapa is the team for the current game.
-# The teams will be different for every game.
-class Kapa < FirebaseObject
-  extend Debugging
+class Kapa
+  attr_accessor :kapa_ref
 
-  attr_accessor :color,
-                :uuid,
-                :nga_kaitakaro,
-                :location,
-                :title,
-                :game
+  attr_reader :color,
+              :name
 
   DEBUGGING = true
-  FIREBASE_CLASSPATH = "kapa"
 
-  def initialize(in_ref, in_title)
-    super(in_ref.child(FIREBASE_CLASSPATH)).tap do |k|
-      puts "KAPA INITIALIZE".green if DEBUGGING
-      k.nga_kaitakaro = []
-      k.title = in_title
-      k.uuid = NSUUID.UUID
-      k.color = CIColor.alloc.initWithColor(UIColor.whiteColor)
-      k.game = Machine.instance.game
-
-      k.variables_to_save = ["color",
-                             "title"]
-      k.update_all
-    end
+  def initialize(ref, args={})
+    puts "KAPA INITIALIZE".light_blue if DEBUGGING
+    @kapa_ref = ref
+    puts "KAPA REF: #{@kapa_ref.URL}"
+    puts args
+    self.name = args["name"] ? args["name"] : "Testing"
+    self.color = args["color"] ? CIColor.alloc.initWithString(args["color"]) : CIColor.alloc.initWithColor(UIColor.systemYellowColor)
   end
 
-  def update_average_location
-    puts "KAPA UPDATE_AVERAGE_LOCATION".blue if DEBUGGING
-    total = CLLocationCoordinate2DMake(0, 0)
-    @nga_kaitakaro.each do |kaitakaro|
-      puts "Player location: #{kaitakaro.location}"
-      puts kaitakaro.location.class
-      total += kaitakaro.location
-    end
-    puts "Total: #{total}"
-    puts total / @nga_kaitakaro.length
+  def color=(in_color)
+    puts "KAPA SET COLOR".blue if DEBUGGING
+    @color = in_color
+    puts @color.stringRepresentation
+    @kapa_ref.updateChildValues(
+      {"color" => in_color.stringRepresentation}, withCompletionBlock:
+      lambda do | error, ref |
+        puts "KAPA SET COLOR COMPLETE".blue if DEBUGGING
+      end
+    )
   end
 
-  def add_player_to_kapa(player)
-    puts "KAPA ADD_PLAYER_TO_KAPA".blue if DEBUGGING
-    @nga_kaitakaro << player
-    puts self.count
-    # this is handled in game
-    # App.notification_center.post("PlayerNewInKapa", object: self)
-
-    # every time we add a new player, we have to recalculate the average location
-    update_average_location
-  end
-
-  def nga_kaitakaro_to_firebase
-    nga_kaitakaro.map {|player| {player.uuid => player.name}}
-  end
-
-  def count
-    puts "KAPA COUNT".blue if DEBUGGING
-    @nga_kaitakaro.length
-  end
-
-  def player_names
-    @nga_kaitakaro.map {|player| player.display_name}
-  end
-
-  def to_s
-    "Kapa. Title: #{@title}, uuid: #{@uuid.UUIDString}, color: #{@color}"
+  def name=(in_name)
+    puts "KAPA SET NAME".blue if DEBUGGING
+    @name = in_name
+    puts @name
+    @kapa_ref.updateChildValues(
+      {"name" => in_name}, withCompletionBlock:
+      lambda do | error, ref |
+        puts "KAPA SET NAME COMPLETE".blue if DEBUGGING
+      end
+    )
   end
 end

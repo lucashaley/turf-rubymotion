@@ -2,7 +2,7 @@ class Takaro
   attr_accessor :ref,
                 :uuid,
                 :local_player_ref,
-                :nga_kapa,
+                # :nga_kapa,
                 :nga_kapa_hash,
                 :machine,
                 :kapa_observer_handle,
@@ -19,76 +19,80 @@ class Takaro
 
   @accepting_new_players = true
 
+  ##
+  # Creates a new Takaro, or initializes from a +in_uuid+ string.
   # uuid is a string.
+
   def initialize(in_uuid = NSUUID.UUID.UUIDString)
     puts "TAKARO INITIALIZE".light_blue if DEBUGGING
     puts in_uuid
     @uuid = in_uuid
     @ref = Machine.instance.db.referenceWithPath("games/#{uuid}")
-    # @ref = Machine.instance.db.referenceWithPath("games").childByAutoId
+
+    # TODO do we do this if we're not creating from scratch? Won't it overwrite?
     new_gamecode = generate_new_id
     @ref.updateChildValues({"gamecode" => new_gamecode}, withCompletionBlock:
       lambda do | error, game_ref |
         App.notification_center.post("GamecodeNew", new_gamecode)
       end
     )
-    puts "New takaro: #{@ref.URL}"
+
+    puts "New takaro: #{@ref.URL}" if DEBUGGING
 
     # TODO add empty kapa
-    @nga_kapa = Array.new
-    # @nga_kapa << Array.new
-    # @nga_kapa << Array.new
-    # trying out hash instead of array
+    # TODO do we still need the array?
+    # @nga_kapa = Array.new
     @nga_kapa_hash = {}
     @nga_kapa_observer_handle_array = Array.new
+
+    # This is only good for the creating player
+    # @nga_kapa_objects = []
+    # TEAM_COUNT.times { |i| @nga_kapa_objects << Kapa.new(@ref.child("kapa").childByAutoId, {"name" => "Team_#{i}", "color" => "1 0 1 0"}) }
+    # puts @nga_kapa_objects
+
+
+    #################
+    # Machine Stuff
+    #################
 
     @machine = StateMachine::Base.new start_state: :start, verbose: DEBUGGING
     @machine.when :start do |state|
       state.on_entry { puts "Takaro state start".pink }
-
-      state.transition_to :pull_remote_kapa,
-        on: :go_to_pull_remote_kapa
+      state.transition_to :pull_remote_kapa, on: :go_to_pull_remote_kapa
     end
     @machine.when :pull_remote_kapa do |state|
       state.on_entry { pull_remote_kapa }
-      state.transition_to :set_up_observers,
-        on: :go_to_set_up_observers
+      state.transition_to :set_up_observers, on: :go_to_set_up_observers
     end
     @machine.when :set_up_observers do |state|
       state.on_entry { set_up_observers }
-      state.transition_to :clean_up,
-        on: :go_to_clean_up
+      state.transition_to :awaiting_players, on: :go_to_awaiting_players
+      # state.transition_to :clean_up, on: :go_to_clean_up
     end
-    @machine.when :clean_up do |state|
-      state.on_entry { puts "Takaro clean_up".pink }
+    # @machine.when :clean_up do |state|
+    #   state.on_entry { puts "Takaro clean_up".pink }
+    #   # state.transition_to :awaiting_players, on: :go_to_awaiting_players
+    # end
+    @machine.when :awaiting_players do |state|
+      state.on_entry { puts "Takaro awaiting_players".pink }
     end
     @machine.start!
     @machine.event :go_to_pull_remote_kapa
 
-    # This is a force to get the most recent
-    # TODO figure out if we can comment out
-    # @ref.getDataWithCompletionBlock(
-    #   proc do | error, snapshot |
-    #     puts "Snapshot: #{snapshot}"
-    #
-    #     # pre-populate existing kapa?
-    #     snapshot.childSnapshotForPath("kapa").children.each do |k|
-    #       puts "k: #{k.ref.URL}"
-    #       puts @nga_kapa
-    #       k.childSnapshotForPath("kaitakaro").children.each do |p|
-    #         @nga_kapa[k.childSnapshotForPath("index").value] << p.value
-    #       end
-    #     end
-    #   end
-    # )
-
-    puts "Going Online!"
-    FIRDatabaseReference.goOnline
+    # TODO Not sure we still need this
+    # puts "Going Online!"
+    # FIRDatabaseReference.goOnline
 
     add_local_player
 
+    # TODO do we need this?
     self
   end
+
+  #################
+  # Sync Functions
+  #################
+  # Not entirely sure we need this.
 
   def start_syncing
     puts "TAKARO START_SYNCING".blue if DEBUGGING
@@ -101,9 +105,9 @@ class Takaro
     @ref.keepSynced false
   end
 
-  # Possibly rename this to set up or something?
+  # TODO Possibly rename this to set up or something?
   def pull_remote_kapa
-    # This needs to happen for joining games?
+    # TODO This needs to happen for joining games?
     puts "TAKARO PULL_REMOTE_KAPA".blue if DEBUGGING
 
     # check if there are any kapa still left to make
@@ -124,12 +128,16 @@ class Takaro
     )
   end
 
+  #################
+  # Database Observers
+  #################
+
   def set_up_observers
     puts "TAKARO SET_UP_OBSERVERS".blue if DEBUGGING
 
     @ref.child("kapa").observeEventType(FIRDataEventTypeChildAdded,
-      withBlock: proc do |kapa_snapshot|
-        puts "\nTAKARO KAPA ADDED".red if DEBUGGING
+      withBlock: lambda do |kapa_snapshot|
+        puts "TAKARO KAPA ADDED".red if DEBUGGING
         puts "Kapa added: #{kapa_snapshot.ref.URL}" if DEBUGGING
 
         # Hash version
@@ -139,19 +147,26 @@ class Takaro
           @nga_kapa_hash[kapa_snapshot.key] = []
           # add a new kapa to the hash array?
           puts "new kapa loop hash: #{@nga_kapa_hash.to_s}" if DEBUGGING
+
+          kapa_snapshot.ref.child("kaitakaro").observeEventType(FIRDataEventTypeChildAdded,
+            withBlock: lambda do |kaitakaro_snapshot|
+              puts "KAITAKARO CHILD ADDED".focus
+              update_kapa_location(kapa_snapshot.ref)
+            end
+          )
         end
       end
     )
 
-    @ref.child("kapa").observeEventType(FIRDataEventTypeChildChanged,
-      withBlock: proc do |kapa_snapshot|
-        puts "\nTAKARO KAPA CHANGED".red if DEBUGGING
-        puts "#{kapa_snapshot.ref.URL}" if DEBUGGING
-        if kapa_snapshot.childSnapshotForPath("location").exists
-          update_kapa_location(kapa_snapshot.ref)
-        end
-      end
-    )
+    # @ref.child("kapa").observeEventType(FIRDataEventTypeChildChanged,
+    #   withBlock: proc do |kapa_snapshot|
+    #     puts "\nTAKARO KAPA CHANGED".red if DEBUGGING
+    #     puts "#{kapa_snapshot.ref.URL}" if DEBUGGING
+    #     if kapa_snapshot.childSnapshotForPath("location").exists
+    #       update_kapa_location(kapa_snapshot.ref)
+    #     end
+    #   end
+    # )
 
     # Oh noes
     # I think this needs to be all local
@@ -188,109 +203,119 @@ class Takaro
       end
     )
 
-    @takaro_update_location_observer = App.notification_center.observe "UpdateLocalPlayerPosition" do |data|
-      puts "TAKARO UPDATELOCALPLAYERPOSITION".blue if DEBUGGING
-
-      update_local_player_location({
-        "latitude" => data.object["latitude"],
-        "longitude" => data.object["longitude"]
-      })
-    end
-    @takaro_update_location_observer_coord = App.notification_center.observe "UpdateLocalPlayerPositionAsLocation" do |data|
+    @takaro_update_location_observer_coord = App.notification_center.observe "UpdateLocation" do |data|
       puts "TAKARO UPDATELOCALPLAYERPOSITION LOCATION".yellow if DEBUGGING
 
       new_location = data.object["new_location"]
       old_location = data.object["old_location"]
+      App.notification_center.post("UpdateLocalPlayerPositionAsLocation",
+        {"new_location" => new_location, "old_location" => old_location}
+      )
 
-      # puts "new_location: #{new_location.coordinate}"
-      # puts "old_location: #{old_location.coordinate}"
-
-      if @local_player_locationCoords.nil? || new_location.distanceFromLocation(old_location) > MOVE_THRESHOLD
-        update_local_player_location({
-          "latitude" => new_location.coordinate.latitude,
-          "longitude" => new_location.coordinate.longitude
-        })
-      end
+      # if @local_player_locationCoords.nil? || new_location.distanceFromLocation(old_location) > MOVE_THRESHOLD
+      #   update_local_player_location({
+      #     "latitude" => new_location.coordinate.latitude,
+      #     "longitude" => new_location.coordinate.longitude
+      #   })
+      # end
     end
-    @machine.event :go_to_clean_up
+
+    puts @machine.current_state.name
+    @machine.event :go_to_awaiting_players
+    puts "Transitioning out".focus
+    @machine.event :go_to_awaiting_players
+    puts @machine.current_state.name
   end
+
+  #################
+  # Local Data
+  #################
 
   # this expects a hash
-  def update_local_player_location(in_location)
-    puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION".blue if DEBUGGING
-    # update the local version
-    @local_player_locationCoords = CLLocationCoordinate2DMake(in_location["latitude"], in_location["longitude"])
-    puts "local_player_locationCoords: #{@local_player_locationCoords}"
+  #
+  # Expected order of operation:
+  # => gets notified of location change
+  # => updates server player with new location
+  # => gets new kapa
+  # => updates server player with new kapa
+  # => updates UI
+  # def update_local_player_location(in_location)
+  #   puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION".blue if DEBUGGING
+  #   # update the local version
+  #   @local_player_locationCoords = CLLocationCoordinate2DMake(in_location["latitude"], in_location["longitude"])
+  #   puts "local_player_locationCoords: #{@local_player_locationCoords}"
+  #   # puts "Result: #{get_kapa_for_location(in_location).URL}".focus
+  #
+  #   # update server version
+  #   player_kapa_ref = nil
+  #   @local_player_ref.updateChildValues(
+  #     {"location" => {
+  #       "latitude" => in_location["latitude"],
+  #       "longitude" => in_location["longitude"]
+  #     }}, withCompletionBlock:
+  #     lambda do | error, player_ref |
+  #       observing_local_player_position = true
+  #
+  #       @ref.child("kapa").getDataWithCompletionBlock(
+  #         lambda do | error, kapa_snapshot |
+  #           puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION CHECKING MOVE".blue if DEBUGGING
+  #           puts "local player kapa ref: #{@local_player_kapa_ref}"
+  #
+  #
+  #           puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION ITERATING".blue if DEBUGGING
+  #           # iterate through the existing kapa
+  #           kapa_snapshot.children.each do |k|
+  #             # check if kapa has a location already
+  #             unless k.childSnapshotForPath("location").exists
+  #               @local_player_kapa_ref ||= k.ref
+  #             end
+  #             # and check if we're close enough
+  #             if k.childSnapshotForPath("location").exists && get_distance(@local_player_locationCoords, k.childSnapshotForPath("location").value) < TEAM_DISTANCE
+  #               puts "Close enough!".yellow
+  #               @local_player_kapa_ref ||= k.ref
+  #             end # if get distance
+  #           end unless kapa_snapshot.childrenCount == 0
+  #
+  #           # if we are prepopulating the kapa, we should never get here
+  #           if @local_player_kapa_ref.nil?
+  #             # if we get here, the player hasn't matched a kapa
+  #             puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION NO KAPA FOUND".blue if DEBUGGING
+  #             # if there are less than two kapa, make a new one
+  #             if kapa_snapshot.childrenCount < 2
+  #               puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION CREATING NEW KAPA".blue if DEBUGGING
+  #               @local_player_kapa_ref = kapa_snapshot.ref.childByAutoId
+  #             else
+  #               # otherwise the player is too far from everyone
+  #               puts "TOO FAR FROM EVERYONE!!!".pink
+  #             end
+  #           end
+  #
+  #           # TODO we need to check if they already have a kapa
+  #           # send the data up
+  #           puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION SENDING DATA".blue if DEBUGGING
+  #           @local_player_kapa_ref.child("kaitakaro/#{@local_player_ref.key}").updateChildValues(
+  #             {"name" => @local_player_name, "location" => {
+  #               "latitude" => in_location["latitude"],
+  #               "longitude" => in_location["longitude"]}
+  #             }, withCompletionBlock:
+  #             lambda do | error, player_ref |
+  #               puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION SETTING KAPA".blue if DEBUGGING
+  #               puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION kapa_ref: #{@local_player_kapa_ref.URL}"
+  #               update_kapa_location(@local_player_kapa_ref)
+  #
+  #               # update the player record
+  #               @local_player_ref.updateChildValues(
+  #                 {"team" => @local_player_kapa_ref.key}
+  #               )
+  #               # update the local kapa hash?
+  #             end
+  #           )
+  #         end
+  #       )
+  #     end
+  #   )
+  # end
 
-    # update server version
-    player_kapa_ref = nil
-    @local_player_ref.updateChildValues(
-      {"location" => {
-        "latitude" => in_location["latitude"],
-        "longitude" => in_location["longitude"]
-      }}, withCompletionBlock:
-      lambda do | error, player_ref |
-        observing_local_player_position = true
-
-        @ref.child("kapa").getDataWithCompletionBlock(
-          lambda do | error, kapa_snapshot |
-            puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION CHECKING MOVE".blue if DEBUGGING
-            puts "local player kapa ref: #{@local_player_kapa_ref}"
-
-
-            puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION ITERATING".blue if DEBUGGING
-            # iterate through the existing kapa
-            kapa_snapshot.children.each do |k|
-              # check if kapa has a location already
-              unless k.childSnapshotForPath("location").exists
-                @local_player_kapa_ref ||= k.ref
-              end
-              # and check if we're close enough
-              if k.childSnapshotForPath("location").exists && get_distance(@local_player_locationCoords, k.childSnapshotForPath("location").value) < TEAM_DISTANCE
-                puts "Close enough!".yellow
-                @local_player_kapa_ref ||= k.ref
-              end # if get distance
-            end unless kapa_snapshot.childrenCount == 0
-
-            # if we are prepopulating the kapa, we should never get here
-            if @local_player_kapa_ref.nil?
-              # if we get here, the player hasn't matched a kapa
-              puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION NO KAPA FOUND".blue if DEBUGGING
-              # if there are less than two kapa, make a new one
-              if kapa_snapshot.childrenCount < 2
-                puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION CREATING NEW KAPA".blue if DEBUGGING
-                @local_player_kapa_ref = kapa_snapshot.ref.childByAutoId
-              else
-                # otherwise the player is too far from everyone
-                puts "TOO FAR FROM EVERYONE!!!".pink
-              end
-            end
-
-            # TODO we need to check if they already have a kapa
-            # send the data up
-            puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION SENDING DATA".blue if DEBUGGING
-            @local_player_kapa_ref.child("kaitakaro/#{@local_player_ref.key}").updateChildValues(
-              {"name" => @local_player_name, "location" => {
-                "latitude" => in_location["latitude"],
-                "longitude" => in_location["longitude"]}
-              }, withCompletionBlock:
-              lambda do | error, player_ref |
-                puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION SETTING KAPA".blue if DEBUGGING
-                puts "TAKARO UPDATE_LOCAL_PLAYER_LOCATION kapa_ref: #{@local_player_kapa_ref.URL}"
-                update_kapa_location(@local_player_kapa_ref)
-
-                # update the player record
-                @local_player_ref.updateChildValues(
-                  {"team" => @local_player_kapa_ref.key}
-                )
-                # update the local kapa hash?
-              end
-            )
-          end
-        )
-      end
-    )
-  end
 
   def create_new_remote_kapa
     puts "TAKARO CREATE_NEW_REMOTE_KAPA".blue if DEBUGGING
@@ -308,68 +333,73 @@ class Takaro
   # Also, this fails when not connected to the internet
   def add_local_player(in_user = Machine.instance.user)
     puts "TAKARO ADD_LOCAL_PLAYER".blue if DEBUGGING
-    @local_player_name = in_user.displayName
-    # first get a new ref for the player
-    @local_player_ref = @ref.child("players").childByAutoId
+    @local_kaitakaro = Kaitarako.new(@ref.child("players").childByAutoId, {"takaro" => self})
+    @local_kaitakaro.user_id = in_user.uid
+    @local_kaitakaro.display_name = in_user.displayName
+    @local_kaitakaro.email = in_user.email
+    @local_kaitakaro.is_local = true
 
-    # then set it's variables
-    # we should be able to get the location
-    @local_player_ref.updateChildValues(
-      {"user_id" => in_user.uid,
-        "display_name" => in_user.displayName,
-        "email" => in_user.email}
-    )
-
-    puts "local_player_ref: #{@local_player_ref}"
-    return @local_player_ref
+    # # first get a new ref for the player
+    # @local_player_ref = @ref.child("players").childByAutoId
+    #
+    # # then set it's variables
+    # # we should be able to get the location
+    # @local_player_ref.updateChildValues(
+    #   {"user_id" => in_user.uid,
+    #     "display_name" => in_user.displayName,
+    #     "email" => in_user.email}
+    # )
+    #
+    # puts "local_player_ref: #{@local_player_ref}"
+    # return @local_player_ref
   end
 
   # hash version
   # Not sure if this is used
-  def add_player_to_kapa_ref(player_snapshot, kapa_ref)
-    puts "TAKARO ADD_PLAYER_TO_KAPA_REF".blue if DEBUGGING
-    puts "Adding #{player_snapshot.childSnapshotForPath("display_name").value} to #{kapa_ref.URL}"
-    kapa_ref.child("kaitakaro").updateChildValues({
-      player_snapshot.key => player_snapshot.childSnapshotForPath("display_name").value},
-      withCompletionBlock: proc do | error, ref |
-        # add the team uuid to the player
-        player_snapshot.ref.updateChildValues({"team" => kapa_ref.key}, withCompletionBlock:
-          lambda do | error, player_ref |
-            # update the average location in the kapa
-            puts "Trying to update location"
-            update_kapa_location(kapa_ref)
-          end
-        )
-
-        # add the player name to the local kapa hash
-        @nga_kapa_hash[kapa_ref.key] << player_snapshot.childSnapshotForPath("display_name").value
-        App.notification_center.post("KapaNew", kapa_ref)
-      end
-    )
-  end
+  # def add_player_to_kapa_ref(player_snapshot, kapa_ref)
+  #   puts "TAKARO ADD_PLAYER_TO_KAPA_REF".blue if DEBUGGING
+  #   puts "Adding #{player_snapshot.childSnapshotForPath("display_name").value} to #{kapa_ref.URL}"
+  #   kapa_ref.child("kaitakaro").updateChildValues({
+  #     player_snapshot.key => player_snapshot.childSnapshotForPath("display_name").value},
+  #     withCompletionBlock: proc do | error, ref |
+  #       # add the team uuid to the player
+  #       player_snapshot.ref.updateChildValues({"team" => kapa_ref.key}, withCompletionBlock:
+  #         lambda do | error, player_ref |
+  #           # update the average location in the kapa
+  #           puts "Trying to update location"
+  #           update_kapa_location(kapa_ref)
+  #         end
+  #       )
+  #
+  #       # add the player name to the local kapa hash
+  #       @nga_kapa_hash[kapa_ref.key] << player_snapshot.childSnapshotForPath("display_name").value
+  #       App.notification_center.post("KapaNew", kapa_ref)
+  #     end
+  #   )
+  # end
 
   # array version
   # Not sure this is used
-  def add_player_to_kapa_ref_with_index(player_snapshot, kapa_ref, index)
-    puts "TAKARO ADD_PLAYER_TO_KAPA".blue if DEBUGGING
-    puts "Adding #{player_snapshot.childSnapshotForPath("display_name").value} to #{kapa_ref.URL} at index: #{index}"
-    kapa_ref.child("kaitakaro").updateChildValues({
-      player_snapshot.key => player_snapshot.childSnapshotForPath("display_name").value},
-      withCompletionBlock: proc do | error, ref |
-        player_snapshot.ref.updateChildValues({"team" => kapa_ref.key}, withCompletionBlock:
-          lambda do | error, player_ref |
-            update_kapa_location(kapa_ref)
-          end
-        )
-
-        # add the player to the local hash
-        @nga_kapa[index] << player_snapshot.childSnapshotForPath("display_name").value
-
-        # let the UI know to refresh
-        App.notification_center.post("KapaNew", kapa_ref)
-      end
-    )
-  end
+  # def add_player_to_kapa_ref_with_index(player_snapshot, kapa_ref, index)
+  #   puts "TAKARO ADD_PLAYER_TO_KAPA".blue if DEBUGGING
+  #   puts "Adding #{player_snapshot.childSnapshotForPath("display_name").value} to #{kapa_ref.URL} at index: #{index}"
+  #   kapa_ref.child("kaitakaro").updateChildValues({
+  #     player_snapshot.key => player_snapshot.childSnapshotForPath("display_name").value},
+  #     withCompletionBlock: proc do | error, ref |
+  #       player_snapshot.ref.updateChildValues({"team" => kapa_ref.key}, withCompletionBlock:
+  #         lambda do | error, player_ref |
+  #           update_kapa_location(kapa_ref)
+  #         end
+  #       )
+  #
+  #       # add the player to the local hash
+  #       @nga_kapa[index] << player_snapshot.childSnapshotForPath("display_name").value
+  #
+  #       # let the UI know to refresh
+  #       App.notification_center.post("KapaNew", kapa_ref)
+  #     end
+  #   )
+  # end
 
   # This  is not working -- maybe the kapa  aren;t made yet?
   def update_kapa_location(kapa_ref)
@@ -397,81 +427,89 @@ class Takaro
     )
   end
 
-  def list_player_names
-    puts "TAKARO LIST_PLAYER_NAMES".blue if DEBUGGING
-    @ref.child("kapa").getDataWithCompletionBlock(
-      # Using a lambda allows us to return?!?
-      lambda do | error, kapa_snapshot |
-        puts kapa_snapshot.childrenCount
-        kapa_hash = kapa_snapshot.value
-        # puts "kapa_hash: #{kapa_hash}"
-        puts kapa_snapshot.children.each { |c| puts "\nc: #{c.value}" }
-        # player_names = player_hash.map { |k| k.last["display_name"] }
-        # puts player_names
-        # return player_names
-      end
-    )
-  end
+  #################
+  # Data for UI
+  #################
 
-  def list_player_names_for_kapa_ref(kapa_ref)
-    puts "TAKARO LIST_PLAYER_NAMES_FOR_KAPA_REF".blue if DEBUGGING
-    puts "TAKARO LIST_PLAYER_NAMES_FOR_KAPA_REF kapa_ref: #{kapa_ref.key}".yellow if DEBUGGING
-    @ref.child("players").queryOrderedByChild("team").queryEqualToValue(kapa_ref.key).getDataWithCompletionBlock(
-      # Using a lambda allows us to return?!?
-      lambda do | error, player_snapshot |
-        player_hash = player_snapshot.value
-        player_names = player_hash.map { |k| k.last["display_name"] }
-        puts player_names
-        return player_names
-      end
-    )
-  end
+  ##
+  # TODO this apparently isn't used.
+  # def list_player_names
+  #   puts "TAKARO LIST_PLAYER_NAMES".blue if DEBUGGING
+  #   @ref.child("kapa").getDataWithCompletionBlock(
+  #     # Using a lambda allows us to return?!?
+  #     lambda do | error, kapa_snapshot |
+  #       puts kapa_snapshot.childrenCount
+  #       kapa_hash = kapa_snapshot.value
+  #       # puts "kapa_hash: #{kapa_hash}"
+  #       puts kapa_snapshot.children.each { |c| puts "\nc: #{c.value}" }
+  #       # player_names = player_hash.map { |k| k.last["display_name"] }
+  #       # puts player_names
+  #       # return player_names
+  #     end
+  #   )
+  # end
 
+  ##
+  # TODO this apparently isn't used.
+  # def list_player_names_for_kapa_ref(kapa_ref)
+  #   puts "TAKARO LIST_PLAYER_NAMES_FOR_KAPA_REF".blue if DEBUGGING
+  #   puts "TAKARO LIST_PLAYER_NAMES_FOR_KAPA_REF kapa_ref: #{kapa_ref.key}".yellow if DEBUGGING
+  #   @ref.child("players").queryOrderedByChild("team").queryEqualToValue(kapa_ref.key).getDataWithCompletionBlock(
+  #     # Using a lambda allows us to return?!?
+  #     lambda do | error, player_snapshot |
+  #       player_hash = player_snapshot.value
+  #       player_names = player_hash.map { |k| k.last["display_name"] }
+  #       puts player_names
+  #       return player_names
+  #     end
+  #   )
+  # end
+
+  ##
+  # Lists players for a given index.
+  # TODO Not sure we need this
   def list_player_names_for_index(in_index)
     puts "TAKARO LIST_PLAYER_NAMES_FOR_INDEX".blue if DEBUGGING
-    # index_query = @ref.child("kapa").queryOrderedByChild("index").queryEqualToValue(in_index)
-
-    #  array version
-    # @nga_kapa[in_index]
-
-    # hash version
     @nga_kapa_hash.values[in_index]
   end
 
+  ##
+  # Returns player count for a gven index.
   def player_count_for_index(in_index)
     puts "TAKARO PLAYER_COUNT_FOR_INDEX".blue if DEBUGGING
-    # array version
-    # return 0 if @nga_kapa[in_index].nil?
-    # @nga_kapa[in_index].count
-
-    # hash version
     return 0 if @nga_kapa_hash.values[in_index].nil?
     @nga_kapa_hash.values[in_index].count
   end
 
-  def get_distance(coord_a, coord_b)
-    puts "TAKARO GET_DISTANCE".blue if DEBUGGING
-    distance = MKMetersBetweenMapPoints(
-      MKMapPointForCoordinate(
-        format_to_location_coord(coord_a)),
-      MKMapPointForCoordinate(
-        format_to_location_coord(coord_b))
-    )
-    puts distance
-    distance
-  end
+  #################
+  # Utility Functions
+  #################
 
-  def format_to_location_coord(input)
-    puts "TAKARO FORMAT_TO_LOCATION_COORD".blue if DEBUGGING
-    puts "Input: #{input}".red if DEBUGGING
-    case input
-    when Hash
-      return CLLocationCoordinate2DMake(input["latitude"], input["longitude"])
-    when CLLocationCoordinate2D
-      return input
-    end
-    0
-  end
+  # def get_distance(coord_a, coord_b)
+  #   puts "TAKARO GET_DISTANCE".blue if DEBUGGING
+  #   distance = MKMetersBetweenMapPoints(
+  #     MKMapPointForCoordinate(
+  #       format_to_location_coord(coord_a)),
+  #     MKMapPointForCoordinate(
+  #       format_to_location_coord(coord_b))
+  #   )
+  #   puts "TAKARO GET_DISTANCE Distance: #{distance}" if DEBUGGING
+  #
+  #   # Not sure we need this return
+  #   distance
+  # end
+  #
+  # def format_to_location_coord(input)
+  #   puts "TAKARO FORMAT_TO_LOCATION_COORD".blue if DEBUGGING
+  #   puts "Input: #{input}".red if DEBUGGING
+  #   case input
+  #   when Hash
+  #     return CLLocationCoordinate2DMake(input["latitude"], input["longitude"])
+  #   when CLLocationCoordinate2D
+  #     return input
+  #   end
+  #   0
+  # end
 
   def generate_new_id
     puts "TAKARO GENERATE_NEW_ID".blue if DEBUGGING
@@ -514,20 +552,9 @@ class Takaro
 
   def create_bot_player
     puts "TAKARO CREATE_BOT_PLAYER".focus if DEBUGGING
-    @ref.child("players").childByAutoId.updateChildValues(
-      {
-        "display_name" => "Test Bot", "email" => "test@test.com"
-      },
-      withCompletionBlock:
-        lambda do | error, p |
-          p.updateChildValues({
-            "location" =>
-            {
-              "latitude" => 37.32889895124122,
-              "longitude" => -122.03668383752265
-            }
-          })
-        end
-    )
+    @bot = Kaitarako.new(@ref.child("players").childByAutoId, { "takaro" => self })
+    @bot.display_name = "Bot McBotface"
+    @bot.email = "lucashaley@yahoo.com"
+    @bot.coordinate = CLLocationCoordinate2DMake(37.33014437012663, -122.05991159514932)
   end
 end

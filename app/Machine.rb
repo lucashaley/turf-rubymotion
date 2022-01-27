@@ -197,7 +197,7 @@ class Machine
     # puts "old_location: #{old_location.coordinate}" unless old_location.nil?
 
     # switching to using CLLocation
-    App.notification_center.post("UpdateLocalPlayerPositionAsLocation",
+    App.notification_center.post("UpdateLocation",
       {"new_location" => new_location, "old_location" => old_location}
     )
   end
