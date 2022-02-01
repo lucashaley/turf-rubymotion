@@ -146,6 +146,7 @@ class JoinController < UIViewController
         .queryLimitedToLast(1)
         .getDataWithCompletionBlock(
           lambda do | error, snapshot |
+            # create the takaro
             @takaro = Takaro.new(snapshot.children.nextObject.key)
           end
         )

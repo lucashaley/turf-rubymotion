@@ -9,7 +9,7 @@ class Kaitarako
               :coordinate,
               :user_id
 
-  DEBUGGING = false
+  DEBUGGING = true
   TEAM_DISTANCE = 3
 
   def initialize(ref, args={})
@@ -115,13 +115,14 @@ class Kaitarako
               unless k.childSnapshotForPath("coordinate").exists
                 puts "KAITAKARO doesn't have a location".focus
                 @kapa_ref ||= k.ref
-              end
+              else
 
-              # But if it does have a location
-              # check if we're close
-              if k.childSnapshotForPath("coordinate").exists && get_distance(@coordinate, k.childSnapshotForPath("coordinate").value) < TEAM_DISTANCE
-                puts "Close enough!".yellow
-                @kapa_ref ||= k.ref
+                # But if it does have a location
+                # check if we're close
+                if k.childSnapshotForPath("coordinate").exists && get_distance(@coordinate, k.childSnapshotForPath("coordinate").value) < TEAM_DISTANCE
+                  puts "Close enough!".yellow
+                  @kapa_ref ||= k.ref
+                end
               end
             end unless kapa_snapshot.childrenCount == 0
             # this checks in case there are no Kapa in the db
@@ -142,6 +143,7 @@ class Kaitarako
               end
             end
 
+            puts "WOW".focus
             # TODO we need to check if they already have a kapa
             # send the data up
             puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION SENDING DATA".blue if DEBUGGING

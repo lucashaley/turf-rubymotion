@@ -42,6 +42,9 @@ class Takaro
     # TODO add empty kapa
     # TODO do we still need the array?
     # @nga_kapa = Array.new
+
+    # This is used for updating the UI
+    # And needs to have 0 and 1 indecies
     @nga_kapa_hash = {}
     @nga_kapa_observer_handle_array = Array.new
 
@@ -49,6 +52,16 @@ class Takaro
     # @nga_kapa_objects = []
     # TEAM_COUNT.times { |i| @nga_kapa_objects << Kapa.new(@ref.child("kapa").childByAutoId, {"name" => "Team_#{i}", "color" => "1 0 1 0"}) }
     # puts @nga_kapa_objects
+
+    # setup_group = Dispatch::Group.new
+    # setup_queue = Dispatch::Queue.new("turf")
+    # other_queue = Dispatch::Queue.new("poop")
+    # setup_queue.async(setup_group) {
+    #   init_kapa
+    # }
+    # setup_group.notify(other_queue) {
+    #   puts "BAAAAALLLLLLLLLLLLSSSSSSSSSS".focus
+    # }
 
 
     #################
@@ -61,7 +74,10 @@ class Takaro
       state.transition_to :pull_remote_kapa, on: :go_to_pull_remote_kapa
     end
     @machine.when :pull_remote_kapa do |state|
-      state.on_entry { pull_remote_kapa }
+      state.on_entry {
+        init_kapa
+        # pull_remote_kapa
+      }
       state.transition_to :set_up_observers, on: :go_to_set_up_observers
     end
     @machine.when :set_up_observers do |state|
@@ -105,28 +121,83 @@ class Takaro
     @ref.keepSynced false
   end
 
-  # TODO Possibly rename this to set up or something?
-  def pull_remote_kapa
-    # TODO This needs to happen for joining games?
-    puts "TAKARO PULL_REMOTE_KAPA".blue if DEBUGGING
+  # This method should check to see if any kapa exist on the server
+  # and if not, it should create them
+  def init_kapa
+    puts "TAKARO INIT_KAPA".blue if DEBUGGING
 
-    # check if there are any kapa still left to make
-    # and initialize them if not
+    # Check first for server kapa
     @ref.child("kapa").getDataWithCompletionBlock(
-      lambda do | error, kapa_snapshot|
-        puts "\nCurrent kapa count: #{kapa_snapshot.childrenCount}\n".pink
-        (TEAM_COUNT - kapa_snapshot.childrenCount).times do |i|
-          kapa_snapshot.ref.childByAutoId.setValue(
-            {"created" => FIRServerValue.timestamp}
+      lambda do | error, kapa_snapshot |
+
+        childCount = kapa_snapshot.hasChildren || 0
+        puts "childCount: #{childCount}".focus
+        TEAM_COUNT.times do |i|
+          if childCount > i
+            # There is already one on the server
+            # get its data and add it to the local hash
+            current_kapa_snapshot = kapa_snapshot.children.allObjects[i]
+            current_kapa_ref = current_kapa_snapshot.ref
+            # and pull down the player names
+            kapa_snapshot.ref.child("kaitakaro").getDataWithCompletionBlock(
+              lambda do | error, player_snapshot |
+                player_snapshot.children.each do |current_player_snapshot|
+                  @setup_queue.async(@setup_group) do
+                    current_player_name = current_player_snapshot.childSnapshotForPath("name").value
+                    @nga_kapa_hash[i] << current_player_name
+                  end # async
+                end
+              end
+            )
+          else
+            # We need to create a new one
+            current_kapa_ref = @ref.child("kapa").childByAutoId
+            current_kapa_ref.updateChildValues({"created" => FIRServerValue.timestamp})
+          end
+          puts "current_kapa_ref: #{current_kapa_ref.URL}".focus
+
+          # then we need to add the observers
+          current_kapa_ref.child("kaitakaro").observeEventType(FIRDataEventTypeChildAdded,
+            withBlock: lambda do |kaitakaro_snapshot|
+              puts "TAKARO INIT_KAPA KAITAKARO CHILD ADDED".focus
+              puts "Info: #{kaitakaro_snapshot.value}"
+              puts "kapa_snapshot: #{kapa_snapshot.ref.URL}"
+              update_kapa_location(current_kapa_ref)
+            end
           )
+
+          @machine.event :go_to_set_up_observers
         end
-        kapa_snapshot.children.each do |kapa|
-          puts "\npull_remote_kapa: #{kapa.value}\n".pink if DEBUGGING
-        end unless kapa_snapshot.nil?
-        @machine.event :go_to_set_up_observers
       end
     )
   end
+
+  # TODO Possibly rename this to set up or something?
+  # def pull_remote_kapa
+  #   # TODO This needs to happen for joining games?
+  #   puts "TAKARO PULL_REMOTE_KAPA".blue if DEBUGGING
+  #
+  #   # check if there are any kapa still left to make
+  #   # and initialize them if not
+  #   @ref.child("kapa").getDataWithCompletionBlock(
+  #     lambda do | error, kapa_snapshot|
+  #       puts "Exists: #{kapa_snapshot.exists}".focus
+  #       puts "Has children: #{kapa_snapshot.hasChildren}".focus
+  #       return unless kapa_snapshot.exists
+  #       return unless kapa_snapshot.hasChildren
+  #       puts "\nCurrent kapa count: #{kapa_snapshot.childrenCount}\n".pink unless kapa_snapshot.childrenCount.nil?
+  #       (TEAM_COUNT - kapa_snapshot.childrenCount).times do |i|
+  #         kapa_snapshot.ref.childByAutoId.setValue(
+  #           {"created" => FIRServerValue.timestamp}
+  #         )
+  #       end
+  #       kapa_snapshot.children.each do |kapa|
+  #         puts "\npull_remote_kapa: #{kapa.value}\n".pink if DEBUGGING
+  #       end unless kapa_snapshot.nil?
+  #       @machine.event :go_to_set_up_observers
+  #     end
+  #   )
+  # end
 
   #################
   # Database Observers
@@ -135,28 +206,29 @@ class Takaro
   def set_up_observers
     puts "TAKARO SET_UP_OBSERVERS".blue if DEBUGGING
 
-    @ref.child("kapa").observeEventType(FIRDataEventTypeChildAdded,
-      withBlock: lambda do |kapa_snapshot|
-        puts "TAKARO KAPA ADDED".red if DEBUGGING
-        puts "Kapa added: #{kapa_snapshot.ref.URL}" if DEBUGGING
-
-        # Hash version
-        unless @nga_kapa_hash.length >= 2
-          # add new array to kapa hash
-          # TODO change this to a set?
-          @nga_kapa_hash[kapa_snapshot.key] = []
-          # add a new kapa to the hash array?
-          puts "new kapa loop hash: #{@nga_kapa_hash.to_s}" if DEBUGGING
-
-          kapa_snapshot.ref.child("kaitakaro").observeEventType(FIRDataEventTypeChildAdded,
-            withBlock: lambda do |kaitakaro_snapshot|
-              puts "KAITAKARO CHILD ADDED".focus
-              update_kapa_location(kapa_snapshot.ref)
-            end
-          )
-        end
-      end
-    )
+    # # TODO can we do all of this in init_kapa?
+    # @ref.child("kapa").observeEventType(FIRDataEventTypeChildAdded,
+    #   withBlock: lambda do |kapa_snapshot|
+    #     puts "TAKARO KAPA ADDED".red if DEBUGGING
+    #     puts "Kapa added: #{kapa_snapshot.ref.URL}" if DEBUGGING
+    #
+    #     # Hash version
+    #     unless @nga_kapa_hash.length >= 2
+    #       # add new array to kapa hash
+    #       # TODO change this to a set?
+    #       @nga_kapa_hash[kapa_snapshot.key] = []
+    #       # add a new kapa to the hash array?
+    #       puts "new kapa loop hash: #{@nga_kapa_hash.to_s}" if DEBUGGING
+    #
+    #       kapa_snapshot.ref.child("kaitakaro").observeEventType(FIRDataEventTypeChildAdded,
+    #         withBlock: lambda do |kaitakaro_snapshot|
+    #           puts "KAITAKARO CHILD ADDED".focus
+    #           update_kapa_location(kapa_snapshot.ref)
+    #         end
+    #       )
+    #     end
+    #   end
+    # )
 
     # @ref.child("kapa").observeEventType(FIRDataEventTypeChildChanged,
     #   withBlock: proc do |kapa_snapshot|
@@ -208,6 +280,10 @@ class Takaro
 
       new_location = data.object["new_location"]
       old_location = data.object["old_location"]
+
+      puts "new_location: #{new_location.coordinate.latitude}"
+      puts "old_location: #{old_location.coordinate.latitude}"
+
       App.notification_center.post("UpdateLocalPlayerPositionAsLocation",
         {"new_location" => new_location, "old_location" => old_location}
       )
@@ -406,12 +482,16 @@ class Takaro
     puts "TAKARO UPDATE_KAPA_LOCATION".blue if DEBUGGING
     loc = CLLocationCoordinate2DMake(0, 0)
 
+    puts "kapa_ref: #{kapa_ref.URL}"
+
     kapa_ref.child("kaitakaro").observeSingleEventOfType(FIRDataEventTypeValue , withBlock:
-      lambda do |k_s|
+      lambda do |kapa_snapshot|
         lats = []
         longs = []
-        puts "observe version: #{k_s.value}"
-        k_s.children.each do |pl|
+        puts "observe version: #{kapa_snapshot.value}"
+
+        # TODO This is an error
+        kapa_snapshot.children.each do |pl|
           pl_loc = pl.childSnapshotForPath("location").value
           # puts pl_loc["latitude"].to_s
           # puts pl_loc["longitude"].to_s
@@ -474,7 +554,7 @@ class Takaro
   end
 
   ##
-  # Returns player count for a gven index.
+  # Returns player count for a given index.
   def player_count_for_index(in_index)
     puts "TAKARO PLAYER_COUNT_FOR_INDEX".blue if DEBUGGING
     return 0 if @nga_kapa_hash.values[in_index].nil?
