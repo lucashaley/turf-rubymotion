@@ -60,19 +60,21 @@ class Takaro
   # Creates a new Takaro, or initializes from a +in_uuid+ string.
   # uuid is a string.
 
-  def initialize(in_uuid = NSUUID.UUID.UUIDString)
+  # def initialize(in_uuid = NSUUID.UUID.UUIDString
+  def initialize(in_uuid = nil)
     puts "TAKARO INITIALIZE".light_blue if DEBUGGING
-    puts in_uuid
-    @uuid = in_uuid
+    puts "Creating new takaro with uuid: #{in_uuid}".focus
+    @uuid = in_uuid || NSUUID.UUID.UUIDString
     @ref = Machine.instance.db.referenceWithPath("games/#{uuid}")
 
     # TODO do we do this if we're not creating from scratch? Won't it overwrite?
+    # TODO yes it totally does
     new_gamecode = generate_new_id
     @ref.updateChildValues({"gamecode" => new_gamecode}, withCompletionBlock:
       lambda do | error, game_ref |
         App.notification_center.post("GamecodeNew", new_gamecode)
       end
-    )
+    ) unless in_uuid
 
     puts "New takaro: #{@ref.URL}" if DEBUGGING
 
