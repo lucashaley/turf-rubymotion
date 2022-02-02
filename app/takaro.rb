@@ -78,19 +78,12 @@ class Takaro
 
     puts "New takaro: #{@ref.URL}" if DEBUGGING
 
-    # TODO add empty kapa
-    # TODO do we still need the array?
-    # @nga_kapa = Array.new
-
     # This is used for updating the UI
     # And needs to have 0 and 1 indecies
     @nga_kapa_hash = {}
-    @nga_kapa_observer_handle_array = Array.new
 
-    # This is only good for the creating player
-    # @nga_kapa_objects = []
-    # TEAM_COUNT.times { |i| @nga_kapa_objects << Kapa.new(@ref.child("kapa").childByAutoId, {"name" => "Team_#{i}", "color" => "1 0 1 0"}) }
-    # puts @nga_kapa_objects
+    # what was I thinking here?
+    # @nga_kapa_observer_handle_array = Array.new
 
     # setup_group = Dispatch::Group.new
     # setup_queue = Dispatch::Queue.new("turf")
