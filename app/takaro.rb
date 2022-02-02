@@ -20,6 +20,43 @@ class Takaro
   @accepting_new_players = true
 
   ##
+  # DATA STRUCTURES
+  #
+  # LOCAL
+  # kapa_hash
+  # [
+  #   {
+  #     "id" => id,
+  #     "players" => ["player_a", "player_b", ...]
+  #   }
+  # ]
+  #
+  # FIREBASE
+  # GAME
+  # - uuid
+  #   - gamecode
+  #   - KAPA
+  #     - created
+  #     - KAITAKARO
+  #       - firebase_id
+  #         - COORDINATE
+  #           - latitude
+  #           - longitude
+  #         - name
+  #     - LOCATION <= rename to coordinate?
+  #       - latitude
+  #       - longitude
+  #   - PLAYERS
+  #     - firebase_id
+  #       - COORDINATE
+  #         - latitude
+  #         - longitude
+  #       - display_name
+  #       - email
+  #       - team
+  #       - user_id
+
+  ##
   # Creates a new Takaro, or initializes from a +in_uuid+ string.
   # uuid is a string.
 
