@@ -307,8 +307,8 @@
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <sections/>
                                 <connections>
-                                    <outlet property="dataSource" destination="lpe-LN-HM1" id="LHu-xf-uwv"/>
-                                    <outlet property="delegate" destination="lpe-LN-HM1" id="iec-af-P8M"/>
+                                    <outlet property="dataSource" destination="xlE-BF-66s" id="LM2-PR-HDS"/>
+                                    <outlet property="delegate" destination="xlE-BF-66s" id="LeL-3i-b3y"/>
                                 </connections>
                             </tableView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="Team A" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="ul9-ui-GFs">
@@ -317,8 +317,8 @@
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <sections/>
                                 <connections>
-                                    <outlet property="dataSource" destination="lpe-LN-HM1" id="PUm-wK-wB2"/>
-                                    <outlet property="delegate" destination="lpe-LN-HM1" id="Ped-Tv-QaY"/>
+                                    <outlet property="dataSource" destination="xlE-BF-66s" id="WgA-9J-7Ou"/>
+                                    <outlet property="delegate" destination="xlE-BF-66s" id="N6p-Kv-EiH"/>
                                 </connections>
                             </tableView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Team B" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KpJ-7o-J7k">
@@ -518,7 +518,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="iZS-Jr-ORe"/>
+        <segue reference="iED-yg-Ztn"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="plus" catalog="system" width="128" height="113"/>

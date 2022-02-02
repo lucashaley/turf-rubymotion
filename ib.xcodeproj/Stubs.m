@@ -60,6 +60,9 @@
 @implementation Kapa
 @end
 
+@implementation KapaFirebaseObject
+@end
+
 @implementation Machine
 @end
 

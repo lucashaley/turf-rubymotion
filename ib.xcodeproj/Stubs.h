@@ -205,11 +205,24 @@
 @end
 
 @interface Kaitarako: NSObject
--(IBAction) location_coordinates;
+-(IBAction) display_name;
+-(IBAction) get_remote_display_name;
+-(IBAction) email;
+-(IBAction) get_remote_email;
+-(IBAction) user_id;
+-(IBAction) coordinate;
+-(IBAction) get_remote_data:(id) in_key;
+-(IBAction) format_to_location_coord:(id) input;
 
 @end
 
-@interface Kapa: FirebaseObject
+@interface Kapa: NSObject
+-(IBAction) color;
+-(IBAction) name;
+
+@end
+
+@interface KapaFirebaseObject: FirebaseObject
 -(IBAction) update_average_location;
 -(IBAction) add_player_to_kapa:(id) player;
 -(IBAction) nga_kaitakaro_to_firebase;
@@ -335,21 +348,18 @@
 -(IBAction) initialize:(id) in_uuid;
 -(IBAction) start_syncing;
 -(IBAction) stop_syncing;
--(IBAction) pull_remote_kapa;
+-(IBAction) init_kapa;
 -(IBAction) set_up_observers;
--(IBAction) update_local_player_location:(id) in_location;
 -(IBAction) create_new_remote_kapa;
 -(IBAction) add_local_player:(id) in_user;
 -(IBAction) update_kapa_location:(id) kapa_ref;
--(IBAction) list_player_names;
--(IBAction) list_player_names_for_kapa_ref:(id) kapa_ref;
 -(IBAction) list_player_names_for_index:(id) in_index;
 -(IBAction) player_count_for_index:(id) in_index;
--(IBAction) format_to_location_coord:(id) input;
 -(IBAction) generate_new_id;
 -(IBAction) set_initial_pouwhenua;
 -(IBAction) start_observing_pouwhenua;
 -(IBAction) create_new_pouwhenua:(id) coord;
+-(IBAction) create_bot_player;
 
 @end
 
