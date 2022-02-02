@@ -12,13 +12,12 @@ class JoinController < UIViewController
   outlet :table_team_b, UITableView
   TABLEVIEW_TEAM_A = 0
   TABLEVIEW_TEAM_B = 1
-  # outlet :tableView, UITableView
 
   outlet :not_close_enough, UILabel
 
-  attr_accessor :takaro, :tableSource
+  attr_accessor :takaro
 
-  DEBUGGING = false
+  DEBUGGING = true
   CELL_IDENTIFIER = "PlayerCell"
 
   def viewDidLoad
@@ -147,6 +146,7 @@ class JoinController < UIViewController
         .getDataWithCompletionBlock(
           lambda do | error, snapshot |
             # create the takaro
+            puts "snapshot: #{snapshot.value}".focus
             @takaro = Takaro.new(snapshot.children.nextObject.key)
           end
         )

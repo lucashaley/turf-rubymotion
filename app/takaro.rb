@@ -3,7 +3,8 @@ class Takaro
                 :uuid,
                 :local_player_ref,
                 # :nga_kapa,
-                :nga_kapa_hash,
+                # :nga_kapa_hash,
+                :kapa_array,
                 :machine,
                 :kapa_observer_handle,
                 :nga_kapa_observer_handle_array,
@@ -80,7 +81,8 @@ class Takaro
 
     # This is used for updating the UI
     # And needs to have 0 and 1 indecies
-    @nga_kapa_hash = {}
+    # @nga_kapa_hash = {}
+    @kapa_array = []
 
     # what was I thinking here?
     # @nga_kapa_observer_handle_array = Array.new
@@ -157,23 +159,23 @@ class Takaro
     # Check first for server kapa
     @ref.child("kapa").getDataWithCompletionBlock(
       lambda do | error, kapa_snapshot |
-
-        childCount = kapa_snapshot.hasChildren || 0
-        puts "childCount: #{childCount}".focus
+        # childCount = kapa_snapshot?.hasChildren || 0
+        childCount = defined?(kapa_snapshot) ? kapa_snapshot.childrenCount : 0
         TEAM_COUNT.times do |i|
           if childCount > i
             # There is already one on the server
             # get its data and add it to the local hash
             current_kapa_snapshot = kapa_snapshot.children.allObjects[i]
             current_kapa_ref = current_kapa_snapshot.ref
+            @kapa_array[i] = {"id" => current_kapa_snapshot.key, "players" => []}
             # and pull down the player names
             kapa_snapshot.ref.child("kaitakaro").getDataWithCompletionBlock(
               lambda do | error, player_snapshot |
+                puts "174"
                 player_snapshot.children.each do |current_player_snapshot|
-                  @setup_queue.async(@setup_group) do
-                    current_player_name = current_player_snapshot.childSnapshotForPath("name").value
-                    @nga_kapa_hash[i] << current_player_name
-                  end # async
+                  current_player_name = current_player_snapshot.childSnapshotForPath("display_name").value
+                  puts "current_player_name:#{current_player_name}".focus
+                  @kapa_array[i]["players"] << current_player_name
                 end
               end
             )
@@ -181,13 +183,13 @@ class Takaro
             # We need to create a new one
             current_kapa_ref = @ref.child("kapa").childByAutoId
             current_kapa_ref.updateChildValues({"created" => FIRServerValue.timestamp})
+            @kapa_array << {"id" => current_kapa_ref.key, "players" => []}
           end
-          puts "current_kapa_ref: #{current_kapa_ref.URL}".focus
 
           # then we need to add the observers
           current_kapa_ref.child("kaitakaro").observeEventType(FIRDataEventTypeChildAdded,
             withBlock: lambda do |kaitakaro_snapshot|
-              puts "TAKARO INIT_KAPA KAITAKARO CHILD ADDED".focus
+              puts "TAKARO INIT_KAPA KAITAKARO CHILD ADDED".blue if DEBUGGING
               puts "Info: #{kaitakaro_snapshot.value}"
               puts "kapa_snapshot: #{kapa_snapshot.ref.URL}"
               update_kapa_location(current_kapa_ref)
@@ -227,16 +229,20 @@ class Takaro
         # if the player _has_ a team, we need to check if they are already in the team
         player_team = player_snapshot.childSnapshotForPath("team")
         if player_team.exists
-          player_team_value = player_team.value
-
-          puts "adding player name to hash: #{player_team_value}" if DEBUGGING
+          player_team_id = player_team.value
+          puts "player_team_id: #{player_team_id}"
           player_display_name = player_snapshot.childSnapshotForPath("display_name").value
-          # TODO whew this can be shorter
-          # TODO maybe this could be a hash instead, using the object id?
-          unless @nga_kapa_hash[player_team_value].include?(player_display_name)
-            @nga_kapa_hash[player_team_value] << player_display_name
+          puts "player_display_name: #{player_display_name}"
+
+          puts "kapa_array (241): #{@kapa_array}".focus
+          kapa_in_array = @kapa_array.find { |k| k["id"] == player_team_id }
+          puts "kapa_in_array: #{kapa_in_array}".focus
+
+          unless kapa_in_array["players"].include?(player_display_name)
+            kapa_in_array["players"] << player_display_name
           end
-          puts "#{nga_kapa_hash}" if DEBUGGING
+
+          puts "kapa_array: #{@kapa_array}"
           App.notification_center.post "PlayerNew"
         end
       end
@@ -290,7 +296,7 @@ class Takaro
     @local_kaitakaro.is_local = true
   end
 
-  # This  is not working -- maybe the kapa  aren;t made yet?
+  # TODO This is not working -- maybe the kapa aren't made yet?
   def update_kapa_location(kapa_ref)
     puts "TAKARO UPDATE_KAPA_LOCATION".blue if DEBUGGING
     loc = CLLocationCoordinate2DMake(0, 0)
@@ -303,13 +309,14 @@ class Takaro
         longs = []
         puts "observe version: #{kapa_snapshot.value}"
 
-        # TODO This is an errorgith
+        # TODO This is an error
         kapa_snapshot.children.each do |pl|
-          pl_loc = pl.childSnapshotForPath("location").value
+          puts "Location: #{pl.childSnapshotForPath("coordinate").value}"
+          pl_coord = pl.childSnapshotForPath("coordinate").value
           # puts pl_loc["latitude"].to_s
           # puts pl_loc["longitude"].to_s
-          lats << pl_loc["latitude"]
-          longs << pl_loc["longitude"]
+          lats << pl_coord["latitude"]
+          longs << pl_coord["longitude"]
         end
         lats_average = lats.inject{ |sum, el| sum + el }.to_f / lats.size
         longs_average = longs.inject{ |sum, el| sum + el }.to_f / longs.size
@@ -329,15 +336,19 @@ class Takaro
   # TODO Not sure we need this
   def list_player_names_for_index(in_index)
     puts "TAKARO LIST_PLAYER_NAMES_FOR_INDEX".blue if DEBUGGING
-    @nga_kapa_hash.values[in_index]
+    # @nga_kapa_hash.values[in_index]
+    @kapa_array[in_index]["players"]
   end
 
   ##
   # Returns player count for a given index.
   def player_count_for_index(in_index)
     puts "TAKARO PLAYER_COUNT_FOR_INDEX".blue if DEBUGGING
-    return 0 if @nga_kapa_hash.values[in_index].nil?
-    @nga_kapa_hash.values[in_index].count
+    # return 0 if @nga_kapa_hash.values[in_index].nil?
+    # @nga_kapa_hash.values[in_index].count
+
+    return 0 if @kapa_array.empty? || @kapa_array[in_index].empty? || @kapa_array[in_index]["players"].empty?
+    @kapa_array[in_index]["players"].count
   end
 
   #################
@@ -357,9 +368,12 @@ class Takaro
 
   def set_initial_pouwhenua
     puts "TAKARO SET_INITIAL_POUWHENUA".blue if DEBUGGING
-    @nga_kapa_hash.each do |k|
-      puts "Current Kapa: #{k}"
-    end
+
+    # TODO urgent: make this work with kapa_array instead
+
+    # @nga_kapa_hash.each do |k|
+    #   puts "Current Kapa: #{k}"
+    # end
   end
 
   def start_observing_pouwhenua
