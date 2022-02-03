@@ -19,3 +19,6 @@ gem "standard"
 
 # https://github.com/clayallsopp/geomotion
 gem "geomotion"
+
+# For RubyMine IDE debugging
+gem "debase"

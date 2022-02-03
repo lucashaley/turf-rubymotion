@@ -89,6 +89,9 @@ GEM
     commander (4.6.0)
       highline (~> 2.0.0)
     concurrent-ruby (1.1.9)
+    debase (2.3.2)
+      debase-ruby_core_source (~> 0.10.11)
+    debase-ruby_core_source (0.10.14)
     declarative (0.0.20)
     digest-crc (0.6.4)
       rake (>= 12.0.0, < 14.0.0)
@@ -319,6 +322,7 @@ PLATFORMS
 
 DEPENDENCIES
   bubble-wrap!
+  debase
   geomotion
   ib
   motion-cocoapods!
