@@ -9,7 +9,7 @@ class Kaitarako
               :coordinate,
               :user_id
 
-  DEBUGGING = true
+  DEBUGGING = false
   TEAM_DISTANCE = 3
 
   def initialize(ref, args={})
@@ -20,7 +20,7 @@ class Kaitarako
     @takaro = args["takaro"] ? args["takaro"] : nil
 
     @local_player_location_observer_coord = App.notification_center.observe "UpdateLocalPlayerPositionAsLocation" do |data|
-      puts "DATA: #{data.object}"
+      puts "DATA: #{data.object}" if DEBUGGING
       if @is_local && (@location_coords.nil? || data.object["new_location"].distanceFromLocation(data.object["old_location"]) > MOVE_THRESHOLD)
         self.coordinate = data.object["new_location"].coordinate
       end
@@ -96,6 +96,7 @@ class Kaitarako
   def coordinate=(in_coordinate)
     puts "KAITAKARO SET COORDINATE".blue if DEBUGGING
     @coordinate = in_coordinate
+    puts "coordinate: #{@coordinate}".focus
     @kaitakaro_ref.updateChildValues(
       {"coordinate" => {
         "latitude" => in_coordinate.latitude,
@@ -113,7 +114,7 @@ class Kaitarako
 
               # This kapa doesn't have a location, so we can add this player
               unless k.childSnapshotForPath("coordinate").exists
-                puts "KAITAKARO doesn't have a location".focus
+                puts "KAITAKARO kapa doesn't have a location".focus
                 @kapa_ref ||= k.ref
               else
 

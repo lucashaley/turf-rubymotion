@@ -13,7 +13,7 @@ class Takaro
                 :local_player_name,
                 :local_player_kapa_ref
 
-  DEBUGGING = true
+  DEBUGGING = false
   TEAM_DISTANCE = 3
   MOVE_THRESHOLD = 2
   TEAM_COUNT = 2
@@ -44,7 +44,7 @@ class Takaro
   #           - latitude
   #           - longitude
   #         - name
-  #     - LOCATION <= rename to coordinate?
+  #     - COORDINATE
   #       - latitude
   #       - longitude
   #   - PLAYERS
@@ -64,7 +64,7 @@ class Takaro
   # def initialize(in_uuid = NSUUID.UUID.UUIDString
   def initialize(in_uuid = nil)
     puts "TAKARO INITIALIZE".light_blue if DEBUGGING
-    puts "Creating new takaro with uuid: #{in_uuid}".focus
+    puts "Creating new takaro with uuid: #{in_uuid}".pink if DEBUGGING
     @uuid = in_uuid || NSUUID.UUID.UUIDString
     @ref = Machine.instance.db.referenceWithPath("games/#{uuid}")
 
@@ -153,6 +153,10 @@ class Takaro
 
   # This method should check to see if any kapa exist on the server
   # and if not, it should create them
+  ##
+  #
+  # INITIALIZE THE KAPA (TEAMS)
+  #
   def init_kapa
     puts "TAKARO INIT_KAPA".blue if DEBUGGING
 
@@ -174,7 +178,7 @@ class Takaro
                 puts "174"
                 player_snapshot.children.each do |current_player_snapshot|
                   current_player_name = current_player_snapshot.childSnapshotForPath("display_name").value
-                  puts "current_player_name:#{current_player_name}".focus
+                  # puts "current_player_name:#{current_player_name}".focus
                   @kapa_array[i]["players"] << current_player_name
                 end
               end
@@ -209,8 +213,10 @@ class Takaro
   def set_up_observers
     puts "TAKARO SET_UP_OBSERVERS".blue if DEBUGGING
 
-    # Oh noes
-    # I think this needs to be all local
+    ##
+    #
+    # PLAYER ADDED
+    #
     @ref.child("players").queryLimitedToLast(1).observeEventType(FIRDataEventTypeChildAdded,
       withBlock: proc do |player_snapshot|
         puts "TAKARO PLAYERADDED".red if DEBUGGING
@@ -218,8 +224,12 @@ class Takaro
         # Let's take a look at who the player is
         puts "new player: #{player_snapshot.value}" if DEBUGGING
       end # player lambda
-    ) # player observer
+    )
 
+    ##
+    #
+    # PLAYER EDITED
+    #
     @ref.child("players").observeEventType(FIRDataEventTypeChildChanged,
       withBlock: proc do |player_snapshot|
         # TODO this adds an existing player, need to change!
@@ -234,9 +244,9 @@ class Takaro
           player_display_name = player_snapshot.childSnapshotForPath("display_name").value
           puts "player_display_name: #{player_display_name}"
 
-          puts "kapa_array (241): #{@kapa_array}".focus
+          # puts "kapa_array (241): #{@kapa_array}".focus
           kapa_in_array = @kapa_array.find { |k| k["id"] == player_team_id }
-          puts "kapa_in_array: #{kapa_in_array}".focus
+          # puts "kapa_in_array: #{kapa_in_array}".focus
 
           unless kapa_in_array["players"].include?(player_display_name)
             kapa_in_array["players"] << player_display_name
@@ -248,14 +258,18 @@ class Takaro
       end
     )
 
+    ##
+    #
+    # LOCAL PLAYER LOCATION UPDATED
+    #
     @takaro_update_location_observer_coord = App.notification_center.observe "UpdateLocation" do |data|
       puts "TAKARO UPDATELOCALPLAYERPOSITION LOCATION".yellow if DEBUGGING
 
       new_location = data.object["new_location"]
       old_location = data.object["old_location"]
 
-      puts "new_location: #{new_location.coordinate.latitude}"
-      puts "old_location: #{old_location.coordinate.latitude}"
+      puts "new_location: #{new_location.coordinate.latitude}" if DEBUGGING
+      puts "old_location: #{old_location.coordinate.latitude}" if DEBUGGING
 
       App.notification_center.post("UpdateLocalPlayerPositionAsLocation",
         {"new_location" => new_location, "old_location" => old_location}
@@ -264,7 +278,7 @@ class Takaro
 
     puts @machine.current_state.name
     @machine.event :go_to_awaiting_players
-    puts "Transitioning out".focus
+    # puts "Transitioning out".focus
     @machine.event :go_to_awaiting_players
     puts @machine.current_state.name
   end
@@ -297,21 +311,22 @@ class Takaro
   end
 
   # TODO This is not working -- maybe the kapa aren't made yet?
+  # This might be working now?
   def update_kapa_location(kapa_ref)
     puts "TAKARO UPDATE_KAPA_LOCATION".blue if DEBUGGING
     loc = CLLocationCoordinate2DMake(0, 0)
 
-    puts "kapa_ref: #{kapa_ref.URL}"
+    puts "kapa_ref: #{kapa_ref.URL}" if DEBUGGING
 
     kapa_ref.child("kaitakaro").observeSingleEventOfType(FIRDataEventTypeValue , withBlock:
       lambda do |kapa_snapshot|
         lats = []
         longs = []
-        puts "observe version: #{kapa_snapshot.value}"
+        puts "observe version: #{kapa_snapshot.value}".focus
 
         # TODO This is an error
         kapa_snapshot.children.each do |pl|
-          puts "Location: #{pl.childSnapshotForPath("coordinate").value}"
+          puts "Coordinate: #{pl.childSnapshotForPath("coordinate").value}".focus
           pl_coord = pl.childSnapshotForPath("coordinate").value
           # puts pl_loc["latitude"].to_s
           # puts pl_loc["longitude"].to_s
@@ -321,7 +336,7 @@ class Takaro
         lats_average = lats.inject{ |sum, el| sum + el }.to_f / lats.size
         longs_average = longs.inject{ |sum, el| sum + el }.to_f / longs.size
         kapa_ref.updateChildValues(
-          {"location" => {"latitude" => lats_average, "longitude" => longs_average}}
+          {"coordinate" => {"latitude" => lats_average, "longitude" => longs_average}}
         )
       end
     )
@@ -398,10 +413,14 @@ class Takaro
   #################
 
   def create_bot_player
-    puts "TAKARO CREATE_BOT_PLAYER".focus if DEBUGGING
+    puts "TAKARO CREATE_BOT_PLAYER".blue if DEBUGGING
     @bot = Kaitarako.new(@ref.child("players").childByAutoId, { "takaro" => self })
-    @bot.display_name = "Bot McBotface"
+    @bot.display_name = "Bot McBotface #{rand(30)}"
     @bot.email = "lucashaley@yahoo.com"
-    @bot.coordinate = CLLocationCoordinate2DMake(37.33014437012663, -122.05991159514932)
+    lat = rand(37.330144370126..37.330144370127)
+    long = -rand(122.059911595149..122.059911595150)
+    # puts "#{lat}, #{long}".focus
+    # @bot.coordinate = CLLocationCoordinate2DMake(37.33014437012663, -122.05991159514932)
+    @bot.coordinate = CLLocationCoordinate2DMake(lat, long)
   end
 end

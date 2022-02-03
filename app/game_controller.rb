@@ -10,7 +10,7 @@ class GameController < UIViewController
                 :game,
                 :player_location
 
-  DEBUGGING = true
+  DEBUGGING = false
 
   def viewWillAppear(animated)
     puts "GAME_CONTROLLER: VIEWWILLAPPEAR".light_blue
