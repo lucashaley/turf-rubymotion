@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="XHM-8t-teB">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="XHM-8t-teB">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <deployment version="5120" identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -148,7 +149,6 @@
                                 <state key="normal" title="Continue"/>
                                 <connections>
                                     <action selector="continue_button_action:" destination="lpe-LN-HM1" eventType="primaryActionTriggered" id="nMU-Se-doc"/>
-                                    <segue destination="Ba5-Em-l6K" kind="show" id="iZS-Jr-ORe"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Game Code:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MBt-Hy-jQ0">
@@ -180,7 +180,7 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="Team A" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="AgA-Xk-jr9">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="New Game Team A" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="AgA-Xk-jr9">
                                 <rect key="frame" x="16" y="249" width="154" height="225"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -197,7 +197,7 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="Team A" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="4iH-LO-1V0">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="New Game Team B" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="4iH-LO-1V0">
                                 <rect key="frame" x="205" y="249" width="154" height="171"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -213,8 +213,7 @@
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="18"/>
                                 <state key="normal" title="Add bot"/>
                                 <connections>
-                                    <action selector="add_bot_action:" destination="lpe-LN-HM1" eventType="touchUpInside" id="S2V-a5-GGm"/>
-                                    <action selector="continue_button_action:" destination="lpe-LN-HM1" eventType="primaryActionTriggered" id="E5f-S7-QJT"/>
+                                    <action selector="add_bot_action:" destination="lpe-LN-HM1" eventType="primaryActionTriggered" id="Blv-Ou-bAQ"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -224,7 +223,6 @@
                     <navigationItem key="navigationItem" id="xrk-ks-pwB"/>
                     <connections>
                         <outlet property="cancel_button" destination="NQU-5x-TWF" id="3tI-a0-mQn"/>
-                        <outlet property="continue_button" destination="UmA-Sh-xgH" id="PPY-um-Ao0"/>
                         <outlet property="gamecode" destination="V47-r9-v7Y" id="zbY-mU-uIr"/>
                         <outlet property="not_close_enough" destination="AFw-8c-ST2" id="twh-B8-0Ii"/>
                         <outlet property="table_team_a" destination="AgA-Xk-jr9" id="txv-ZG-ZEt"/>
@@ -263,7 +261,7 @@
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
                                 <state key="normal" title="Continue"/>
                                 <connections>
-                                    <segue destination="Ba5-Em-l6K" kind="show" id="iED-yg-Ztn"/>
+                                    <segue destination="Ba5-Em-l6K" kind="show" identifier="" id="iED-yg-Ztn"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lIx-pz-Dmn">
@@ -301,7 +299,7 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="Team A" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="4EA-X1-DF8">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="Join Game Team B" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="4EA-X1-DF8">
                                 <rect key="frame" x="205" y="232" width="154" height="225"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -311,7 +309,7 @@
                                     <outlet property="delegate" destination="xlE-BF-66s" id="LeL-3i-b3y"/>
                                 </connections>
                             </tableView>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="Team A" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="ul9-ui-GFs">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="Join Game Team A" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="ul9-ui-GFs">
                                 <rect key="frame" x="16" y="232" width="154" height="225"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -468,6 +466,7 @@
                         <segue destination="Y6W-OH-hqX" kind="relationship" relationship="rootViewController" id="Eaz-XX-zsw"/>
                         <segue destination="8aw-7i-1GL" kind="show" identifier="ToMenu" id="61o-Lf-6W7"/>
                         <segue destination="eZk-Vt-bN8" kind="presentation" identifier="ToCharacter" id="8aD-bN-U3a"/>
+                        <segue destination="Ba5-Em-l6K" kind="show" identifier="ToGame" id="gPf-Yu-zFj"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Dzk-9k-cbq" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -514,11 +513,11 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mg8-gS-fEk" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4405.6000000000004" y="1518.8905547226389"/>
+            <point key="canvasLocation" x="4279" y="1730"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="iED-yg-Ztn"/>
+        <segue reference="gPf-Yu-zFj"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="plus" catalog="system" width="128" height="113"/>
