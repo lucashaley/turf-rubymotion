@@ -84,6 +84,27 @@ class CLLocationCoordinate2D
   def /(denom)
     CLLocationCoordinate2DMake(latitude/denom, longitude/denom)
   end
+
+  def to_cgpoint
+    MKMapPointForCoordinate(self).to_cgpoint
+  end
+end
+
+class MKMapPoint
+  def to_cgpoint
+    CGPointMake(x, y)
+  end
+end
+
+class MKMapRect
+  def to_cgrect
+    CGRectMake(
+      origin.x,
+      origin.y,
+      size.width,
+      size.height
+    )
+  end
 end
 
 module Debugging
@@ -104,5 +125,35 @@ module Debugging
     else
       h
     end
+  end
+end
+
+module Utilities
+  module_function
+
+  def get_distance(coord_a, coord_b)
+    puts "UTILITIES GET_DISTANCE".blue
+    distance = MKMetersBetweenMapPoints(
+      MKMapPointForCoordinate(
+        format_to_location_coord(coord_a)),
+      MKMapPointForCoordinate(
+        format_to_location_coord(coord_b))
+    )
+    puts "UTILITIES GET_DISTANCE Distance: #{distance}"
+
+    # Not sure we need this return
+    distance
+  end
+
+  def format_to_location_coord(input)
+    puts "TAKARO FORMAT_TO_LOCATION_COORD".blue
+    puts "Input: #{input}".red
+    case input
+    when Hash
+      return CLLocationCoordinate2DMake(input["latitude"], input["longitude"])
+    when CLLocationCoordinate2D
+      return input
+    end
+    0
   end
 end

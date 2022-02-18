@@ -16,7 +16,9 @@ class GameController < UIViewController
     puts "GAME_CONTROLLER: VIEWWILLAPPEAR".light_blue
     # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
     map_view.showsUserLocation = true
-    map_view.showsPitchControl = true
+    map_view.showsPitchControl = false
+
+    Machine.instance.current_view = self
     # initialize_location_manager
     add_overlays_and_annotations
 
@@ -26,7 +28,7 @@ class GameController < UIViewController
     # Machine.instance.game.start_observing_pylons
     # Machine.instance.game.start_observing_pouwhenua
     # Machine.instance.tracking = true
-    Machine.instance.takaro.start_observing_pouwhenua
+    # Machine.instance.takaro.start_observing_pouwhenua
 
     # @local_player = Player.new
 
@@ -133,11 +135,18 @@ class GameController < UIViewController
   def viewDidLoad
     puts "GAMECONTROLLER: VIEWDIDLOAD".light_blue
     Machine.instance.current_view = self
+    Machine.instance.takaro.start_observing_pouwhenua
 
-    region = create_play_region
-    map_view.setRegion(region, animated: false)
+    # TODO should this now be controlled by the game?
+    # region = create_play_region
+    # map_view.setRegion(region, animated: false)
+
+    map_view.setRegion(Machine.instance.takaro.taiapa_region, animated: false)
+    map_view.setCameraBoundary(MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro.taiapa_region), animated: true)
+
     # map_view.regionThatFits(region) # this adjusts the region to fir the current view
-    Machine.instance.bounding_box = mkmaprect_for_coord_region(region)
+    # Machine.instance.bounding_box = mkmaprect_for_coord_region(region)
+
     @voronoi_map = VoronoiMap.new
 
     @button_fsm = StateMachine::Base.new start_state: :up, verbose: true
@@ -269,7 +278,9 @@ class GameController < UIViewController
     # overlay.fillColor = UIColor.systemGreenColor
     rend.fillColor = UIColor.colorWithHue(0.2, saturation: 0.9, brightness: 0.9, alpha: 0.3)
     unless overlay.overlayColor.nil?
-      rend.fillColor = UIColor.colorWithCGColor(overlay.overlayColor.CGColor)
+      # rend.fillColor = UIColor.colorWithCGColor(overlay.overlayColor.CGColor)
+      puts "overlayColor: #{overlay.overlayColor}".focus
+      rend.fillColor = UIColor.colorWithCIColor(overlay.overlayColor)
     end
     rend.lineJoin = KCGLineJoinMiter
     rend
@@ -287,9 +298,11 @@ class GameController < UIViewController
     # This is a hack to get past having one pylon
     return if @voronoi_map.pylons.length < 2
 
+    puts "GAME_CONTROLLER getting the cells"
     vcells = @voronoi_map.voronoiCells
 
     vcells.each do |cell|
+      puts "cell: #{cell}".focus
       map_view.addOverlay(cell.overlay)
     end
   end

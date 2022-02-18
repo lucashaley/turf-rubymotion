@@ -145,6 +145,7 @@ class Pouwhenua < Site # Fake subclass of Site
     #   @site.uuID.UUIDString
     # end
     def uuid_string
+      puts "POUWHENUA UUID_STRING".blue if DEBUGGING
       uuID.UUIDString
     end
 

@@ -138,12 +138,13 @@ class NewController < UIViewController
 
   def continue_button_action sender
     puts "NEWCONTROLLER CONTINUE_BUTTON_ACTION".light_blue if DEBUGGING
-
+    puts "Continuing to game".focus
     # make the first two pouwhenua
-    @takaro.set_initial_pouwhenua
-
     # set the machine takaro
     Machine.instance.takaro = @takaro
+    puts "#{@takaro}".focus
+
+    @takaro.set_initial_pouwhenua
   end
 
   def dismiss_new

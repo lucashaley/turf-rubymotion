@@ -1,4 +1,6 @@
 class Kaitarako
+  extend Utilities # Use extend with RubyMotion?
+  
   attr_accessor :takaro,
                 :kaitakaro_ref,
                 :kapa_ref,
@@ -96,7 +98,7 @@ class Kaitarako
   def coordinate=(in_coordinate)
     puts "KAITAKARO SET COORDINATE".blue if DEBUGGING
     @coordinate = in_coordinate
-    puts "coordinate: #{@coordinate}".focus
+    # puts "coordinate: #{@coordinate}".focus
     @kaitakaro_ref.updateChildValues(
       {"coordinate" => {
         "latitude" => in_coordinate.latitude,
@@ -114,13 +116,13 @@ class Kaitarako
 
               # This kapa doesn't have a location, so we can add this player
               unless k.childSnapshotForPath("coordinate").exists
-                puts "KAITAKARO kapa doesn't have a location".focus
+                # puts "KAITAKARO kapa doesn't have a coordinate".focus
                 @kapa_ref ||= k.ref
               else
 
                 # But if it does have a location
                 # check if we're close
-                if k.childSnapshotForPath("coordinate").exists && get_distance(@coordinate, k.childSnapshotForPath("coordinate").value) < TEAM_DISTANCE
+                if k.childSnapshotForPath("coordinate").exists && Utilities.get_distance(@coordinate, k.childSnapshotForPath("coordinate").value) < TEAM_DISTANCE
                   puts "Close enough!".yellow
                   @kapa_ref ||= k.ref
                 end
@@ -144,9 +146,9 @@ class Kaitarako
               end
             end
 
-            puts "WOW".focus
             # TODO we need to check if they already have a kapa
             # send the data up
+            # TODO why are we sending the name? Is it not there already?
             puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION SENDING DATA".blue if DEBUGGING
             @kapa_ref.child("kaitakaro/#{@kaitakaro_ref.key}").updateChildValues(
               {"name" => @display_name, "coordinate" => {
@@ -192,29 +194,29 @@ class Kaitarako
   # Utility Functions
   #################
 
-  def get_distance(coord_a, coord_b)
-    puts "KAITAKARO GET_DISTANCE".blue if DEBUGGING
-    distance = MKMetersBetweenMapPoints(
-      MKMapPointForCoordinate(
-        format_to_location_coord(coord_a)),
-      MKMapPointForCoordinate(
-        format_to_location_coord(coord_b))
-    )
-    puts "KAITAKARO GET_DISTANCE Distance: #{distance}" if DEBUGGING
+  # def get_distance(coord_a, coord_b)
+  #   puts "KAITAKARO GET_DISTANCE".blue if DEBUGGING
+  #   distance = MKMetersBetweenMapPoints(
+  #     MKMapPointForCoordinate(
+  #       format_to_location_coord(coord_a)),
+  #     MKMapPointForCoordinate(
+  #       format_to_location_coord(coord_b))
+  #   )
+  #   puts "KAITAKARO GET_DISTANCE Distance: #{distance}" if DEBUGGING
+  #
+  #   # Not sure we need this return
+  #   distance
+  # end
 
-    # Not sure we need this return
-    distance
-  end
-
-  def format_to_location_coord(input)
-    puts "TAKARO FORMAT_TO_LOCATION_COORD".blue if DEBUGGING
-    puts "Input: #{input}".red if DEBUGGING
-    case input
-    when Hash
-      return CLLocationCoordinate2DMake(input["latitude"], input["longitude"])
-    when CLLocationCoordinate2D
-      return input
-    end
-    0
-  end
+  # def format_to_location_coord(input)
+  #   puts "TAKARO FORMAT_TO_LOCATION_COORD".blue if DEBUGGING
+  #   puts "Input: #{input}".red if DEBUGGING
+  #   case input
+  #   when Hash
+  #     return CLLocationCoordinate2DMake(input["latitude"], input["longitude"])
+  #   when CLLocationCoordinate2D
+  #     return input
+  #   end
+  #   0
+  # end
 end

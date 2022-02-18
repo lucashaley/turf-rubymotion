@@ -18,8 +18,9 @@ class Wakawaka # < Cell
   # end
   def color
     puts "WAKAWAKA: COLOR".blue if DEBUGGING
-    puts @pylon if DEBUGGING
-    @pylon.lifespan_color
+    # puts @pylon if DEBUGGING
+    # @pylon.lifespan_color
+    return CIColor.alloc.initWithColor(UIColor.systemYellowColor)
   end
 
   def edges
@@ -36,8 +37,9 @@ class Wakawaka # < Cell
     puts "WAKAWAKA: OVERLAY".blue if DEBUGGING
     # THIS IS OTHER PLACES TOO?
     overlay = overlay_from_vertices(vertices)
-    # puts "#{overlay}, #{@pylon.title}"
-    overlay.overlayColor = color
+    puts "#{overlay}".focus
+    overlay.overlayColor = self.color
+    puts "#{overlay}".focus
     overlay
   end
 
