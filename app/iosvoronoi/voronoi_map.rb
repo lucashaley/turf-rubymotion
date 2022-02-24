@@ -33,33 +33,32 @@ class VoronoiMap
     puts "in_pylons: #{in_pylons}".red if DEBUGGING
 
     voronoi_cells = []
-    voronoi = Voronoi.new
-
     taiapa_region = Machine.instance.takaro.taiapa_region
+    bounding_box = mkmaprect_for_coord_region(taiapa_region).to_cgrect
 
-    voronoi.boundingBox = taiapa_region
+    voronoi = Voronoi.new
+    # not sure we need this
+    voronoi.boundingBox = bounding_box
 
-    pylons_array = Machine.instance.takaro.pouwhenua_array
+    # pylons_array = Machine.instance.takaro.pouwhenua_array
 
     # new pouwhenua_array way
+    # When a Site is created, it gets assigned a NSUUID.
+    # That NSUUID gets passed on to the generated cell during the computeWithSites
+    # method.
     site_array_map = Machine.instance.takaro.pouwhenua_array.map { |p|
-      Site.alloc.initWithCoord(format_to_location_coord(p["location"]).to_cgpoint)
+      # Site.alloc.initWithCoord(format_to_location_coord(p["location"]).to_cgpoint)
+      # PouSite.alloc.initWithCoord(format_to_location_coord(p["location"]).to_cgpoint)
+      PouSite.new(format_to_location_coord(p["location"]).to_cgpoint, CIColor.colorWithString(p['color']))
     }
-    # old way
-    # site_array_map = pylons_array.map { |p|
-    #   # cgpoint = format_to_location_coord(p["coordinate"]).to_cgpoint
-    #   Site.alloc.initWithCoord(format_to_location_coord(p["coordinate"]).to_cgpoint)
-    # }
     puts "site_array_map: #{site_array_map.inspect}".focus
 
     puts "COMPUTEWITHSITES".red if DEBUGGING
-    # TODO make this prettier
-    # result = voronoi.computeWithSites(site_array, andBoundingBox: CGRectMake(voronoi.boundingBox.origin.x, voronoi.boundingBox.origin.y, voronoi.boundingBox.size.height, voronoi.boundingBox.size.width))
-    result = voronoi.computeWithSites(site_array_map, andBoundingBox: mkmaprect_for_coord_region(taiapa_region).to_cgrect)
+    result = voronoi.computeWithSites(site_array_map, andBoundingBox: bounding_box)
     puts "COMPUTEWITHSITES FINISHED".red if DEBUGGING
 
     result.cells.each_with_index do |cell, index|
-      puts "cell: #{cell.description}".focus
+      puts "cell: #{cell.site}".focus
       pylon = pylons.objectForKey(cell.site.uuID)
 
       c = Wakawaka.new(cell, pylon)
@@ -80,16 +79,30 @@ class VoronoiMap
   alias :voronoiCells :voronoi_cells
 
   def annotations
-    # What is this doing here
+    puts "VORONOI_MAP ANNOTATIONS".focus
+    # # What is this doing here
     annotations = []
+    #
+    # @pylons.allValues.each do |pylon|
+    #   anno = PylonAnnotation.new(pylon)
+    #   anno.title = pylon.title
+    #
+    #   annotations << anno
+    # end
+    #
+    # annotations
 
-    @pylons.allValues.each do |pylon|
-      anno = PylonAnnotation.new(pylon)
-      anno.title = pylon.title
-
-      annotations << anno
+    # Let's try adding the pouwhenua
+    Machine.instance.takaro.pouwhenua_array.each do |p|
+      puts "Adding p: #{p}".focus
+      pa = PouAnnotation.alloc.initWithCoordinate(
+        format_to_location_coord(p['location'])
+      )
+      pa.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(p['color']))
+      annotations << pa
     end
 
+    puts "Annotations: #{annotations}".focus
     annotations
   end
 

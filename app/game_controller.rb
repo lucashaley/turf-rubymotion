@@ -48,6 +48,7 @@ class GameController < UIViewController
 
       # This should probably happen in the notification call
       handle_new_pouwhenua({uuID: notification.object.key}.merge(notification.object.value))
+      renderOverlays
     end
     # # PYLON NEW
     @pylon_new_observer = App.notification_center.observe "PylonNew" do |notification|
@@ -57,6 +58,9 @@ class GameController < UIViewController
 
       # This should probably happen in the notification call
       handle_new_pylon({uuID: notification.object.key}.merge(notification.object.value))
+
+      add_overlays_and_annotations
+      renderOverlays
     end
     # PYLON CHANGE
     @pylon_observer = App.notification_center.observe "PylonChange" do |notification|
@@ -64,6 +68,7 @@ class GameController < UIViewController
 
       # render the wakawaka and annotations
       renderOverlays
+      add_overlays_and_annotations
     end
     @pylon_death_observer = App.notification_center.observe "PylonDeath" do |notification|
       puts "PYLON DEATH".yellow
@@ -267,20 +272,20 @@ class GameController < UIViewController
 
   ### Called after annotations have been added ###
   def mapView(map_view, didAddAnnotationViews: views)
-    # puts "didAddAnnotationViews!!"
+    puts "didAddAnnotationViews!!".focus
   end
 
   def mapView(map_view, rendererForOverlay: overlay)
     puts "GAME_CONTROLLER: MAPVIEW.RENDERFOROVERLAY".blue if DEBUGGING
     rend = MKPolygonRenderer.alloc.initWithOverlay(overlay)
     rend.lineWidth = 0.75
-    rend.strokeColor = UIColor.colorWithHue(0.5, saturation: 0.9, brightness: 0.9, alpha: 1.0)
+    rend.strokeColor = UIColor.colorWithHue(0.2, saturation: 0.9, brightness: 0.9, alpha: 1.0)
     # overlay.fillColor = UIColor.systemGreenColor
     rend.fillColor = UIColor.colorWithHue(0.2, saturation: 0.9, brightness: 0.9, alpha: 0.3)
     unless overlay.overlayColor.nil?
       # rend.fillColor = UIColor.colorWithCGColor(overlay.overlayColor.CGColor)
       puts "overlayColor: #{overlay.overlayColor}".focus
-      rend.fillColor = UIColor.colorWithCIColor(overlay.overlayColor)
+      rend.fillColor = UIColor.colorWithCIColor(overlay.overlayColor).colorWithAlphaComponent(0.2)
     end
     rend.lineJoin = KCGLineJoinMiter
     rend
@@ -294,9 +299,17 @@ class GameController < UIViewController
       overlaysToRemove = map_view.overlays.mutableCopy
       map_view.removeOverlays(overlaysToRemove)
     end
+    if map_view.annotations
+      annotations_to_remove = map_view.annotations.mutableCopy
+      map_view.removeAnnotations(annotations_to_remove)
+    end
 
     # This is a hack to get past having one pylon
-    return if @voronoi_map.pylons.length < 2
+    # return if @voronoi_map.pylons.length < 2
+    return if Machine.instance.takaro.pouwhenua_array.length < 2
+
+    puts "Adding annotations: #{@voronoi_map.annotations}".focus
+    map_view.addAnnotations(@voronoi_map.annotations)
 
     puts "GAME_CONTROLLER getting the cells"
     vcells = @voronoi_map.voronoiCells
@@ -343,13 +356,13 @@ class GameController < UIViewController
     puts "GAME_CONTROLLER: ADD_ANNOTATIIONS".blue if DEBUGGING
     map_view.addAnnotations(@voronoi_map.annotations)
   end
-
-  def create_play_region(args = {})
-    puts "GAME_CONTROLLER: CREATE_PLAY_REGION".blue if DEBUGGING
-    location = args[:location] || CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
-    span = args[:span] || MKCoordinateSpanMake(0.01, 0.01)
-    region = MKCoordinateRegionMake(location, span)
-  end
+  #
+  # def create_play_region(args = {})
+  #   puts "GAME_CONTROLLER: CREATE_PLAY_REGION".blue if DEBUGGING
+  #   location = args[:location] || CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
+  #   span = args[:span] || MKCoordinateSpanMake(0.01, 0.01)
+  #   region = MKCoordinateRegionMake(location, span)
+  # end
 
   def player_for_audio(filename)
     sound_path = NSBundle.mainBundle.pathForResource(filename, ofType: "mp3")

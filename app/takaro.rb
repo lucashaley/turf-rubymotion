@@ -453,7 +453,7 @@ class Takaro
     # TODO Could this be using the local info?
     @kapa_array.each do |k|
       # create remote instance
-      puts "Creating remote instance".focus
+      # puts "Creating remote instance".focus
       create_new_pouwhenua(k["coordinate"])
 
       # # create local pouwhenua with coordinate
@@ -509,11 +509,11 @@ class Takaro
 
   def start_observing_pouwhenua
     puts "TAKARO START_OBSERVING_POUWHENUA".blue if DEBUGGING
-    puts "TAKARO START_OBSERVING_POUWHENUA".focus
+    # puts "TAKARO START_OBSERVING_POUWHENUA".focus
 
     @ref.child("pouwhenua").observeEventType(FIRDataEventTypeChildAdded,
       withBlock: lambda do | data |
-        puts "\n\nPOUWHENUA ADDED\n\n".focus
+        # puts "\n\nPOUWHENUA ADDED\n\n".focus
 
         # We've received a FIRDataSnapshot!
         new_pouwhenua = {}
@@ -537,18 +537,18 @@ class Takaro
     puts "TAKARO CREATE_NEW_POUWHENUA".blue if DEBUGGING
     coord = Utilities::format_to_location_coord(coord)
     puts "Coord: #{coord}"
-    puts "create_new_pouwhenua coord: #{coord.latitude}, #{coord.longitude}".focus
+    # puts "create_new_pouwhenua coord: #{coord.latitude}, #{coord.longitude}".focus
     # TODO restructure Pouwhenua
     # We need to create it remotely, then have the observers create the local version?
     @ref.child("pouwhenua").childByAutoId.updateChildValues(
       {
         'created' => FIRServerValue.timestamp,
-        'color' => CIColor.alloc.initWithColor(UIColor.systemYellowColor).stringRepresentation,
+        'color' => CIColor.blueColor.stringRepresentation,
         'location' => { 'latitude' => coord.latitude, 'longitude' => coord.longitude },
         'title' => 'Baked Beans'
       },
       withCompletionBlock: lambda do | error, child_ref |
-        puts "CREATED REMOTE POUWHENUA".focus
+        # puts "CREATED REMOTE POUWHENUA".focus
       end
     )
 
