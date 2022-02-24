@@ -24,10 +24,10 @@ module VoronoiUtilities
         vertices.addObject(end_point)
       end
     end
-    puts "vertices:".red
-    vertices.each do |v|
-      puts v
-    end
+    # puts "vertices:".red
+    # vertices.each do |v|
+    #   puts v
+    # end
     vertices
   end
   alias :verticesFromCell :vertices_from_cell
@@ -35,7 +35,7 @@ module VoronoiUtilities
   def overlay_from_vertices(vertices)
     puts "VORONOI_UTILITIES: OVERLAY_FROM_VERTICES".blue if DEBUGGING
     puts "vertices: #{vertices.length}".red
-    
+
     points = []
 
     # can we use map here?

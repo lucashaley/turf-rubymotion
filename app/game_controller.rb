@@ -386,14 +386,14 @@ class GameController < UIViewController
 
   def handle_new_pouwhenua(data)
     puts "GAME_CONTROLLER: HANDLE_NEW_POUWHENUA".blue if DEBUGGING
-    data.each do |k, v|
-      puts "#{k}: #{v}"
-    end
-    puts data["title"]
+    # data.each do |k, v|
+    #   puts "#{k}: #{v}"
+    # end
+    # puts data["title"]
 
     p = Pouwhenua.new(data["location"], {color: data["color"], title: data["title"], birthdate: data["birthdate"]})
-    puts data[:uuID]
-    puts data["uuID"]
+    # puts data[:uuID]
+    # puts data["uuID"]
     p.set_uuid data[:uuID]
 
     # @voronoi_map.add_pylon(p)

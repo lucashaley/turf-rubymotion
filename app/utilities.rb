@@ -107,6 +107,12 @@ class MKMapRect
   end
 end
 
+class Hash
+  def to_CLLocationCoordinate2D
+    CLLocationCoordinate2DMake(self["latitude"], self["longitude"])
+  end
+end
+
 module Debugging
   module_function
 
@@ -139,7 +145,7 @@ module Utilities
       MKMapPointForCoordinate(
         format_to_location_coord(coord_b))
     )
-    puts "UTILITIES GET_DISTANCE Distance: #{distance}"
+    # puts "UTILITIES GET_DISTANCE Distance: #{distance}"
 
     # Not sure we need this return
     distance
@@ -147,7 +153,7 @@ module Utilities
 
   def format_to_location_coord(input)
     puts "TAKARO FORMAT_TO_LOCATION_COORD".blue
-    puts "Input: #{input}".red
+    # puts "Input: #{input}".red
     case input
     when Hash
       return CLLocationCoordinate2DMake(input["latitude"], input["longitude"])

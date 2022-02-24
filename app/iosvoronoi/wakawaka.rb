@@ -1,3 +1,7 @@
+# Wakawaka
+#
+# This is the cell created by the Voronoi process.
+
 class Wakawaka # < Cell
   include VoronoiUtilities
 
@@ -20,7 +24,7 @@ class Wakawaka # < Cell
     puts "WAKAWAKA: COLOR".blue if DEBUGGING
     # puts @pylon if DEBUGGING
     # @pylon.lifespan_color
-    return CIColor.alloc.initWithColor(UIColor.systemYellowColor)
+    return CIColor.alloc.initWithColor(UIColor.systemYellowColor.colorWithAlphaComponent(0.2))
   end
 
   def edges

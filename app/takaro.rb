@@ -41,14 +41,18 @@ class Takaro
   #     {
   #       "latitude" => x,
   #       "longitude" => y
-  #     }
+  #     },
+  #     "color" =>
+  #      {
+  #
+  #      }
   #   }
   # ]
   #
   # pouwhenua_array
   # [
   #   {
-  #     "id" => id,
+  #     "title" => title,
   #     "color =>
   #     {
   #       ???
@@ -60,6 +64,7 @@ class Takaro
   #     }
   #   }
   # ]
+  #
   #
   # FIREBASE
   # GAME
@@ -277,9 +282,9 @@ class Takaro
         player_team = player_snapshot.childSnapshotForPath("team")
         if player_team.exists
           player_team_id = player_team.value
-          puts "player_team_id: #{player_team_id}"
+          # puts "player_team_id: #{player_team_id}"
           player_display_name = player_snapshot.childSnapshotForPath("display_name").value
-          puts "player_display_name: #{player_display_name}"
+          # puts "player_display_name: #{player_display_name}"
 
           # puts "kapa_array (241): #{@kapa_array}".focus
           kapa_in_array = @kapa_array.find { |k| k["id"] == player_team_id }
@@ -289,7 +294,7 @@ class Takaro
             kapa_in_array["players"] << player_display_name
           end
 
-          puts "kapa_array: #{@kapa_array}"
+          # puts "kapa_array: #{@kapa_array}"
           App.notification_center.post "PlayerNew"
         end
       end
@@ -311,6 +316,17 @@ class Takaro
       App.notification_center.post("UpdateLocalPlayerPositionAsLocation",
         {"new_location" => new_location, "old_location" => old_location}
       )
+
+      @local_player_locationCoords = new_location.coordinate
+    end
+
+    ##
+    #
+    # ADD NEW POUWHENUA
+    #
+    @takaro_add_new_pouwhenua = App.notification_center.observe "PouwhenuaNew" do |data|
+      puts "TAKARO ADD NEW POUWHENUA".focus
+      puts "data object: #{data.object}"
     end
 
     puts @machine.current_state.name
@@ -381,7 +397,7 @@ class Takaro
           "latitude" => lats_average,
           "longitude" => longs_average
         }
-        puts "kapa_array: #{@kapa_array}".focus
+        # puts "kapa_array: #{@kapa_array}".focus
       end
     )
   end
@@ -436,19 +452,23 @@ class Takaro
 
     # TODO Could this be using the local info?
     @kapa_array.each do |k|
-      # create local pouwhenua with coordinate
-      p = Pouwhenua.new(k["coordinate"])
+      # create remote instance
+      puts "Creating remote instance".focus
+      create_new_pouwhenua(k["coordinate"])
 
-      # add to local pouwhenua array
-      @pouwhenua_array << {
-        "id" => p.uuid_string,
-        "color" => p.color.stringRepresentation,
-        "coordinate" => {
-          "latitude" => p.location.latitude,
-          "longitude" => p.location.longitude
-        }
-      }
-      puts "pouwhenua_array: #{pouwhenua_array}".focus
+      # # create local pouwhenua with coordinate
+      # p = Pouwhenua.new(k["coordinate"])
+      #
+      # # add to local pouwhenua array
+      # @pouwhenua_array << {
+      #   "id" => p.uuid_string,
+      #   "color" => p.color.stringRepresentation,
+      #   "coordinate" => {
+      #     "latitude" => p.location.latitude,
+      #     "longitude" => p.location.longitude
+      #   }
+      # }
+      # puts "pouwhenua_array: #{pouwhenua_array}".focus
 
       # add to local coords
       coord_array << k["coordinate"]
@@ -457,163 +477,57 @@ class Takaro
     # use coords to calculate play area
     lats = coord_array.map {|c| c["latitude"]}.minmax
     longs = coord_array.map {|c| c["longitude"]}.minmax
-    start_coord_hash = {"latitude" => lats[0], "longitude" => longs[0]}
-    end_coord_hash = {"latitude" => lats[1], "longitude" => longs[1]}
-    # puts "start_coord: #{start_coord_hash}".focus
-    # puts "end_coord: #{end_coord_hash}".focus
-    start_coord_array = [lats[0], longs[0]]
-    end_coord_array = [lats[1], longs[1]]
 
-    # start_coord = CLLocationCoordinate2DMake(lats[0], longs[0])
-    # end_coord = CLLocationCoordinate2DMake(lats[1], longs[1])
-    top_right_coord = CLLocation.alloc.initWithLatitude(lats[0], longitude: longs[0])
-    bottom_right_coord = CLLocation.alloc.initWithLatitude(lats[0], longitude: longs[1])
-    bottom_left_coord = CLLocation.alloc.initWithLatitude(lats[1], longitude: longs[1])
-
-    # Get the midpoint
-    midpoint_hash = {
-      "latitude" => (start_coord_hash["latitude"] + end_coord_hash["latitude"]) * 0.5,
-      "longitude" => (start_coord_hash["longitude"] + end_coord_hash["longitude"]) * 0.5
-    }
-    # puts "midpoint: #{midpoint_hash}".focus
+    # This is a hack way to find the midpoint
+    # A more accurate solution is here:
+    # https://stackoverflow.com/questions/10559219/determining-midpoint-between-2-coordinates
     midpoint_array = [(lats[0]+lats[1])*0.5, (longs[0]+longs[1])*0.5]
-    # midpoint_coord = CLLocationCoordinate2DMake(midpoint_array[0],midpoint_array[1])
+    midpoint_location = CLLocation.alloc.initWithLatitude(midpoint_array[0], longitude: midpoint_array[1])
+    top_location = CLLocation.alloc.initWithLatitude(lats[1], longitude: midpoint_array[1])
+    right_location = CLLocation.alloc.initWithLatitude(midpoint_array[0], longitude: longs[1])
+    latitude_delta = midpoint_location.distanceFromLocation(top_location)
+    longitude_delta = midpoint_location.distanceFromLocation(right_location)
 
     @taiapa_center = MKMapPointForCoordinate(CLLocationCoordinate2DMake(midpoint_array[0], midpoint_array[1]))
-    # puts "\ntaiapa_center: #{@taiapa_center.x}, #{@taiapa_center.y}".focus
 
-    test_point = CLLocationCoordinate2DMake(midpoint_array[0], midpoint_array[1]).to_cgpoint
-    # puts "test_point: #{test_point.x}, #{test_point.y}".focus
-
-    # Get the distance between the points
-    distance = Utilities.get_distance(start_coord_hash, end_coord_hash)
-    # puts "distance: #{distance}".focus
-
-    # Grunt scaling
-    # Start
-    start_scaled = start_coord_array.each_with_index.map {| value, index | ((value-midpoint_array[index])*FIELD_SCALE)+midpoint_array[index] }
-    end_scaled = end_coord_array.each_with_index.map {| value, index | ((value-midpoint_array[index])*FIELD_SCALE)+midpoint_array[index] }
-    # puts "start_scaled: #{start_scaled}".focus
-    # puts "end_scaled: #{end_scaled}".focus
-
-
-    # Do we need this to be a MKCoordinateRegion?
-    # MKCoordinateRegionMakeWithDistance?
-    # MKCoordinateRegionMake
-    # MKCoordinateRegionForMapRect
-    @taiapa = MKMapRectMake(
-      @taiapa_center.x,
-      @taiapa_center.y,
-      end_scaled[0]-start_scaled[0],
-      end_scaled[1]-start_scaled[1]
-    )
-    puts "taiapa: #{taiapa.origin.x}:#{taiapa.origin.y}, #{taiapa.size.height}:#{taiapa.size.width}".focus
-
-    # tried this, seems small?
-    # @taiapa_region = MKCoordinateRegionForMapRect(@taiapa)
-    # @taiapa_region = MKCoordinateRegionMake(
-    #   CLLocationCoordinate2DMake(midpoint_array[0], midpoint_array[1]),
-    #   MKCoordinateSpanMake(0.01, 0.01)
-    # )
-
-    @taiapa_region = MKCoordinateRegionForMapRect(@taiapa)
-    puts "taiapa_region take 1: #{@taiapa_region.center.latitude}, #{@taiapa_region.center.longitude}; #{@taiapa_region.span.latitudeDelta}, #{@taiapa_region.span.longitudeDelta}".focus
+    # Sometimes the resulting rectangle is super narrow
+    # resize based on the longer side and golden ratio
+    if latitude_delta < longitude_delta
+      latitude_delta = longitude_delta * 0.618034
+    else
+      longitude_delta = latitude_delta * 0.618034
+    end
 
     @taiapa_region = MKCoordinateRegionMakeWithDistance(
-      CLLocationCoordinate2DMake(midpoint_array[0], midpoint_array[1]),
-      top_right_coord.distanceFromLocation(bottom_right_coord) * FIELD_SCALE,
-      bottom_right_coord.distanceFromLocation(bottom_left_coord) * FIELD_SCALE
+      midpoint_location.coordinate, latitude_delta * 2 * FIELD_SCALE, longitude_delta * 2 * FIELD_SCALE
     )
-    puts "taiapa_region take 2: #{@taiapa_region.center.latitude}, #{@taiapa_region.center.longitude}; #{@taiapa_region.span.latitudeDelta}, #{@taiapa_region.span.longitudeDelta}".focus
 
     # Then send us to the game
     # TODO should this be here?
     Machine.instance.segue("ToGame")
-
-    # # puts "kapa_array: #{@kapa_array}".focus
-    # @ref.child("kapa").observeSingleEventOfType(FIRDataEventTypeValue, withBlock:
-    #   lambda do |kapa_snapshot|
-    #     # puts "kapa_snapshot: #{kapa_snapshot}".focus
-    #
-    #     kapa_snapshot.children.each do |k|
-    #       coords = k.childSnapshotForPath("coordinate").value
-    #       # puts "coords: #{coords}".focus
-    #       p = create_new_pouwhenua(coords)
-    #
-    #       # add to local array
-    #       pouwhenua_array << {
-    #         "id" => p.uuid_string,
-    #         "color" => p.color.stringRepresentation,
-    #         "coordinate" => {
-    #           "latitude" => p.location["latitude"],
-    #           "longitude" => p.location["longitude"]
-    #         }
-    #       }
-    #       puts "pouwhenua_array: #{pouwhenua_array}".focus
-    #
-    #       # Add coords for calculations
-    #       coord_array << coords
-    #     end
-    #     cache_pouwhenua
-    #
-    #     # set the bounding box
-    #     # could we just flip the coords?
-    #     # puts "coord_array: #{coord_array}".focus
-    #     lats = coord_array.map {|c| c["latitude"]}.minmax
-    #     longs = coord_array.map {|c| c["longitude"]}.minmax
-    #     start_coord_hash = {"latitude" => lats[0], "longitude" => longs[0]}
-    #     end_coord_hash = {"latitude" => lats[1], "longitude" => longs[1]}
-    #     # puts "start_coord: #{start_coord_hash}".focus
-    #     # puts "end_coord: #{end_coord_hash}".focus
-    #     start_coord_array = [lats[0], longs[0]]
-    #     end_coord_array = [lats[1], longs[1]]
-    #
-    #     # Get the midpoint
-    #     midpoint_hash = {
-    #       "latitude" => (start_coord_hash["latitude"] + end_coord_hash["latitude"]) * 0.5,
-    #       "longitude" => (start_coord_hash["longitude"] + end_coord_hash["longitude"]) * 0.5
-    #     }
-    #     # puts "midpoint: #{midpoint_hash}".focus
-    #     midpoint_array = [(lats[0]+lats[1])*0.5, (longs[0]+longs[1])*0.5]
-    #     @taiapa_center = MKMapPointForCoordinate(CLLocationCoordinate2DMake(midpoint_array[0], midpoint_array[1]))
-    #
-    #     # Get the distance between the points
-    #     distance = Utilities.get_distance(start_coord_hash, end_coord_hash)
-    #     # puts "distance: #{distance}".focus
-    #
-    #     # Grunt scaling
-    #     # Start
-    #     start_scaled = start_coord_array.each_with_index.map {| value, index | ((value-midpoint_array[index])*FIELD_SCALE)+midpoint_array[index] }
-    #     end_scaled = end_coord_array.each_with_index.map {| value, index | ((value-midpoint_array[index])*FIELD_SCALE)+midpoint_array[index] }
-    #     # puts "start_scaled: #{start_scaled}".focus
-    #     # puts "end_scaled: #{end_scaled}".focus
-    #
-    #     @taiapa = MKMapRectMake(
-    #       midpoint_array[0],
-    #       midpoint_array[1],
-    #       end_scaled[0]-start_scaled[0],
-    #       end_scaled[1]-start_scaled[1]
-    #     )
-    #     puts "taiapa: #{taiapa}".focus
-    #
-    #     Machine.instance.bounding_box = CGRectMake(
-    #       start_scaled[0],
-    #       start_scaled[1],
-    #       end_scaled[0]-start_scaled[0],
-    #       end_scaled[1]-start_scaled[1]
-    #     )
-    #
-    #   # create_new_pouwhenua(CLLocationCoordinate2DMake(coords["latitude"], coords["longitude"]))
-    #   Machine.instance.segue("ToGame")
-    # end
-    # )
   end
 
   def start_observing_pouwhenua
     puts "TAKARO START_OBSERVING_POUWHENUA".blue if DEBUGGING
+    puts "TAKARO START_OBSERVING_POUWHENUA".focus
 
     @ref.child("pouwhenua").observeEventType(FIRDataEventTypeChildAdded,
-      withBlock: proc do |data|
+      withBlock: lambda do | data |
+        puts "\n\nPOUWHENUA ADDED\n\n".focus
+
+        # We've received a FIRDataSnapshot!
+        new_pouwhenua = {}
+        puts "data: #{data}"
+        data.children.each do |s|
+          new_pouwhenua[s.key] = s.value
+        end
+        # puts "#{new_pouwhenua}".focus
+        # puts "#{(NSDate.now.timeIntervalSince1970 * 1000).round}"
+
+        # Add the pouwhenua to the local array
+        pouwhenua_array << new_pouwhenua
+        puts "#{pouwhenua_array}".focus
+
         # Should we turn it into a better-formed hash here?
         App.notification_center.post("PouwhenuaNew", data)
     end)
@@ -621,12 +535,29 @@ class Takaro
 
   def create_new_pouwhenua(coord = @local_player_locationCoords)
     puts "TAKARO CREATE_NEW_POUWHENUA".blue if DEBUGGING
+    coord = Utilities::format_to_location_coord(coord)
+    puts "Coord: #{coord}"
+    puts "create_new_pouwhenua coord: #{coord.latitude}, #{coord.longitude}".focus
     # TODO restructure Pouwhenua
-    new_pouwhenua = Pouwhenua.new(coord)
-    puts "#{new_pouwhenua.uuid_string}".focus
-    # puts "New pouwhenua: #{new_pouwhenua.uuid_string}".focus
-    @ref.child("pouwhenua/#{new_pouwhenua.uuid_string}").setValue(new_pouwhenua.to_hash)
-    return new_pouwhenua
+    # We need to create it remotely, then have the observers create the local version?
+    @ref.child("pouwhenua").childByAutoId.updateChildValues(
+      {
+        'created' => FIRServerValue.timestamp,
+        'color' => CIColor.alloc.initWithColor(UIColor.systemYellowColor).stringRepresentation,
+        'location' => { 'latitude' => coord.latitude, 'longitude' => coord.longitude },
+        'title' => 'Baked Beans'
+      },
+      withCompletionBlock: lambda do | error, child_ref |
+        puts "CREATED REMOTE POUWHENUA".focus
+      end
+    )
+
+    # This was the old way
+    # new_pouwhenua = Pouwhenua.new(coord)
+    # puts "#{new_pouwhenua.uuid_string}".focus
+    # # puts "New pouwhenua: #{new_pouwhenua.uuid_string}".focus
+    # @ref.child("pouwhenua/#{new_pouwhenua.uuid_string}").setValue(new_pouwhenua.to_hash)
+    # return new_pouwhenua
   end
 
   ##
@@ -658,10 +589,12 @@ class Takaro
 
   def create_bot_player
     puts "TAKARO CREATE_BOT_PLAYER".blue if DEBUGGING
+
+    # TODO this doesn't create a real player?
     @bot = Kaitarako.new(@ref.child("players").childByAutoId, { "takaro" => self })
     @bot.display_name = "Bot McBotface #{rand(30)}"
     @bot.email = "lucashaley@yahoo.com"
-    lat = rand(37.330144370126..37.330144370127)
+    lat = rand(37.336144370126..37.336144370127)
     long = -rand(122.059911595149..122.059911595150)
     # puts "#{lat}, #{long}".focus
     # @bot.coordinate = CLLocationCoordinate2DMake(37.33014437012663, -122.05991159514932)

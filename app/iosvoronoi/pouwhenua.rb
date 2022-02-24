@@ -1,6 +1,7 @@
 # == POUWHENUA
 # This is the marker, which has a particular location. This location contributes
-# to the creation of the Voronoi map through the Wakawaka area.
+# to the creation of the Voronoi map through the Wakawaka cell.
+
 class Pouwhenua < Site # Fake subclass of Site
   extend Debugging
 
@@ -27,29 +28,29 @@ class Pouwhenua < Site # Fake subclass of Site
     def initialize(coords, args = {})
       puts "POUWHENUA INITIALIZE".green if DEBUGGING
 
-      puts "coords: #{coords}".green if DEBUGGING
-      puts "args: #{args}".green if DEBUGGING
+      # puts "coords: #{coords}".green if DEBUGGING
+      # puts "args: #{args}".green if DEBUGGING
       symbol_args = args ? recursive_symbolize_keys(args) : {}
-      puts "Pouwhenua symbol_args: #{symbol_args}".red if DEBUGGING
+      # puts "Pouwhenua symbol_args: #{symbol_args}".red if DEBUGGING
 
       # @site = Site.new
 
       # check for what kind of coords we got
       case coords
         when CLLocationCoordinate2D
-          puts "CLLocationCoordinate2D"
+          # puts "CLLocationCoordinate2D"
           # @location = CLLocation.alloc.initWithLatitude(coords.latitude, longitude: coords.longitude)
           @location = coords
         when Hash
-          puts "Hash"
-          puts coords["latitude"]
-          puts coords["longitude"]
+          # puts "Hash"
+          # puts coords["latitude"]
+          # puts coords["longitude"]
           # @location = CLLocation.alloc.initWithLatitude(
           #   coords["latitude"], longitude: coords["longitude"]
           # )
           @location = CLLocationCoordinate2DMake(coords["latitude"], coords["longitude"])
         else
-          puts "Empty?"
+          puts "Empty?".focus
           # @location = CLLocation.alloc.initWithLatitude(37.33190, longitude: -122.03129)
           @location = CLLocationCoordinate2DMake(37.33190, -122.03129)
       end
@@ -132,10 +133,10 @@ class Pouwhenua < Site # Fake subclass of Site
     def set_uuid(new_uuid)
       puts "POUWHENUA SET_UUID".blue if DEBUGGING
 
-      puts "new_uuid: #{new_uuid}"
+      # puts "new_uuid: #{new_uuid}"
       # @site.uuID = NSUUID.alloc.initWithUUIDString(new_uuid)
       @uuid = NSUUID.alloc.initWithUUIDString(new_uuid)
-      puts "uuid: #{@uuid}"
+      # puts "uuid: #{@uuid}"
     end
     # def uuid
     #   @site.uuID
