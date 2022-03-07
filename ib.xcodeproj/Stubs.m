@@ -33,6 +33,12 @@
 @implementation MKPolygon
 @end
 
+@implementation PouAnnotation
+@end
+
+@implementation PouSite
+@end
+
 @implementation Pouwhenua
 @end
 
@@ -78,19 +84,7 @@
 @implementation PlayerCell
 @end
 
-@implementation BeachSection
-@end
-
-@implementation CircleEvent
-@end
-
 @implementation ClayPathMaker
-@end
-
-@implementation Edge
-@end
-
-@implementation Halfedge
 @end
 
 @implementation Scout
@@ -121,5 +115,14 @@
 @end
 
 @implementation CLLocationCoordinate2D
+@end
+
+@implementation MKMapPoint
+@end
+
+@implementation MKMapRect
+@end
+
+@implementation Hash
 @end
 

@@ -36,6 +36,8 @@
 
 @property IBOutlet UIButton * scout_button;
 
+-(IBAction) viewDidLoad;
+-(IBAction) select_player_class:(id) sender;
 -(IBAction) select_scout;
 -(IBAction) dismiss_modal;
 
@@ -92,11 +94,8 @@
 -(IBAction) add_overlays_and_annotations;
 -(IBAction) add_overlays;
 -(IBAction) add_annotations;
--(IBAction) create_play_region:(id) args;
 -(IBAction) player_for_audio:(id) filename;
 -(IBAction) create_new_pouwhenua;
--(IBAction) handle_new_pylon:(id) data;
--(IBAction) handle_new_pouwhenua:(id) data;
 
 @end
 
@@ -117,6 +116,12 @@
 @end
 
 @interface MKPolygon: NSObject
+@end
+
+@interface PouAnnotation: MKPointAnnotation
+@end
+
+@interface PouSite: Site
 @end
 
 @interface Pouwhenua: Site
@@ -212,7 +217,6 @@
 -(IBAction) user_id;
 -(IBAction) coordinate;
 -(IBAction) get_remote_data:(id) in_key;
--(IBAction) format_to_location_coord:(id) input;
 
 @end
 
@@ -300,32 +304,7 @@
 
 @end
 
-@interface BeachSection: NSObject
--(IBAction) initialize:(id) in_site;
-
-@end
-
-@interface CircleEvent: NSObject
--(IBAction) set_coord_as_value:(id) in_value;
--(IBAction) coord_as_value;
--(IBAction) set_x:(id) in_x;
--(IBAction) x;
--(IBAction) set_y:(id) in_y;
--(IBAction) y;
-
-@end
-
 @interface ClayPathMaker: NSObject
-@end
-
-@interface Edge: NSObject
-@end
-
-@interface Halfedge: NSObject
--(IBAction) get_start_point;
--(IBAction) get_end_point;
--(IBAction) compare:(id) in_halfedge;
-
 @end
 
 @interface Scout: Character
@@ -358,7 +337,6 @@
 -(IBAction) generate_new_id;
 -(IBAction) set_initial_pouwhenua;
 -(IBAction) start_observing_pouwhenua;
--(IBAction) create_new_pouwhenua:(id) coord;
 -(IBAction) create_bot_player;
 
 @end
@@ -385,20 +363,25 @@
 @interface CIColor: NSObject
 -(IBAction) to_firebase;
 -(IBAction) to_s;
--(IBAction) recu;
+-(IBAction) to_cgpoint;
 
 @end
 
 @interface CGPoint: NSObject
 -(IBAction) to_s;
 -(IBAction) to_firebase;
--(IBAction) recursive_symbolize_keys:(id) h;
+-(IBAction) to_cgpoint;
+-(IBAction) to_cgrect;
+-(IBAction) to;
 
 @end
 
 @interface CLLocation: NSObject
 -(IBAction) to_firebase;
 -(IBAction) to_s;
+-(IBAction) to_cgpoint;
+-(IBAction) to_cgrect;
+-(IBAction) to_CLLocationCoordinate2D;
 -(IBAction) recursive_symbolize_keys:(id) h;
 
 @end
@@ -406,7 +389,34 @@
 @interface CLLocationCoordinate2D: NSObject
 -(IBAction) to_s;
 -(IBAction) to_firebase;
+-(IBAction) to_cgpoint;
+-(IBAction) to_cgrect;
+-(IBAction) to_CLLocationCoordinate2D;
 -(IBAction) recursive_symbolize_keys:(id) h;
+
+@end
+
+@interface MKMapPoint: NSObject
+-(IBAction) to_cgpoint;
+-(IBAction) to_cgrect;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) recursive_symbolize_keys:(id) h;
+-(IBAction) format_to_location_coord:(id) input;
+
+@end
+
+@interface MKMapRect: NSObject
+-(IBAction) to_cgrect;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) recursive_symbolize_keys:(id) h;
+-(IBAction) format_to_location_coord:(id) input;
+
+@end
+
+@interface Hash: NSObject
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) recursive_symbolize_keys:(id) h;
+-(IBAction) format_to_location_coord:(id) input;
 
 @end
 
