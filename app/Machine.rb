@@ -236,6 +236,8 @@ class Machine
   end
   def create_new_pouwhenua
     puts "MACHINE: CREATE_NEW_POUWHENUA".blue if DEBUGGING
+
+    # TODO This doesn't use the Kapa!
     @game.create_new_pouwhenua(@player.location.coordinate)
   end
 

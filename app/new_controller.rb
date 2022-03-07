@@ -15,8 +15,6 @@ class NewController < UIViewController
 
   outlet :not_close_enough, UILabel
 
-  # Should this switch to Machine?
-  # Maybe only when we exit?
   attr_accessor :takaro
 
   DEBUGGING = false
@@ -28,15 +26,6 @@ class NewController < UIViewController
     Machine.instance.current_view = self
     # get the current player's location
     Machine.instance.initialize_location_manager
-
-    # # Old version
-    # # create a new game in Firebase and retrieve its ID
-    # # TODO perhaps move this into viewWillAppear?
-    # # Machine.instance.create_new_game
-    # Machine.instance.create_new_game.tap do |game|
-    #   puts "Created new game: #{game.uuid_string}".pink
-    #   gamecode.text = game.gamecode
-    # end
 
     @takaro = Takaro.new
 
@@ -84,6 +73,7 @@ class NewController < UIViewController
     end
 
     # This will eventually be their character role
+    # TODO: add the player class to the Takaro list_player_names_for_index
     cell.detailTextLabel.text = "Mung beans"
 
     cell

@@ -138,7 +138,7 @@ module Utilities
   module_function
 
   def get_distance(coord_a, coord_b)
-    puts "UTILITIES GET_DISTANCE".blue
+    # puts "UTILITIES GET_DISTANCE".blue
     distance = MKMetersBetweenMapPoints(
       MKMapPointForCoordinate(
         format_to_location_coord(coord_a)),
@@ -152,7 +152,7 @@ module Utilities
   end
 
   def format_to_location_coord(input)
-    puts "TAKARO FORMAT_TO_LOCATION_COORD".blue
+    # puts "UTILITIES FORMAT_TO_LOCATION_COORD".blue
     # puts "Input: #{input}".red
     case input
     when Hash

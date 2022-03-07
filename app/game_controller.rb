@@ -47,7 +47,7 @@ class GameController < UIViewController
       # puts notification.object.value
 
       # This should probably happen in the notification call
-      handle_new_pouwhenua({uuID: notification.object.key}.merge(notification.object.value))
+      # handle_new_pouwhenua({uuID: notification.object.key}.merge(notification.object.value))
       renderOverlays
     end
     # # PYLON NEW
@@ -142,6 +142,9 @@ class GameController < UIViewController
     Machine.instance.current_view = self
     Machine.instance.takaro.start_observing_pouwhenua
 
+    deploy_time = Machine.instance.takaro.local_kaitakaro_hash["deploy_time"]
+    puts "deploy_time: #{deploy_time}".focus
+
     # TODO should this now be controlled by the game?
     # region = create_play_region
     # map_view.setRegion(region, animated: false)
@@ -163,7 +166,8 @@ class GameController < UIViewController
     @button_fsm.when :down do |state|
       state.on_entry { set_button_color(UIColor.systemRedColor) }
       state.transition_to :primed,
-        after: 5
+        # after: 5
+        after: deploy_time
       state.transition_to :up,
         on: :button_up
     end
@@ -174,7 +178,7 @@ class GameController < UIViewController
         # action: proc { create_new_pylon } # CREATE NEW PYLON!
         # TODO switch to Takaro
         # action: proc { Machine.instance.game.create_new_pouwhenua }
-        action: proc { Machine.instance.takaro.create_new_pouwhenua }
+        action: proc { create_new_pouwhenua }
     end
 
     puts "Starting button state machine\n\n"
@@ -182,53 +186,6 @@ class GameController < UIViewController
 
     add_overlays_and_annotations
   end
-
-  ### LOCATION MANAGER DELEGATES ###
-
-  ### Start up the Location Manager ###
-  ### This has now moved into the Machine ###
-  # def initialize_location_manager
-  #   puts "initialize_location_manager"
-  #   @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
-  #     lm.requestWhenInUseAuthorization
-  #
-  #     # constant needs to be capitalized because?
-  #     lm.desiredAccuracy = KCLLocationAccuracyBest
-  #     lm.startUpdatingLocation
-  #     lm.delegate = self
-  #   end
-  #   map_view.registerClass(PylonAnnotation, forAnnotationViewWithReuseIdentifier: "PylonAnnotation")
-  # end
-
-  ### Get new location information ###
-  ### This has now moved into the Machine ###
-  # https://github.com/HipByte/RubyMotionSamples/blob/a387842594fd0ac9d8560d2dc64eff4d87534093/ios/Locations/app/locations_controller.rb
-  # def locationManager(manager, didUpdateToLocation:newLocation, fromLocation:oldLocation)
-  #   # puts "GameController.didUpdateLocation: #{newLocation} to: #{oldLocation}"
-  #
-  #   # Check if we are outside the bounds of play
-  #   # unless MKMapRectContainsPoint(Machine.instance.bounding_box, MKMapPointForCoordinate(newLocation.coordinate))
-  #   #   App.notification_center.post 'BoundaryExit'
-  #   # end
-  #   if MKMapRectContainsPoint(Machine.instance.bounding_box, MKMapPointForCoordinate(newLocation.coordinate))
-  #     @local_player.machine.event(:enter_bounds)
-  #   else
-  #     @local_player.machine.event(:exit_bounds)
-  #   end
-  #   locationUpdate(newLocation)
-  # end
-  #
-  # def locationManager(manager, didFailWithError:error)
-  #   puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
-  #   App.notification_center.post "PlayerDisappear"
-  # end
-  #
-  # def locationUpdate(location)
-  #   loc = location.coordinate
-  #   @player_location = location.coordinate
-  #   @local_player.location = location
-  #   # map_view.setCenterCoordinate(loc)
-  # end
 
   PYLON_VIEW_IDENTIFIER = "PylonViewIdentifier"
 
@@ -285,6 +242,7 @@ class GameController < UIViewController
     unless overlay.overlayColor.nil?
       # rend.fillColor = UIColor.colorWithCGColor(overlay.overlayColor.CGColor)
       puts "overlayColor: #{overlay.overlayColor}".focus
+      rend.strokeColor = UIColor.colorWithCIColor(overlay.overlayColor).colorWithAlphaComponent(1.0)
       rend.fillColor = UIColor.colorWithCIColor(overlay.overlayColor).colorWithAlphaComponent(0.2)
     end
     rend.lineJoin = KCGLineJoinMiter
@@ -356,13 +314,6 @@ class GameController < UIViewController
     puts "GAME_CONTROLLER: ADD_ANNOTATIIONS".blue if DEBUGGING
     map_view.addAnnotations(@voronoi_map.annotations)
   end
-  #
-  # def create_play_region(args = {})
-  #   puts "GAME_CONTROLLER: CREATE_PLAY_REGION".blue if DEBUGGING
-  #   location = args[:location] || CLLocationCoordinate2DMake(37.33189332651307, -122.03128724123847)
-  #   span = args[:span] || MKCoordinateSpanMake(0.01, 0.01)
-  #   region = MKCoordinateRegionMake(location, span)
-  # end
 
   def player_for_audio(filename)
     sound_path = NSBundle.mainBundle.pathForResource(filename, ofType: "mp3")
@@ -372,46 +323,8 @@ class GameController < UIViewController
     puts "AVAudioPlayer error: #{error_ptr[0]}" if error_ptr[0]
   end
 
-  # def create_new_pylon
-  #   puts "GAME_CONTROLLER: CREATE_NEW_PYLON".blue if DEBUGGING
-  #
-  #   # this gets it into the DB, but not on screen
-  #   # @fb_game.create_new_pylon(@player_location)
-  #   # Machine.instance.create_new_pylon(@player_location)
-  #   # Machine.instance.create_new_pylon(Machine.instance.player.location)
-  #   Machine.instance.create_new_pylon
-  # end
-
   def create_new_pouwhenua
-
-  end
-
-  def handle_new_pylon(data)
-    puts "GAME_CONTROLLER: HANDLE_NEW_PYLON".blue if DEBUGGING
-
-    p = Pylon.initWithHash(data)
-    p.set_uuid data[:uuID]
-
-    @voronoi_map.add_pylon(p)
-
-    renderOverlays
-  end
-
-  def handle_new_pouwhenua(data)
-    puts "GAME_CONTROLLER: HANDLE_NEW_POUWHENUA".blue if DEBUGGING
-    # data.each do |k, v|
-    #   puts "#{k}: #{v}"
-    # end
-    # puts data["title"]
-
-    p = Pouwhenua.new(data["location"], {color: data["color"], title: data["title"], birthdate: data["birthdate"]})
-    # puts data[:uuID]
-    # puts data["uuID"]
-    p.set_uuid data[:uuID]
-
-    # @voronoi_map.add_pylon(p)
-    @voronoi_map.add_pouwhenua(p)
-
-    renderOverlays
+    puts "GAME_CONTROLLER: CREATE_NEW_POUWHENUA".focus
+    Machine.instance.takaro.create_new_pouwhenua
   end
 end

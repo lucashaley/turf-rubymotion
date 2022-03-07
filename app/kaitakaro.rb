@@ -1,10 +1,15 @@
 class Kaitarako
   extend Utilities # Use extend with RubyMotion?
-  
+
   attr_accessor :takaro,
                 :kaitakaro_ref,
                 :kapa_ref,
-                :is_local
+                :is_local,
+                :kapa_color,
+                :is_playing, # TODO this should not be here, should be in Takaro instead
+                :deploy_time_ms,
+                :lifespan_ms,
+                :pouwhenua_start
 
   attr_reader :display_name,
               :email,
@@ -18,6 +23,7 @@ class Kaitarako
     puts "KAITAKARO INITIALIZE".light_blue if DEBUGGING
     @kaitakaro_ref = ref
     @is_local = false
+    @is_playing = false
 
     @takaro = args["takaro"] ? args["takaro"] : nil
 
@@ -51,6 +57,31 @@ class Kaitarako
     @kaitakaro_ref.child("display_name").getDataWithCompletionBlock(
       lambda do | error, data |
         puts "KAITAKARO GET_REMOTE_DISPLAY_NAME: #{data.value}"
+        return data.value
+      end
+    )
+  end
+
+  def player_class=(in_player_class)
+    @player_class = in_player_class
+    @kaitakaro_ref.updateChildValues(
+      {"player_class" => in_player_class}, withCompletionBlock:
+      lambda do | error, ref |
+        puts "KAITAKARO SET PLAYER_CLASS COMPLETE".blue if DEBUGGING
+      end
+    )
+  end
+
+  def player_class
+    Dispatch.once { @player_class ||= get_remote_player_class }
+    @player_class
+  end
+
+  def get_remote_player_class
+    puts "KAITAKARO GET_REMOTE_PLAYER_CLASS".blue if DEBUGGING
+    @kaitakaro_ref.child("player_class").getDataWithCompletionBlock(
+      lambda do | error, data |
+        puts "KAITAKARO GET_REMOTE_PLAYER_CLASS: #{data.value}"
         return data.value
       end
     )
@@ -97,6 +128,7 @@ class Kaitarako
 
   def coordinate=(in_coordinate)
     puts "KAITAKARO SET COORDINATE".blue if DEBUGGING
+    @color_string = "0.0 0.0 0.0 1.0"
     @coordinate = in_coordinate
     # puts "coordinate: #{@coordinate}".focus
     @kaitakaro_ref.updateChildValues(
@@ -108,63 +140,89 @@ class Kaitarako
         # Here we need to check if we're still in the same Kapa
         # Maybe great with a closure, but hell if I understand them
 
-        @takaro.ref.child("kapa").getDataWithCompletionBlock(
-          lambda do | error, kapa_snapshot |
-            puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION ITERATING".blue if DEBUGGING
-            # iterate through the existing kapa
-            kapa_snapshot.children.each do |k|
+        unless @is_playing
 
-              # This kapa doesn't have a location, so we can add this player
-              unless k.childSnapshotForPath("coordinate").exists
-                # puts "KAITAKARO kapa doesn't have a coordinate".focus
-                @kapa_ref ||= k.ref
-              else
+          @takaro.ref.child("kapa").getDataWithCompletionBlock(
+            lambda do | error, kapa_snapshot |
+              puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION ITERATING".blue if DEBUGGING
+              # iterate through the existing kapa
+              kapa_snapshot.children.each do |k|
 
-                # But if it does have a location
-                # check if we're close
-                if k.childSnapshotForPath("coordinate").exists && Utilities.get_distance(@coordinate, k.childSnapshotForPath("coordinate").value) < TEAM_DISTANCE
-                  puts "Close enough!".yellow
+                # This kapa doesn't have a location, so we can add this player
+                unless k.childSnapshotForPath("coordinate").exists
+                  # puts "KAITAKARO kapa doesn't have a coordinate".focus
                   @kapa_ref ||= k.ref
+                  @color_string = k.childSnapshotForPath("color").value
+                  # puts "new kapa color_string: #{@color_string}".focus
+                else
+
+                  # But if it does have a location
+                  # check if we're close
+                  if k.childSnapshotForPath("coordinate").exists && Utilities.get_distance(@coordinate, k.childSnapshotForPath("coordinate").value) < TEAM_DISTANCE
+                    puts "Close enough!".yellow
+                    @kapa_ref ||= k.ref
+                    @color_string = k.childSnapshotForPath("color").value
+                    # puts "add to kapa color_string: #{@color_string}".focus
+
+                    # TODO where does this go…
+                    break
+                  else
+                    # Under what circumstances do we end up here?
+                    # TODO figure this shit out
+                    # This is possibly when the bot gets added?
+                    puts "testing for kapa_ref: #{@kapa_ref}"
+                    # puts k.key
+                    # puts k.childSnapshotForPath("coordinate").exists
+                    # puts @coordinate
+                    # puts k.childSnapshotForPath("coordinate").value
+                    puts Utilities.get_distance(@coordinate, k.childSnapshotForPath("coordinate").value)
+                    puts "\n\nDANGERZONE\n\n".focus
+                    @color_string = "0.9 0.0 0.1 1.0"
+                  end
+                end
+              end unless kapa_snapshot.childrenCount == 0
+              # this checks in case there are no Kapa in the db
+
+              # We should have a kapa_ref
+              # But if not, we need to make a new one
+              # if we are prepopulating the kapa, we should never get here
+              if @kapa_ref.nil?
+                # if we get here, the player hasn't matched a kapa
+                puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION NO KAPA FOUND".blue if DEBUGGING
+                # if there are less than two kapa, make a new one
+                if kapa_snapshot.childrenCount < 2
+                  puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION CREATING NEW KAPA".blue if DEBUGGING
+                  @kapa_ref = @takaro.ref.child("kapa").childByAutoId
+                else
+                  # otherwise the player is too far from everyone
+                  puts "#{@display_name} is TOO FAR FROM EVERYONE!!!".pink
                 end
               end
-            end unless kapa_snapshot.childrenCount == 0
-            # this checks in case there are no Kapa in the db
 
-            # We should have a kapa_ref
-            # But if not, we need to make a new one
-            # if we are prepopulating the kapa, we should never get here
-            if @kapa_ref.nil?
-              # if we get here, the player hasn't matched a kapa
-              puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION NO KAPA FOUND".blue if DEBUGGING
-              # if there are less than two kapa, make a new one
-              if kapa_snapshot.childrenCount < 2
-                puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION CREATING NEW KAPA".blue if DEBUGGING
-                @kapa_ref = @takaro.ref.child("kapa").childByAutoId
-              else
-                # otherwise the player is too far from everyone
-                puts "#{@display_name} is TOO FAR FROM EVERYONE!!!".pink
-              end
+              # TODO we need to check if they already have a kapa
+              # send the data up
+              # TODO why are we sending the name? Is it not there already?
+              puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION SENDING DATA".blue if DEBUGGING
+              @kapa_ref.child("kaitakaro/#{@kaitakaro_ref.key}").updateChildValues(
+                {"name" => @display_name, "coordinate" => {
+                  "latitude" => in_coordinate.latitude,
+                  "longitude" => in_coordinate.longitude}
+                }, withCompletionBlock:
+                lambda do | error, player_ref |
+                  puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION SETTING KAPA".blue if DEBUGGING
+                  # update the player record
+                  @kaitakaro_ref.updateChildValues(
+                    {"team" => @kapa_ref.key}
+                  )
+                  # set the player color
+                  # puts "color_string: #{@color_string}".focus
+                  @kapa_color = defined?(@color_string) ? @color_string : "0.0 0.0 0.0 1.0"
+                  # puts "kapa_color: #{kapa_color}".focus
+                end
+              )
             end
-
-            # TODO we need to check if they already have a kapa
-            # send the data up
-            # TODO why are we sending the name? Is it not there already?
-            puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION SENDING DATA".blue if DEBUGGING
-            @kapa_ref.child("kaitakaro/#{@kaitakaro_ref.key}").updateChildValues(
-              {"name" => @display_name, "coordinate" => {
-                "latitude" => in_coordinate.latitude,
-                "longitude" => in_coordinate.longitude}
-              }, withCompletionBlock:
-              lambda do | error, player_ref |
-                puts "KAITAKARO UPDATE_LOCAL_PLAYER_LOCATION SETTING KAPA".blue if DEBUGGING
-                # update the player record
-                @kaitakaro_ref.updateChildValues(
-                  {"team" => @kapa_ref.key}
-                )
-              end
-            )
-          end
-        )
+          )
+        end
         puts "KAITAKARO SET COORDINATE COMPLETE"
       end
     )
@@ -189,34 +247,4 @@ class Kaitarako
       end
     )
   end
-
-  #################
-  # Utility Functions
-  #################
-
-  # def get_distance(coord_a, coord_b)
-  #   puts "KAITAKARO GET_DISTANCE".blue if DEBUGGING
-  #   distance = MKMetersBetweenMapPoints(
-  #     MKMapPointForCoordinate(
-  #       format_to_location_coord(coord_a)),
-  #     MKMapPointForCoordinate(
-  #       format_to_location_coord(coord_b))
-  #   )
-  #   puts "KAITAKARO GET_DISTANCE Distance: #{distance}" if DEBUGGING
-  #
-  #   # Not sure we need this return
-  #   distance
-  # end
-
-  # def format_to_location_coord(input)
-  #   puts "TAKARO FORMAT_TO_LOCATION_COORD".blue if DEBUGGING
-  #   puts "Input: #{input}".red if DEBUGGING
-  #   case input
-  #   when Hash
-  #     return CLLocationCoordinate2DMake(input["latitude"], input["longitude"])
-  #   when CLLocationCoordinate2D
-  #     return input
-  #   end
-  #   0
-  # end
 end

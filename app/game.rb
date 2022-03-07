@@ -70,8 +70,9 @@ class Game < FirebaseObject
     new_id = rand(36**6).to_s(36)
   end
 
+  # TODO do we use this?
   def add_local_player(user)
-    puts "GAME ADD_LOCAL_PLAYER".blue if DEBUGGING
+    puts "GAME ADD_LOCAL_PLAYER".focus
 
     puts "adding user: #{user}".red if DEBUGGING
     puts user.providerData

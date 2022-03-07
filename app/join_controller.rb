@@ -27,10 +27,7 @@ class JoinController < UIViewController
     # get the current player's location
     Machine.instance.initialize_location_manager
 
-    # Never really got this to work
-    # Keep around, though, just in case
-    # table_team_a.registerClass(PlayerCell, forCellReuseIdentifier: CELL_IDENTIFIER)
-    # table_team_b.registerClass(PlayerCell, forCellReuseIdentifier: CELL_IDENTIFIER)
+    @takaro = Takaro.new
 
     # Listen for new players
     @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
@@ -146,6 +143,8 @@ class JoinController < UIViewController
         .getDataWithCompletionBlock(
           lambda do | error, snapshot |
             # create the takaro
+            # TODO This is throwing an error
+            # undefined method `value' for nil
             puts "snapshot: #{snapshot.value}".focus
             @takaro = Takaro.new(snapshot.children.nextObject.key)
           end
