@@ -19,7 +19,7 @@ require "bubble-wrap"
 # https://github.com/rubymotion-community/ib
 require "ib"
 # https://github.com/clayallsopp/geomotion
-require "geomotion"
+# require "geomotion"
 
 
 # Uncomment the following line to add an icon generate capacity to your build
