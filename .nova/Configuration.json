@@ -1,0 +1,4 @@
+{
+  "john-ellis.rubocop-nova.base-command" : "rubocop --only Layout",
+  "workspace.name" : "turf"
+}

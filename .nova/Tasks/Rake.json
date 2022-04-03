@@ -1,0 +1,13 @@
+{
+  "actions" : {
+    "build" : {
+      "enabled" : true,
+      "script" : "rake"
+    },
+    "run" : {
+      "enabled" : true,
+      "script" : "rake"
+    }
+  },
+  "openLogOnRun" : "start"
+}
