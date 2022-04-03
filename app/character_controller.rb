@@ -1,6 +1,4 @@
-class CharacterController < UIViewController
-  # https://code.tutsplus.com/tutorials/lets-write-a-rubymotion-app-part-1--cms-20612
-  extend IB
+class CharacterController < MachineViewController
   attr_accessor :player_classes
 
   outlet :scout_button, UIButton

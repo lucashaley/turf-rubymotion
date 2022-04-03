@@ -1,6 +1,4 @@
-class MenuController < UIViewController
-  extend IB
-
+class MenuController < MachineViewController
   DEBUGGING = true
 
   outlet :button_login, UIButton
@@ -10,6 +8,7 @@ class MenuController < UIViewController
   outlet :button_game_join, UIButton
 
   def viewDidLoad
+    super
     puts "MENUCONTROLLER VIEWDIDLOAD".blue if DEBUGGING
     if Machine.instance.user
       puts Machine.instance.user.email

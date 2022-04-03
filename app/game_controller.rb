@@ -1,6 +1,4 @@
-class GameController < UIViewController
-  extend IB
-  extend Debugging
+class GameController < MachineViewController
   include VoronoiUtilities
 
   outlet :map_view, MKMapView
@@ -138,8 +136,9 @@ class GameController < UIViewController
   end
 
   def viewDidLoad
+    super
     puts "GAMECONTROLLER: VIEWDIDLOAD".light_blue
-    Machine.instance.current_view = self
+    
     Machine.instance.takaro.start_observing_pouwhenua
 
     # TODO should this now be controlled by the game?

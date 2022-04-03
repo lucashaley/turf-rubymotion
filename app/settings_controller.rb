@@ -1,9 +1,8 @@
-class SettingsController < UIViewController
-  # https://code.tutsplus.com/tutorials/lets-write-a-rubymotion-app-part-1--cms-20612
-  extend IB
-
-  # ib_action :dismiss_modal
-
+class SettingsController < MachineViewController
+  def viewDidLoad
+    super
+  end
+  
   def dismiss_modal
     # https://stackoverflow.com/questions/21593770/ios-unwind-back-in-a-chain-of-modal-segues
     presentingViewController.dismissViewControllerAnimated(true, completion: nil)

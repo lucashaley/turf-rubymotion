@@ -1,7 +1,4 @@
-class JoinController < UIViewController
-  # https://code.tutsplus.com/tutorials/lets-write-a-rubymotion-app-part-1--cms-20612
-  extend IB
-
+class JoinController < MachineViewController
   # outlet :mapview, MKMapView
   outlet :gamecode, UITextField
   outlet :character_view, CharacterController
@@ -21,9 +18,9 @@ class JoinController < UIViewController
   CELL_IDENTIFIER = "PlayerCell"
 
   def viewDidLoad
+    super
     puts "JOINCONTROLLER VIEWDIDLOAD".light_blue if DEBUGGING
 
-    Machine.instance.current_view = self
     # get the current player's location
     Machine.instance.initialize_location_manager
 

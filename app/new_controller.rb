@@ -1,7 +1,4 @@
-class NewController < UIViewController
-  # https://code.tutsplus.com/tutorials/lets-write-a-rubymotion-app-part-1--cms-20612
-  extend IB
-
+class NewController < MachineViewController
   # outlet :mapview, MKMapView
   outlet :gamecode, UILabel
   outlet :character_view, CharacterController
@@ -23,9 +20,9 @@ class NewController < UIViewController
   CELL_IDENTIFIER = "PlayerCell"
 
   def viewDidLoad
+    super
     puts "NEWCONTROLLER: VIEWDIDLOAD".light_blue
 
-    Machine.instance.current_view = self
     # get the current player's location
     Machine.instance.initialize_location_manager
 
