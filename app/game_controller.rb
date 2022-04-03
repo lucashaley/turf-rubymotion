@@ -6,81 +6,42 @@ class GameController < MachineViewController
 
   attr_accessor :voronoi_map,
                 :game,
-                :player_location
+                :player_location,
+                :boundary_audio
 
   DEBUGGING = false
+  
+  def setup_mapview
+    map_view.showsUserLocation = true
+    map_view.showsPitchControl = false
+  end
+
+  def setup_audio
+    # AUDIO SETUP
+    @boundary_audio = player_for_audio("boundary")
+  end
 
   def viewWillAppear(animated)
     puts "GAME_CONTROLLER: VIEWWILLAPPEAR".light_blue
     # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
-    map_view.showsUserLocation = true
-    map_view.showsPitchControl = false
-
-    Machine.instance.current_view = self
-    # initialize_location_manager
+    setup_mapview
+    setup_audio
+    
     add_overlays_and_annotations
-
-    # With Takaro, do we still do this?
-    # # Start observing
-    # puts "Trying to start observing"
-    # Machine.instance.game.start_observing_pylons
-    # Machine.instance.game.start_observing_pouwhenua
-    # Machine.instance.tracking = true
-    # Machine.instance.takaro.start_observing_pouwhenua
-
-    # @local_player = Player.new
-
-    # AUDIO SETUP
-    boundary_audio = player_for_audio("boundary")
-
-    # THIS WORKED
-    # Machine.instance.db_game_ref.child("pylons/pylon-03").setValue("Hairline")
-    # Machine.instance.db_game_ref.observeEventType(FIRDataEventTypeValue,
-    #   withBlock: Machine.instance.handleDataResult)
-
-    # Testing NSNotifications
+    
     @pouwhenua_new_observer = App.notification_center.observe "PouwhenuaNew" do |notification|
-      puts "POUWHENUA NEW".yellow
-
-      # puts notification.object.value
-
-      # This should probably happen in the notification call
-      handle_new_pouwhenua({uuID: notification.object.key}.merge(notification.object.value))
-      renderOverlays
+      observe_new_pouwhenua
     end
-    # # PYLON NEW
     @pylon_new_observer = App.notification_center.observe "PylonNew" do |notification|
-      puts "PYLON NEW".yellow
-
-      # puts notification.object.value
-
-      # This should probably happen in the notification call
-      handle_new_pylon({uuID: notification.object.key}.merge(notification.object.value))
-
-      add_overlays_and_annotations
-      renderOverlays
+      observe_new_pylon(notification.object)
     end
-    # PYLON CHANGE
     @pylon_observer = App.notification_center.observe "PylonChange" do |notification|
-      puts "PYLON CHANGE".yellow
-
-      # render the wakawaka and annotations
-      renderOverlays
-      add_overlays_and_annotations
+      observe_change_pylon
     end
     @pylon_death_observer = App.notification_center.observe "PylonDeath" do |notification|
-      puts "PYLON DEATH".yellow
-      puts "notification: #{notification.object[:object]}"
-      # remove the pylon from the array
-      # test_dict.delete(notification.object.uuid)
-      removed_pylon = @voronoi_map.pylons.delete(notification.object[:object].uuID)
-      puts "removed_pylon: #{removed_pylon}".red
-      # redraw everything
-      puts "\nRemoving annotation? #{notification.object[:object].annotation}".red
-      map_view.removeAnnotation(notification.object[:object].annotation)
-      renderOverlays
-      add_overlays_and_annotations
+      observe_death_pylon(notification.object)
     end
+    
     @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
       puts "NEW PLAYER"
     end
@@ -141,9 +102,8 @@ class GameController < MachineViewController
     
     Machine.instance.takaro.start_observing_pouwhenua
 
-    # TODO should this now be controlled by the game?
-    # region = create_play_region
-    # map_view.setRegion(region, animated: false)
+    deploy_time = Machine.instance.takaro.local_kaitakaro_hash['player_class']['deploy_time']
+    puts "deploy_time: #{deploy_time}".pink
 
     map_view.setRegion(Machine.instance.takaro.taiapa_region, animated: false)
     map_view.setCameraBoundary(MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro.taiapa_region), animated: true)
@@ -162,7 +122,7 @@ class GameController < MachineViewController
     @button_fsm.when :down do |state|
       state.on_entry { set_button_color(UIColor.systemRedColor) }
       state.transition_to :primed,
-        after: 5
+        after: deploy_time
       state.transition_to :up,
         on: :button_up
     end
@@ -241,18 +201,9 @@ class GameController < MachineViewController
     # puts "viewForAnnotation: #{annotation.class}"
     # check to see if it exists and has been queued
     if annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PYLON_VIEW_IDENTIFIER)
-      # puts "using existing view"
-      # annotation_view.annotation = pylon # what does this line do?
-    else
-      # create a new one
-      # MKPinAnnotationView is depreciated
-      # puts "create new view"
-      # annotation_view = MKMarkerAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier:PylonViewIdentifier)
+     else
       annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: PYLON_VIEW_IDENTIFIER)
 
-      # use png
-      # annotation_view.image = UIImage.imageNamed("pylon_test_01.png")
-      # dynamically generate
       ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
 
       annotation_view.image = ui_renderer.imageWithActions(
@@ -412,5 +363,29 @@ class GameController < MachineViewController
     @voronoi_map.add_pouwhenua(p)
 
     renderOverlays
+  end
+  
+  def observe_new_pouwhenua
+    puts "-game_controller observe_new_pouwhenua".blue if DEBUGGING
+    renderOverlays
+  end
+  def observe_new_pylon(notification_object)
+    puts "-game_controller observe_new_pylon".blue if DEBUGGING
+    handle_new_pylon({uuID: notification_object.key}.merge(notification_object.value))
+    
+    add_overlays_and_annotations
+    renderOverlays
+  end
+  def observe_change_pylon
+    puts "-game_controller observe_change_pylon".blue if DEBUGGING
+    renderOverlays
+    add_overlays_and_annotations
+  end
+  def observe_death_pylon(notification_object)
+    puts "-game_controller observe_death_pylon".blue if DEBUGGING
+    removed_pylon = @voronoi_map.pylons.delete(notification.object[:object].uuID)
+    map_view.removeAnnotation(notification.object[:object].annotation)
+    renderOverlays
+    add_overlays_and_annotations
   end
 end

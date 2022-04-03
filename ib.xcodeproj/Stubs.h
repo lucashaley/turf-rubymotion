@@ -212,6 +212,8 @@
 @interface Kaitarako: NSObject
 -(IBAction) display_name;
 -(IBAction) get_remote_display_name;
+-(IBAction) player_class;
+-(IBAction) get_remote_player_class;
 -(IBAction) email;
 -(IBAction) get_remote_email;
 -(IBAction) user_id;
@@ -324,9 +326,7 @@
 @end
 
 @interface Takaro: NSObject
--(IBAction) initialize:(id) in_uuid;
--(IBAction) start_syncing;
--(IBAction) stop_syncing;
+-(IBAction) initialize:(id) in_id;
 -(IBAction) init_kapa;
 -(IBAction) set_up_observers;
 -(IBAction) create_new_remote_kapa;
@@ -334,6 +334,7 @@
 -(IBAction) update_kapa_location:(id) kapa_ref;
 -(IBAction) list_player_names_for_index:(id) in_index;
 -(IBAction) player_count_for_index:(id) in_index;
+-(IBAction) list_player_classes_for_index:(id) in_index;
 -(IBAction) generate_new_id;
 -(IBAction) set_initial_pouwhenua;
 -(IBAction) start_observing_pouwhenua;

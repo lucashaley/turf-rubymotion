@@ -5,17 +5,6 @@ class CharacterController < MachineViewController
 
   DEBUGGING = true
 
-  def select_scout
-    puts "CHARACTERCONTROLLER SELECT_SCOUT".blue if DEBUGGING
-
-    # TODO all this needs to change to the game local player
-    # Machine.instance.player.role = "scout"
-    # Machine.instance.player.refresh = 5 # in seconds
-    # Machine.instance.player.pouwhenua_count = 5
-    #
-    # puts Machine.instance.player.to_s.red
-    # Machine.instance.player.update_all
-
   def viewDidLoad
     super
     puts 'CHARACTERCONTROLLER VIEWDIDLOAD'.blue if DEBUGGING
@@ -69,7 +58,7 @@ class CharacterController < MachineViewController
     # Machine.instance.current_view.takaro.kaitakaro_hash["pouwhenua_current"] = player_class["pouwhenua_start"]
     Machine.instance.current_view.takaro.local_kaitakaro_hash['player_class'] = player_class
     puts "Machine class: #{Machine.instance.current_view.takaro.local_kaitakaro_hash['player_class']}"
->>>>>>> Stashed changes
+
     dismiss_modal
   end
 
