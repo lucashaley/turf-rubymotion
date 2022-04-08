@@ -24,6 +24,9 @@
 @implementation Game
 @end
 
+@implementation MachineViewController
+@end
+
 @implementation GameController
 @end
 

@@ -4,7 +4,7 @@ class Takaro
   attr_accessor :ref,
                 :uuid,
                 :local_player_ref,
-                # :nga_kapa,
+                :nga_kapa,
                 # :nga_kapa_hash,
                 :kapa_array,
                 :machine,
@@ -14,13 +14,15 @@ class Takaro
                 :local_player_locationCoords,
                 :local_player_name,
                 :local_player_kapa_ref,
+                :local_kaitakaro_hash,
+                :local_kaitakaro,
                 :taiapa, # the field, as MKRect
                 :taiapa_center, # as MKMapPoint
                 :taiapa_region, # as MKCoordinateRegion
                 :pouwhenua,
                 :pouwhenua_array
 
-  DEBUGGING = false
+  DEBUGGING = true
   TEAM_DISTANCE = 3
   MOVE_THRESHOLD = 2
   TEAM_COUNT = 2
@@ -36,7 +38,13 @@ class Takaro
   # [
   #   {
   #     "id" => id,
-  #     "players" => ["player_a", "player_b", ...]
+  #     "players" => 
+  #     [
+  #       {
+  #         'display_name',
+  #         'character'
+  #       }, ...
+  #     ]
   #     "coordinate" =>
   #     {
   #       "latitude" => x,
@@ -96,11 +104,15 @@ class Takaro
   # uuid is a string.
 
   # def initialize(in_uuid = NSUUID.UUID.UUIDString
-  def initialize(in_uuid = nil)
+  def initialize(in_key = nil)
     puts "TAKARO INITIALIZE".light_blue if DEBUGGING
-    puts "Creating new takaro with uuid: #{in_uuid}".pink if DEBUGGING
-    @uuid = in_uuid || NSUUID.UUID.UUIDString
-    @ref = Machine.instance.db.referenceWithPath("games/#{uuid}")
+    puts "Creating new takaro with key: #{in_key}".pink if DEBUGGING
+    
+    unless in_key.nil?
+      @ref = Machine.instance.db.referenceWithPath("games/#{in_key}")
+    else
+      @ref = Machine.instance.db.referenceWithPath('games').childByAutoId
+    end
 
     # TODO do we do this if we're not creating from scratch? Won't it overwrite?
     # TODO yes it totally does
@@ -109,29 +121,17 @@ class Takaro
       lambda do | error, game_ref |
         App.notification_center.post("GamecodeNew", new_gamecode)
       end
-    ) unless in_uuid
+    ) unless in_key
 
     puts "New takaro: #{@ref.URL}" if DEBUGGING
 
     # This is used for updating the UI
     # And needs to have 0 and 1 indecies
     # @nga_kapa_hash = {}
+    @nga_kapa = []
     @kapa_array = []
     @pouwhenua_array = []
-
-    # what was I thinking here?
-    # @nga_kapa_observer_handle_array = Array.new
-
-    # setup_group = Dispatch::Group.new
-    # setup_queue = Dispatch::Queue.new("turf")
-    # other_queue = Dispatch::Queue.new("poop")
-    # setup_queue.async(setup_group) {
-    #   init_kapa
-    # }
-    # setup_group.notify(other_queue) {
-    #   puts "BAAAAALLLLLLLLLLLLSSSSSSSSSS".focus
-    # }
-
+    @local_kaitakaro_hash = {}
 
     #################
     # Machine Stuff
@@ -194,6 +194,9 @@ class Takaro
   #
   def init_kapa
     puts "TAKARO INIT_KAPA".blue if DEBUGGING
+    
+    @nga_kapa << Kapa.new(@ref.child('nga_kapa').childByAutoId)
+    @nga_kapa << Kapa.new(@ref.child('nga_kapa').childByAutoId)
 
     # Check first for server kapa
     @ref.child("kapa").getDataWithCompletionBlock(
@@ -206,6 +209,8 @@ class Takaro
             # get its data and add it to the local hash
             current_kapa_snapshot = kapa_snapshot.children.allObjects[i]
             current_kapa_ref = current_kapa_snapshot.ref
+            
+            # set up blank array
             @kapa_array[i] = {
               "id" => current_kapa_snapshot.key,
               "players" => [],
@@ -217,7 +222,11 @@ class Takaro
                 player_snapshot.children.each do |current_player_snapshot|
                   current_player_name = current_player_snapshot.childSnapshotForPath("display_name").value
                   # puts "current_player_name:#{current_player_name}".focus
-                  @kapa_array[i]["players"] << current_player_name
+                  @kapa_array[i]["players"] << {
+                    'display_name' => current_player_name,
+                    'character' => 'Toad'
+                  }
+                  puts "kapa_array: #{@kapa_array.inspect}".red
                 end
               end
             )
@@ -265,37 +274,53 @@ class Takaro
 
         # Let's take a look at who the player is
         puts "new player: #{player_snapshot.value}" if DEBUGGING
+        App.notification_center.post "PlayerNew"
       end # player lambda
     )
 
     ##
     #
     # PLAYER EDITED
-    #
+    # When the player is edited, chances are it's the location
+    # And if it is, we need to re-check the kapa teams
     @ref.child("players").observeEventType(FIRDataEventTypeChildChanged,
       withBlock: proc do |player_snapshot|
         # TODO this adds an existing player, need to change!
         puts "Updated player: #{player_snapshot.value}" if DEBUGGING
 
         # Okay what is going on here
-        # if the player _has_ a team, we need to check if they are already in the team
+        # if the player _has_ a team, 
+        # we add it to the kapa_array
         player_team = player_snapshot.childSnapshotForPath("team")
         if player_team.exists
           player_team_id = player_team.value
           # puts "player_team_id: #{player_team_id}"
           player_display_name = player_snapshot.childSnapshotForPath("display_name").value
+          player_character = player_snapshot.childSnapshotForPath("character/title").value
           # puts "player_display_name: #{player_display_name}"
 
-          # puts "kapa_array (241): #{@kapa_array}".focus
+          puts "kapa_array (297): #{@kapa_array}".focus
           kapa_in_array = @kapa_array.find { |k| k["id"] == player_team_id }
-          # puts "kapa_in_array: #{kapa_in_array}".focus
+          puts "kapa_in_array: #{kapa_in_array}".focus
 
-          unless kapa_in_array["players"].include?(player_display_name)
-            kapa_in_array["players"] << player_display_name
+          # Here we check if the player is already in the kapa_array
+          # and if not, we add it
+          # and if so, we update with the character
+          player_index = kapa_in_array['players'].index {|p| p['display_name']==player_display_name}
+          if player_index.nil?
+            puts "ADDING TO KAPA!!! #{player_display_name}".blue
+            kapa_in_array["players"] << {
+              'display_name' => player_display_name,
+              'character' => player_character
+            }
+          else
+            kapa_in_array['players'][player_index]['character'] = player_character
           end
+          
+          puts "Updated Kapa: #{@kapa_array}"
 
-          # puts "kapa_array: #{@kapa_array}"
-          App.notification_center.post "PlayerNew"
+          # puts "takaro kapa_array: #{@kapa_array}".red
+          App.notification_center.post "PlayerChanged"
         end
       end
     )
@@ -310,8 +335,8 @@ class Takaro
       new_location = data.object["new_location"]
       old_location = data.object["old_location"]
 
-      puts "new_location: #{new_location.coordinate.latitude}" if DEBUGGING
-      puts "old_location: #{old_location.coordinate.latitude}" if DEBUGGING
+      # puts "new_location: #{new_location.coordinate.latitude}" if DEBUGGING
+      # puts "old_location: #{old_location.coordinate.latitude}" if DEBUGGING
 
       App.notification_center.post("UpdateLocalPlayerPositionAsLocation",
         {"new_location" => new_location, "old_location" => old_location}
@@ -340,15 +365,16 @@ class Takaro
   # Local Data
   #################
 
-  def create_new_remote_kapa
-    puts "TAKARO CREATE_NEW_REMOTE_KAPA".blue if DEBUGGING
-    # TODO We need to check here if there are existing kapa!
-    @ref.child("kapa").childByAutoId.updateChildValues({index: 0}, withCompletionBlock:
-      lambda do | error, child_ref |
-        @ref.child("kapa").childByAutoId.updateChildValues({index: 1})
-      end
-    )
-  end
+  # Does this even get called?
+  # def create_new_remote_kapa
+  #   puts "TAKARO CREATE_NEW_REMOTE_KAPA".blue if DEBUGGING
+  #   # TODO We need to check here if there are existing kapa!
+  #   @ref.child("kapa").childByAutoId.updateChildValues({index: 0}, withCompletionBlock:
+  #     lambda do | error, child_ref |
+  #       @ref.child("kapa").childByAutoId.updateChildValues({index: 1})
+  #     end
+  #   )
+  # end
 
   # This needs to do the hard labour of setting the kapa
   # and it all needs to be local, then sent to server
@@ -363,8 +389,7 @@ class Takaro
     @local_kaitakaro.is_local = true
   end
 
-  # TODO This is not working -- maybe the kapa aren't made yet?
-  # This might be working now?
+  
   def update_kapa_location(kapa_ref)
     puts "TAKARO UPDATE_KAPA_LOCATION".blue if DEBUGGING
     loc = CLLocationCoordinate2DMake(0, 0)
@@ -411,8 +436,10 @@ class Takaro
   # TODO Not sure we need this
   def list_player_names_for_index(in_index)
     puts "TAKARO LIST_PLAYER_NAMES_FOR_INDEX".blue if DEBUGGING
-    # @nga_kapa_hash.values[in_index]
-    @kapa_array[in_index]["players"]
+    puts "in_index: #{in_index}".red
+    
+    puts "Kapa array: #{@kapa_array[in_index]['players'].inspect}".red
+    @kapa_array[in_index]['players']
   end
 
   ##
@@ -455,20 +482,6 @@ class Takaro
       # create remote instance
       # puts "Creating remote instance".focus
       create_new_pouwhenua(k["coordinate"])
-
-      # # create local pouwhenua with coordinate
-      # p = Pouwhenua.new(k["coordinate"])
-      #
-      # # add to local pouwhenua array
-      # @pouwhenua_array << {
-      #   "id" => p.uuid_string,
-      #   "color" => p.color.stringRepresentation,
-      #   "coordinate" => {
-      #     "latitude" => p.location.latitude,
-      #     "longitude" => p.location.longitude
-      #   }
-      # }
-      # puts "pouwhenua_array: #{pouwhenua_array}".focus
 
       # add to local coords
       coord_array << k["coordinate"]
@@ -551,25 +564,7 @@ class Takaro
         # puts "CREATED REMOTE POUWHENUA".focus
       end
     )
-
-    # This was the old way
-    # new_pouwhenua = Pouwhenua.new(coord)
-    # puts "#{new_pouwhenua.uuid_string}".focus
-    # # puts "New pouwhenua: #{new_pouwhenua.uuid_string}".focus
-    # @ref.child("pouwhenua/#{new_pouwhenua.uuid_string}").setValue(new_pouwhenua.to_hash)
-    # return new_pouwhenua
   end
-
-  ##
-  # Return all of the current pouwhenua
-  # def cache_pouwhenua()
-  #   @ref.child("pouwhenua").observeSingleEventOfType(FIRDataEventTypeValue, withBlock:
-  #     lambda do |pouwhenua_snapshot|
-  #       puts "pouwhenua: #{pouwhenua}".focus
-  #       @pouwhenua = pouwhenua_snapshot.children.value.values
-  #     end
-  #   )
-  # end
 
   # Return all the pouwhenua as coords
   # For the voronoi to calculate
@@ -594,10 +589,32 @@ class Takaro
     @bot = Kaitarako.new(@ref.child("players").childByAutoId, { "takaro" => self })
     @bot.display_name = "Bot McBotface #{rand(30)}"
     @bot.email = "lucashaley@yahoo.com"
-    lat = rand(37.336144370126..37.336144370127)
-    long = -rand(122.059911595149..122.059911595150)
-    # puts "#{lat}, #{long}".focus
-    # @bot.coordinate = CLLocationCoordinate2DMake(37.33014437012663, -122.05991159514932)
-    @bot.coordinate = CLLocationCoordinate2DMake(lat, long)
+    @bot.character = {
+      'deploy_time' => 4,
+      'lifespan_ms' => 280000,
+      'pouwhenua_start' => 3,
+      'title' => 'Bot Character'
+    }
+    
+    
+    # Here we're going to use the team A coordinate as a starting point
+    @ref.child('kapa').observeSingleEventOfType(FIRDataEventTypeValue , withBlock:
+      lambda do |kapa_snapshot|
+        # Make sure team A has a coordinate! Otherwise it's screwed. But this is a hack!
+        puts "kapa_snapshot: #{kapa_snapshot.inspect}".yellow
+        team_a_coordinate_snapshot = kapa_snapshot.children.nextObject.childSnapshotForPath('coordinate')
+        puts "team_a_coordinate_snapshot: #{team_a_coordinate_snapshot.valueInExportFormat}".yellow
+        
+        # and then randomly move away from that point
+        lat = team_a_coordinate_snapshot.valueInExportFormat['latitude'] + rand(-0.01..0.01)
+        long = team_a_coordinate_snapshot.valueInExportFormat['longitude'] + rand(-0.01..0.01)
+        @bot.coordinate = CLLocationCoordinate2DMake(lat, long)
+        puts "Updated bot coordinate: #{CLLocationCoordinate2DMake(lat, long).inspect}".yellow
+      end
+    )
+    # 
+    # lat = rand(37.336144370126..37.336144370127)
+    # long = -rand(122.059911595149..122.059911595150)
+    # @bot.coordinate = CLLocationCoordinate2DMake(lat, long)
   end
 end

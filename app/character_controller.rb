@@ -1,4 +1,6 @@
-class CharacterController < MachineViewController
+class CharacterController < UIViewController
+  extend IB
+  
   attr_accessor :player_classes
 
   outlet :scout_button, UIButton
@@ -6,23 +8,25 @@ class CharacterController < MachineViewController
   DEBUGGING = true
 
   def viewDidLoad
-    super
     puts 'CHARACTERCONTROLLER VIEWDIDLOAD'.blue if DEBUGGING
     @player_classes = {
       'scout' => {
         "deploy_time" => 4,
         "lifespan_ms" => 2 * 60 * 1000,
-        "pouwhenua_start" => 8
+        "pouwhenua_start" => 8,
+        'title' => 'Scout'
       },
       "tank" => {
         "deploy_time" => 6,
         "lifespan_ms" => 8 * 60 * 1000,
-        "pouwhenua_start" => 3
+        "pouwhenua_start" => 3,
+        'title' => 'Tank'
       },
       "commander" => {
         "deploy_time" => 8,
         "lifespan_ms" => 5 * 60 * 1000,
-        "pouwhenua_start" => 4
+        "pouwhenua_start" => 4,
+        'title' => 'Commander'
       }
     }
     @player_classes.each_with_index do |pc, index|
@@ -56,8 +60,11 @@ class CharacterController < MachineViewController
     puts "Class selected: #{player_class}".focus
     # Machine.instance.current_view.takaro.kaitakaro_hash = player_class
     # Machine.instance.current_view.takaro.kaitakaro_hash["pouwhenua_current"] = player_class["pouwhenua_start"]
+    
     Machine.instance.current_view.takaro.local_kaitakaro_hash['player_class'] = player_class
-    puts "Machine class: #{Machine.instance.current_view.takaro.local_kaitakaro_hash['player_class']}"
+    Machine.instance.current_view.takaro.local_kaitakaro.character_hash = player_class
+    Machine.instance.current_view.takaro.local_kaitakaro.character = player_class
+    puts "local_kaitakaro: #{Machine.instance.current_view.takaro.local_kaitakaro.inspect}".red
 
     dismiss_modal
   end

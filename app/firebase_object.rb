@@ -1,76 +1,52 @@
 class FirebaseObject
   attr_accessor :ref,
-                :uuid,
-                :variables_to_save
+                :variables_to_save,
+                :data_hash
 
   DEBUGGING = true
 
-  def initialize(in_ref, in_uuid = NSUUID.UUID)
+  def initialize(in_ref, in_data_hash)
     puts "#{__FILE__} #{__method__} line: #{__LINE__}".green if DEBUGGING
     puts "FIREBASEOBJECT INITIALIZE".green if DEBUGGING
-    # @uuid = NSUUID.UUID
-    @uuid = in_uuid
-    @ref = in_ref.child(uuid_string)
-    @variables_to_save = []
 
+    @ref = in_ref
+    @data_hash = in_data_hash
+    
     self
   end
 
   def pull
     puts "FIREBASEOBJECT PULL".green if DEBUGGING
-    @ref.getDataWithCompletionBlock(proc do | error, snapshot |
-      @variables_to_save.each do |v|
-        self.setValue(snapshot.getSnapshotForPath(v).value , forKey: v)
+    @ref.getDataWithCompletionBlock(
+      lambda do | error, data_snapshot |
+        puts "Error: #{error.localizedDescription}".red if error
+        @data_hash = data_snapshot.valueInExportFormat
       end
-    end)
+    )
   end
 
   def start_observing
-    @ref.observeEventType(FIRDataEventTypeChildChanged,
-      withBlock: proc do |data|
+    @ref.observeEventType(FIRDataEventTypeChildChanged, withBlock: 
+      lambda do |data_snapshot|
         puts "FIREBASEOBJECT CHILDCHANGED".red if DEBUGGING
-        App.notification_center.post("#{self.class.name.upcase}Changed", data)
+        App.notification_center.post("#{self.class.name.upcase}Changed", data_snapshot)
     end)
 
-    @ref.observeEventType(FIRDataEventTypeChildAdded,
-      withBlock: proc do |data|
+    @ref.observeEventType(FIRDataEventTypeChildAdded, withBlock: 
+      lambda do |data_snapshot|
         puts "FIREBASEOBJECT CHILDADDED".red if DEBUGGING
-        # Should we turn it into a better-formed hash here?
-        App.notification_center.post("#{self.class.name.upcase}New", data)
+        App.notification_center.post("#{self.class.name.upcase}New", data_snapshot)
     end)
   end
-
-  def set_uuid_with_string(in_uuid_string)
-    @uuid = NSUUID.alloc.initWithUUIDString(in_uuid_string)
-  end
-
-
 
   def update_all
     puts "FIREBASEOBJECT UPDATE_ALL".blue if DEBUGGING
-    output = {}
-    @variables_to_save.each do |v|
-      # puts self.valueForKey(v)
-      val = self.valueForKey(v)
-      # puts val.class
-      # puts val.class.method_defined? :to_firebase
-      # output[v] = val.to_firebase
-      # output[v] = val.is_a? ":String" ? val : val.to_firebase # this doesn't work
-      # why the hell does this not work for Strings
-      # TODO fix this nonsense
-      case val
-      when String
-        output[v] = val # ugh
-      when NilClass
-
-      else
-        output[v] = val.to_firebase
+    @ref.setValue(data_hash, withCompletionBlock: 
+      lambda do |error, ref|
+        puts "FIREBASEOBJECT UPDATED".green
+        puts "Updated: #{ref.key}".green
       end
-    end
-    puts "Updating all: #{output}"
-    @ref.setValue(output, withCompletionBlock: lambda do |error, ref|
-      puts "FIREBASEOBJECT UPDATED\a"
-    end)
+    )
   end
 
   def update(node)
@@ -79,14 +55,27 @@ class FirebaseObject
     # puts "temp_variable: #{temp_variable}"
     @ref.child("#{node}").setValue(temp_variable.to_firebase)
   end
-
-  def uuid_string
-    @uuid.UUIDString if @uuid
+  
+  def get_node(node)
+    @ref.child(node).getDataWithCompletionBlock(
+      lambda do | error, data_snapshot |
+        puts "Error: #{error.localizedDescription}".red if error
+        return data_snapshot.valueInExportFormat
+      end
+    )
+  end
+  
+  def do_node_completion(node, &completion)
+    @ref.child(node).getDataWithCompletionBlock(
+      lambda do | error, data_snapshot |
+        puts "Error: #{error.localizedDescription}".red if error
+        
+        completion.call(data_snapshot.valueInExportFormat)
+      end
+    )
   end
 
   def to_s
-    class_name = self.class.name
-    puts instance_variables.to_s
-    "FirebaseObject: #{class_name}\n\tref: #{@ref}\n\tuuid: #{uuid_string}\n"
+    "FirebaseObject: #{self.class.name}\n\tref: #{@ref}\n\tdata_hash: #{@data_hash}\n"
   end
 end

@@ -38,7 +38,6 @@
 
 -(IBAction) viewDidLoad;
 -(IBAction) select_player_class:(id) sender;
--(IBAction) select_scout;
 -(IBAction) dismiss_modal;
 
 @end
@@ -79,11 +78,18 @@
 
 @end
 
-@interface GameController: UIViewController
+@interface MachineViewController: UIViewController
+-(IBAction) viewDidLoad;
+
+@end
+
+@interface GameController: MachineViewController
 
 @property IBOutlet MKMapView * map_view;
 @property IBOutlet UIButton * button_pylon;
 
+-(IBAction) setup_mapview;
+-(IBAction) setup_audio;
 -(IBAction) viewWillAppear:(id) animated;
 -(IBAction) viewDidLoad;
 -(IBAction) renderOverlays;
@@ -96,6 +102,12 @@
 -(IBAction) add_annotations;
 -(IBAction) player_for_audio:(id) filename;
 -(IBAction) create_new_pouwhenua;
+-(IBAction) handle_new_pylon:(id) data;
+-(IBAction) handle_new_pouwhenua:(id) data;
+-(IBAction) observe_new_pouwhenua;
+-(IBAction) observe_new_pylon:(id) notification_object;
+-(IBAction) observe_change_pylon;
+-(IBAction) observe_death_pylon:(id) notification_object;
 
 @end
 
@@ -187,7 +199,7 @@
 
 @end
 
-@interface JoinController: UIViewController
+@interface JoinController: MachineViewController
 
 @property IBOutlet UITextField * gamecode;
 @property IBOutlet CharacterController * character_view;
@@ -212,9 +224,8 @@
 @interface Kaitarako: NSObject
 -(IBAction) display_name;
 -(IBAction) get_remote_display_name;
--(IBAction) player_class;
--(IBAction) get_remote_player_class;
 -(IBAction) email;
+-(IBAction) character;
 -(IBAction) get_remote_email;
 -(IBAction) user_id;
 -(IBAction) coordinate;
@@ -252,7 +263,7 @@
 
 @end
 
-@interface MenuController: UIViewController
+@interface MenuController: MachineViewController
 
 @property IBOutlet UIButton * button_login;
 @property IBOutlet UIButton * button_settings;
@@ -270,7 +281,7 @@
 
 @end
 
-@interface NewController: UIViewController
+@interface NewController: MachineViewController
 
 @property IBOutlet UILabel * gamecode;
 @property IBOutlet CharacterController * character_view;
@@ -282,6 +293,7 @@
 
 -(IBAction) viewDidLoad;
 -(IBAction) handle_new_player;
+-(IBAction) handle_changed_player;
 -(IBAction) cancel_new_game;
 -(IBAction) compose_sms;
 -(IBAction) continue_button_action:(id) sender;
@@ -314,19 +326,22 @@
 
 @end
 
-@interface SettingsController: UIViewController
+@interface SettingsController: MachineViewController
+-(IBAction) viewDidLoad;
 -(IBAction) dismiss_modal;
 
 @end
 
-@interface SplashController: UIViewController
+@interface SplashController: MachineViewController
 -(IBAction) viewDidLoad;
 -(IBAction) handleSingleTap:(id) recognizer;
 
 @end
 
 @interface Takaro: NSObject
--(IBAction) initialize:(id) in_id;
+-(IBAction) initialize:(id) in_uuid;
+-(IBAction) start_syncing;
+-(IBAction) stop_syncing;
 -(IBAction) init_kapa;
 -(IBAction) set_up_observers;
 -(IBAction) create_new_remote_kapa;
@@ -334,10 +349,11 @@
 -(IBAction) update_kapa_location:(id) kapa_ref;
 -(IBAction) list_player_names_for_index:(id) in_index;
 -(IBAction) player_count_for_index:(id) in_index;
--(IBAction) list_player_classes_for_index:(id) in_index;
 -(IBAction) generate_new_id;
 -(IBAction) set_initial_pouwhenua;
 -(IBAction) start_observing_pouwhenua;
+-(IBAction) create_new_pouwhenua:(id) coord;
+-(IBAction) get_all_pouwhenua_coords;
 -(IBAction) create_bot_player;
 
 @end

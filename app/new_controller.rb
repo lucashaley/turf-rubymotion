@@ -1,4 +1,6 @@
 class NewController < MachineViewController
+  extend IB
+  
   # outlet :mapview, MKMapView
   outlet :gamecode, UILabel
   outlet :character_view, CharacterController
@@ -26,25 +28,18 @@ class NewController < MachineViewController
     # get the current player's location
     Machine.instance.initialize_location_manager
 
-    # # Old version
-    # # create a new game in Firebase and retrieve its ID
-    # # TODO perhaps move this into viewWillAppear?
-    # # Machine.instance.create_new_game
-    # Machine.instance.create_new_game.tap do |game|
-    #   puts "Created new game: #{game.uuid_string}".pink
-    #   gamecode.text = game.gamecode
-    # end
-
     @takaro = Takaro.new
 
     # Listen for new players
     @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
       puts "PLAYER NEW".yellow
-
-      # puts notification.object.value unless notification.object.value.nil?
-
       handle_new_player
     end
+    @player_changed_observer = App.notification_center.observe "PlayerChanged" do |notification|
+      puts "PLAYER CHANGED".yellow
+      handle_changed_player
+    end
+    
     @kapa_new_observer = App.notification_center.observe "KapaNew" do |notification|
       puts "NEWCONTROLLER NEWKAPA".yellow
       table_team_a.reloadData
@@ -72,16 +67,16 @@ class NewController < MachineViewController
     unless cell
       cell = UITableViewCell.alloc.initWithStyle(UITableViewCellStyleSubtitle, reuseIdentifier: CELL_IDENTIFIER)
     end
-
-    # How can we tell which table it's from?
-    if table_view == @table_team_a
-      cell.textLabel.text = @takaro.list_player_names_for_index(TABLEVIEW_TEAM_A)[index_path.row]
-    elsif table_view == @table_team_b
-      cell.textLabel.text = @takaro.list_player_names_for_index(TABLEVIEW_TEAM_B)[index_path.row]
+    
+    puts "table_view: #{table_view.inspect}".red
+    table = case table_view
+      when @table_team_a then TABLEVIEW_TEAM_A
+      when @table_team_b then TABLEVIEW_TEAM_B
+      else 'poop'
     end
-
-    # This will eventually be their character role
-    cell.detailTextLabel.text = "Mung beans"
+    player = @takaro.list_player_names_for_index(table)[index_path.row]
+    cell.textLabel.text = player['display_name']
+    cell.detailTextLabel.text = player['character']
 
     cell
   end
@@ -105,6 +100,13 @@ class NewController < MachineViewController
 
   def handle_new_player
     puts "NEWCONTROLLER HANDLE_NEW_PLAYER".blue if DEBUGGING
+    # TODO this is a hack
+    table_team_a.reloadData
+    table_team_b.reloadData
+  end
+  
+  def handle_changed_player
+    puts "NEWCONTROLLER HANDLE_CHANGED_PLAYER".blue if DEBUGGING
     # TODO this is a hack
     table_team_a.reloadData
     table_team_b.reloadData
