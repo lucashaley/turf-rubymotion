@@ -55,10 +55,9 @@
 @interface FirebaseObject: NSObject
 -(IBAction) pull;
 -(IBAction) start_observing;
--(IBAction) set_uuid_with_string:(id) in_uuid_string;
 -(IBAction) update_all;
 -(IBAction) update:(id) node;
--(IBAction) uuid_string;
+-(IBAction) get_node:(id) node;
 -(IBAction) to_s;
 
 @end
@@ -233,9 +232,9 @@
 
 @end
 
-@interface Kapa: NSObject
+@interface Kapa: FirebaseObject
 -(IBAction) color;
--(IBAction) name;
+-(IBAction) within_distance:(id) in_coordinate;
 
 @end
 
@@ -257,7 +256,6 @@
 -(IBAction) set_player:(id) player;
 -(IBAction) create_new_game;
 -(IBAction) set_game:(id) game;
--(IBAction) create_new_pylon;
 -(IBAction) create_new_pouwhenua;
 -(IBAction) check_for_game:(id) gamecode;
 
@@ -339,20 +337,19 @@
 @end
 
 @interface Takaro: NSObject
--(IBAction) initialize:(id) in_uuid;
+-(IBAction) initialize:(id) in_key;
 -(IBAction) start_syncing;
 -(IBAction) stop_syncing;
 -(IBAction) init_kapa;
 -(IBAction) set_up_observers;
--(IBAction) create_new_remote_kapa;
 -(IBAction) add_local_player:(id) in_user;
 -(IBAction) update_kapa_location:(id) kapa_ref;
 -(IBAction) list_player_names_for_index:(id) in_index;
 -(IBAction) player_count_for_index:(id) in_index;
 -(IBAction) generate_new_id;
+-(IBAction) random_color_string;
 -(IBAction) set_initial_pouwhenua;
 -(IBAction) start_observing_pouwhenua;
--(IBAction) create_new_pouwhenua:(id) coord;
 -(IBAction) get_all_pouwhenua_coords;
 -(IBAction) create_bot_player;
 
@@ -427,6 +424,7 @@
 -(IBAction) to_CLLocationCoordinate2D;
 -(IBAction) recursive_symbolize_keys:(id) h;
 -(IBAction) format_to_location_coord:(id) input;
+-(IBAction) random_color;
 
 @end
 
@@ -434,6 +432,7 @@
 -(IBAction) to_CLLocationCoordinate2D;
 -(IBAction) recursive_symbolize_keys:(id) h;
 -(IBAction) format_to_location_coord:(id) input;
+-(IBAction) random_color;
 
 @end
 

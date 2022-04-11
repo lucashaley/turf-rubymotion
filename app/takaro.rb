@@ -5,7 +5,7 @@ class Takaro
                 :uuid,
                 :local_player_ref,
                 :nga_kapa,
-                # :nga_kapa_hash,
+                :nga_kapa_hash,
                 :kapa_array,
                 :machine,
                 :kapa_observer_handle,
@@ -127,7 +127,7 @@ class Takaro
 
     # This is used for updating the UI
     # And needs to have 0 and 1 indecies
-    # @nga_kapa_hash = {}
+    @nga_kapa_hash = {}
     @nga_kapa = []
     @kapa_array = []
     @pouwhenua_array = []
@@ -208,25 +208,43 @@ class Takaro
             # There is already one on the server
             # get its data and add it to the local hash
             current_kapa_snapshot = kapa_snapshot.children.allObjects[i]
-            current_kapa_ref = current_kapa_snapshot.ref
+            # current_kapa_ref = current_kapa_snapshot.ref
             
             # set up blank array
             @kapa_array[i] = {
-              "id" => current_kapa_snapshot.key,
-              "players" => [],
-              "coordinate" => {}
+              'id' => current_kapa_snapshot.key,
+              'players' => [],
+              'coordinate' => {},
+              'color' => random_color_string
             }
+            @nga_kapa_hash[current_kapa_snapshot.key] = 
+            {
+              'players' => [],
+              'coordinate' => {},
+              'color' => random_color_string
+            }
+            puts "nga_kapa_hash: #{@nga_kapa_hash.inspect}".yellow
+            
             # and pull down the player names
-            kapa_snapshot.ref.child("kaitakaro").getDataWithCompletionBlock(
+            # kapa_snapshot.ref.child("kaitakaro").getDataWithCompletionBlock(
+            current_kapa_snapshot.ref.child('kaitakaro').getDataWithCompletionBlock(
               lambda do | error, player_snapshot |
                 player_snapshot.children.each do |current_player_snapshot|
-                  current_player_name = current_player_snapshot.childSnapshotForPath("display_name").value
+                  current_player_name = current_player_snapshot.childSnapshotForPath('display_name').value
+                  current_player_character = current_player_snapshot.childSnapshotForPath('character').value
                   # puts "current_player_name:#{current_player_name}".focus
-                  @kapa_array[i]["players"] << {
+                  @kapa_array[i]['players'] << {
                     'display_name' => current_player_name,
-                    'character' => 'Toad'
+                    'character' => current_player_character
                   }
-                  puts "kapa_array: #{@kapa_array.inspect}".red
+                  puts current_kapa_ref.key
+                  @nga_kapa_hash[current_kapa_snapshot.key].merge 
+                  {
+                    'display_name' => current_player_name,
+                    'character' => current_player_character
+                  }
+                  puts "kapa_array: #{@kapa_array.inspect}".yellow
+                  puts "nga_kapa_hash: #{@nga_kapa_hash.inspect}".yellow
                 end
               end
             )
@@ -234,11 +252,21 @@ class Takaro
             # We need to create a new one
             current_kapa_ref = @ref.child("kapa").childByAutoId
             current_kapa_ref.updateChildValues({"created" => FIRServerValue.timestamp})
+            new_color = random_color_string
+            current_kapa_ref.updateChildValues({'color' => new_color})
             @kapa_array << {
               "id" => current_kapa_ref.key,
               "players" => [],
-              "coordinate" => {}
+              "coordinate" => {},
+              'color' => new_color
             }
+            @nga_kapa_hash[current_kapa_ref.key] = 
+            {
+              'players' => [],
+              'coordinate' => {},
+              'color' => new_color
+            }
+            puts "nga_kapa_hash: #{@nga_kapa_hash.inspect}".yellow
           end
 
           # then we need to add the observers
@@ -365,16 +393,6 @@ class Takaro
   # Local Data
   #################
 
-  # Does this even get called?
-  # def create_new_remote_kapa
-  #   puts "TAKARO CREATE_NEW_REMOTE_KAPA".blue if DEBUGGING
-  #   # TODO We need to check here if there are existing kapa!
-  #   @ref.child("kapa").childByAutoId.updateChildValues({index: 0}, withCompletionBlock:
-  #     lambda do | error, child_ref |
-  #       @ref.child("kapa").childByAutoId.updateChildValues({index: 1})
-  #     end
-  #   )
-  # end
 
   # This needs to do the hard labour of setting the kapa
   # and it all needs to be local, then sent to server
@@ -463,6 +481,10 @@ class Takaro
     # https://gist.github.com/mbajur/2aba832a6df3fc31fe7a82d3109cb626
     rand(36**6).to_s(36)
   end
+  
+  def random_color_string
+    "#{rand().round(2)} #{rand().round(2)} #{rand().round(2)} 1"
+  end
 
   #################
   # Pouwhenua Stuff
@@ -478,10 +500,14 @@ class Takaro
     coord_array = []
 
     # TODO Could this be using the local info?
+    puts "kapa_array for default pouwhenua: #{@kapa_array.inspect}".yellow
+    puts "nga_kapa_hash for default pouwhenua: #{@nga_kapa_hash.inspect}".yellow
     @kapa_array.each do |k|
       # create remote instance
       # puts "Creating remote instance".focus
-      create_new_pouwhenua(k["coordinate"])
+      # this uses the same local color for each!
+      # TODO change to use the kapa colors
+      create_new_pouwhenua(k["coordinate"], k['color'])
 
       # add to local coords
       coord_array << k["coordinate"]
@@ -542,23 +568,25 @@ class Takaro
         puts "#{pouwhenua_array}".focus
 
         # Should we turn it into a better-formed hash here?
-        App.notification_center.post("PouwhenuaNew", data)
+        App.notification_center.post('PouwhenuaNew', data)
     end)
   end
 
-  def create_new_pouwhenua(coord = @local_player_locationCoords)
+  def create_new_pouwhenua(coord = @local_player_locationCoords, color = @nga_kapa_hash[@local_kaitakaro.kapa_ref.key]['color'])
     puts "TAKARO CREATE_NEW_POUWHENUA".blue if DEBUGGING
     coord = Utilities::format_to_location_coord(coord)
-    puts "Coord: #{coord}"
-    # puts "create_new_pouwhenua coord: #{coord.latitude}, #{coord.longitude}".focus
-    # TODO restructure Pouwhenua
-    # We need to create it remotely, then have the observers create the local version?
+    
+    # we also need to get the color
+    puts "local_kaitakaro: #{local_kaitakaro.inspect}".green
+    puts "nga_kapa_hash: #{@nga_kapa_hash[@local_kaitakaro.kapa_ref.key]['color'].inspect}".green
     @ref.child("pouwhenua").childByAutoId.updateChildValues(
       {
         'created' => FIRServerValue.timestamp,
-        'color' => CIColor.blueColor.stringRepresentation,
+        'color' => color,
         'location' => { 'latitude' => coord.latitude, 'longitude' => coord.longitude },
-        'title' => 'Baked Beans'
+        'title' => 'Baked Beans',
+        'kapa' => @local_kaitakaro.kapa_ref.key,
+        'lifespan' => @local_kaitakaro.character['lifespan_ms']
       },
       withCompletionBlock: lambda do | error, child_ref |
         # puts "CREATED REMOTE POUWHENUA".focus
@@ -612,9 +640,5 @@ class Takaro
         puts "Updated bot coordinate: #{CLLocationCoordinate2DMake(lat, long).inspect}".yellow
       end
     )
-    # 
-    # lat = rand(37.336144370126..37.336144370127)
-    # long = -rand(122.059911595149..122.059911595150)
-    # @bot.coordinate = CLLocationCoordinate2DMake(lat, long)
   end
 end

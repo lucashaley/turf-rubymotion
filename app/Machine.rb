@@ -15,8 +15,8 @@ class Machine
                 :auth_view_controller,
                 :takaro
 
-  attr_reader :handleDataResult,
-              :game
+  attr_reader :handleDataResult
+              # :game
 
   DEBUGGING = false
 
@@ -227,13 +227,6 @@ class Machine
     @game = game
   end
 
-  # def create_new_pylon(location=@player.location)
-  def create_new_pylon
-    puts "MACHINE: CREATE_NEW_PYLON".blue if DEBUGGING
-    # new_location = location || @player.location
-    puts "Player location: #{@player.location.coordinate.longitude}, #{@player.location.coordinate.latitude}".red
-    @game.create_new_pylon(@player.location.coordinate)
-  end
   def create_new_pouwhenua
     puts "MACHINE: CREATE_NEW_POUWHENUA".blue if DEBUGGING
     @game.create_new_pouwhenua(@player.location.coordinate)

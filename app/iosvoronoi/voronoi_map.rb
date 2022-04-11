@@ -59,6 +59,9 @@ class VoronoiMap
 
     result.cells.each_with_index do |cell, index|
       puts "cell: #{cell.site}".focus
+      
+      # In the old version, this would cross-reference the pylon list
+      # for us, we need to access the kapa
       pylon = pylons.objectForKey(cell.site.uuID)
 
       c = Wakawaka.new(cell, pylon)

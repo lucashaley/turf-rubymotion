@@ -162,4 +162,8 @@ module Utilities
     end
     0
   end
+  
+  def random_color
+    "#{rand().round(2)} #{rand().round(2)} #{rand().round(2)} 1"
+  end
 end

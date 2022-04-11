@@ -142,53 +142,6 @@ class GameController < MachineViewController
     add_overlays_and_annotations
   end
 
-  ### LOCATION MANAGER DELEGATES ###
-
-  ### Start up the Location Manager ###
-  ### This has now moved into the Machine ###
-  # def initialize_location_manager
-  #   puts "initialize_location_manager"
-  #   @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
-  #     lm.requestWhenInUseAuthorization
-  #
-  #     # constant needs to be capitalized because?
-  #     lm.desiredAccuracy = KCLLocationAccuracyBest
-  #     lm.startUpdatingLocation
-  #     lm.delegate = self
-  #   end
-  #   map_view.registerClass(PylonAnnotation, forAnnotationViewWithReuseIdentifier: "PylonAnnotation")
-  # end
-
-  ### Get new location information ###
-  ### This has now moved into the Machine ###
-  # https://github.com/HipByte/RubyMotionSamples/blob/a387842594fd0ac9d8560d2dc64eff4d87534093/ios/Locations/app/locations_controller.rb
-  # def locationManager(manager, didUpdateToLocation:newLocation, fromLocation:oldLocation)
-  #   # puts "GameController.didUpdateLocation: #{newLocation} to: #{oldLocation}"
-  #
-  #   # Check if we are outside the bounds of play
-  #   # unless MKMapRectContainsPoint(Machine.instance.bounding_box, MKMapPointForCoordinate(newLocation.coordinate))
-  #   #   App.notification_center.post 'BoundaryExit'
-  #   # end
-  #   if MKMapRectContainsPoint(Machine.instance.bounding_box, MKMapPointForCoordinate(newLocation.coordinate))
-  #     @local_player.machine.event(:enter_bounds)
-  #   else
-  #     @local_player.machine.event(:exit_bounds)
-  #   end
-  #   locationUpdate(newLocation)
-  # end
-  #
-  # def locationManager(manager, didFailWithError:error)
-  #   puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
-  #   App.notification_center.post "PlayerDisappear"
-  # end
-  #
-  # def locationUpdate(location)
-  #   loc = location.coordinate
-  #   @player_location = location.coordinate
-  #   @local_player.location = location
-  #   # map_view.setCenterCoordinate(loc)
-  # end
-
   PYLON_VIEW_IDENTIFIER = "PylonViewIdentifier"
 
   ### Makes an annotation image for the map ###
@@ -332,20 +285,20 @@ class GameController < MachineViewController
   #   Machine.instance.create_new_pylon
   # end
 
-  def create_new_pouwhenua
-
-  end
-
-  def handle_new_pylon(data)
-    puts "GAME_CONTROLLER: HANDLE_NEW_PYLON".blue if DEBUGGING
-
-    p = Pylon.initWithHash(data)
-    p.set_uuid data[:uuID]
-
-    @voronoi_map.add_pylon(p)
-
-    renderOverlays
-  end
+#   def create_new_pouwhenua
+# 
+#   end
+# 
+#   def handle_new_pylon(data)
+#     puts "GAME_CONTROLLER: HANDLE_NEW_PYLON".blue if DEBUGGING
+# 
+#     p = Pylon.initWithHash(data)
+#     p.set_uuid data[:uuID]
+# 
+#     @voronoi_map.add_pylon(p)
+# 
+#     renderOverlays
+#   end
 
   def handle_new_pouwhenua(data)
     puts "GAME_CONTROLLER: HANDLE_NEW_POUWHENUA".blue if DEBUGGING
