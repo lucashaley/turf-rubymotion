@@ -1,3 +1,4 @@
+# This is the main brain for the app
 class Machine
   attr_accessor :fsm,
                 :delegate,
@@ -13,20 +14,27 @@ class Machine
                 :location_manager,
                 :tracking,
                 :auth_view_controller,
-                :takaro
+                :takaro,
+                :takaro_fbo,
+                :game_duration,
+                :local_character,
+                :gamecode,
+                :is_waiting,
+                :is_playing
 
   attr_reader :handleDataResult
-              # :game
 
-  DEBUGGING = false
+  DEBUGGING = true
 
   def initialize
-    puts "MACHINE: INITIALIZE".green if DEBUGGING
+    puts 'MACHINE: INITIALIZE'.green if DEBUGGING
 
     @delegate = UIApplication.sharedApplication.delegate
     @rootview = UIApplication.sharedApplication.delegate.window.rootViewController
 
     @tracking = false
+    @is_playing = false
+    @is_waiting = false
     # @game = Game.new
     # @bounding_box = UIScreen.mainScreen.bounds
 
@@ -59,13 +67,13 @@ class Machine
     # also
     # http://www.zenruby.info/2016/05/procs-and-lambdas-closures-in-ruby.html
     handle_auth_state_changed = proc do |auth, user|
-      puts "handle_auth_state_changed".red
+      puts 'handle_auth_state_changed'.red
 
       if auth.currentUser
-        puts "User already logged in".pink
+        puts 'User already logged in'.pink
         @user = auth.currentUser
       else
-        puts "No user logged in".pink
+        puts 'No user logged in'.pink
         @user = nil
       end
     end
@@ -99,22 +107,22 @@ class Machine
     ####################
     # SPLASH SCREEN
     @fsm.when :splash do |state|
-      state.on_entry { puts "Machine start splash".pink }
-      state.on_exit { puts "Machine end splash".pink }
+      state.on_entry { puts 'Machine start splash'.pink }
+      state.on_exit { puts 'Machine end splash'.pink }
 
       state.transition_to :menu,
         after: 10,
         on: :splashToMenu,
         # on: :ready_for_splash,
-        action: proc { segue("ToMenu") }
+        action: proc { segue('ToMenu') }
         # action: Proc.new { UIApplication.sharedApplication.delegate.window.rootViewController.performSegueWithIdentifier("ToMenu", sender: self) }
     end
 
     ####################
     # MENU SCREEN
     @fsm.when :menu do |state|
-      state.on_entry { puts "Machine starting menu" }
-      state.on_exit { puts "Machine ending menu" }
+      state.on_entry { puts 'Machine starting menu' }
+      state.on_exit { puts 'Machine ending menu' }
 
       state.transition_to :logging_in,
         on: :log_in
@@ -123,8 +131,8 @@ class Machine
     ####################
     # LOGGING IN MODAL
     @fsm.when :logging_in do |state|
-      state.on_entry { puts "Machine starting logging_in!" }
-      state.on_exit { puts "Machine ending logging_in!" }
+      state.on_entry { puts 'Machine starting logging_in!' }
+      state.on_exit { puts 'Machine ending logging_in!' }
     end
 
     # calling this from the application instead
@@ -134,19 +142,17 @@ class Machine
   #####################
   # SINGLETON
   def self.instance
-    # puts "MACHINE: INSTANCE"
-    # @instance ||= self.new
     Dispatch.once { @instance ||= new }
     @instance
   end
 
-  def set_state(state)
-    puts "MACHINE SET_STATE".blue if DEBUGGING
+  def state=(state)
+    puts 'MACHINE SET_STATE'.blue if DEBUGGING
     @fsm.event(state)
   end
 
   def segue(name)
-    puts "MACHINE SEGUE".blue if DEBUGGING
+    puts 'MACHINE SEGUE'.blue if DEBUGGING
 
     # Can't we just use the current view controller shortcut?
     @delegate.window.rootViewController.performSegueWithIdentifier(name, sender: self)
@@ -163,13 +169,13 @@ class Machine
   #   # puts @db_ref.child("games")
   # end
 
-  def authUI(authUI, didSignInWithAuthDataResult: result, error: error)
-    puts "MACHINE DID_SIGN_IN".blue if DEBUGGING
-    puts "insane".red
+  def authUI(authUI, didSignInWithAuthDataResult: result, error: _error)
+    puts 'MACHINE DID_SIGN_IN'.blue if DEBUGGING
+    puts 'insane'.red
   end
 
   def initialize_location_manager
-    puts "MACHINE: INITIALIZE_LOCATION_MANAGER".blue if DEBUGGING
+    puts 'MACHINE: INITIALIZE_LOCATION_MANAGER'.blue if DEBUGGING
     @location_manager ||= CLLocationManager.alloc.init.tap do |lm|
       lm.requestWhenInUseAuthorization
 
@@ -182,8 +188,8 @@ class Machine
 
   # https://github.com/HipByte/RubyMotionSamples/blob/a387842594fd0ac9d8560d2dc64eff4d87534093/ios/Locations/app/locations_controller.rb
   def locationManager(manager, didUpdateToLocation: new_location, fromLocation: old_location)
-    puts "MACHINE: DIDUPDATETOLOCATION".blue if DEBUGGING
-    return unless @tracking
+    puts 'MACHINE: DIDUPDATETOLOCATION'.blue if DEBUGGING
+    # return unless @tracking
 
     # Check if the local player has left the play area
     # We don't need to do this in the NewController
@@ -197,23 +203,23 @@ class Machine
     # puts "old_location: #{old_location.coordinate}" unless old_location.nil?
 
     # switching to using CLLocation
-    App.notification_center.post("UpdateLocation",
-      {"new_location" => new_location, "old_location" => old_location}
+    App.notification_center.post('UpdateLocation',
+      {'new_location' => new_location, 'old_location' => old_location}
     )
   end
 
   def locationManager(manager, didFailWithError: error)
     puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
-    App.notification_center.post "PlayerDisappear"
+    App.notification_center.post 'PlayerDisappear'
   end
 
   def set_player(player)
-    puts "MACHINE: SET_PLAYER".blue if DEBUGGING
+    puts 'MACHINE: SET_PLAYER'.blue if DEBUGGING
     @player = player
   end
 
   def create_new_game
-    puts "MACHINE: CREATE_NEW_GAME".blue if DEBUGGING
+    puts 'MACHINE: CREATE_NEW_GAME'.blue if DEBUGGING
     # Old version not FirebaseObject
     # @game = Game.init_new_game
 
@@ -221,23 +227,23 @@ class Machine
     @game = Game.new
   end
 
-  def set_game(game)
-    puts "MACHINE: SET_GAME".blue if DEBUGGING
+  def game=(game)
+    puts 'MACHINE: SET_GAME'.blue if DEBUGGING
     puts game
     @game = game
   end
 
   def create_new_pouwhenua
-    puts "MACHINE: CREATE_NEW_POUWHENUA".blue if DEBUGGING
+    puts 'MACHINE: CREATE_NEW_POUWHENUA'.blue if DEBUGGING
     @game.create_new_pouwhenua(@player.location.coordinate)
   end
 
   def check_for_game(gamecode)
-    puts "MACHINE CHECK_FOR_GAME".blue if DEBUGGING
+    puts 'MACHINE CHECK_FOR_GAME'.blue if DEBUGGING
     puts gamecode.red if DEBUGGING
-    games_ref = @db.referenceWithPath("games")
+    games_ref = @db.referenceWithPath('games')
     puts "Games ref: #{games_ref.URL}"
-    this_query = games_ref.queryOrderedByChild("gamecode").queryEqualToValue(gamecode).queryLimitedToLast(1)
+    this_query = games_ref.queryOrderedByChild('gamecode').queryEqualToValue(gamecode).queryLimitedToLast(1)
     # puts this_query.ref.URL
     # puts "_this_query: #{_this_query}"
     this_query.getDataWithCompletionBlock(
@@ -252,5 +258,9 @@ class Machine
         return next_snapshot.key
       end
     )
+  end
+
+  def check_location_in_taiapa(in_location)
+    puts 'MACHINE check_location_in_taiapa'.blue if DEBUGGING
   end
 end

@@ -58,13 +58,19 @@ class CharacterController < UIViewController
 
     player_class = @player_classes.values[sender.tag]
     puts "Class selected: #{player_class}".focus
-    # Machine.instance.current_view.takaro.kaitakaro_hash = player_class
-    # Machine.instance.current_view.takaro.kaitakaro_hash["pouwhenua_current"] = player_class["pouwhenua_start"]
+
+    # This sends it directly to the Takaro
+    # But this won't work with the Join Controller, as the Takaro doesn't exist until
+    # the player enters the gamecode    
+    # Machine.instance.current_view.takaro.local_kaitakaro_hash['player_class'] = player_class
+    # Machine.instance.current_view.takaro.local_kaitakaro.character_hash = player_class
+    # Machine.instance.current_view.takaro.local_kaitakaro.character = player_class
     
-    Machine.instance.current_view.takaro.local_kaitakaro_hash['player_class'] = player_class
-    Machine.instance.current_view.takaro.local_kaitakaro.character_hash = player_class
-    Machine.instance.current_view.takaro.local_kaitakaro.character = player_class
-    puts "local_kaitakaro: #{Machine.instance.current_view.takaro.local_kaitakaro.inspect}".red
+    # directly make a local variable on the Controller, for Join Controller
+    Machine.instance.current_view.local_character = player_class
+    
+    # post notification for New Controller
+    App.notification_center.post("SelectCharacter", player_class)
 
     dismiss_modal
   end

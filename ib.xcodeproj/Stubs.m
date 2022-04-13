@@ -33,6 +33,9 @@
 @implementation GameOld
 @end
 
+@implementation GameOptionsController
+@end
+
 @implementation MKPolygon
 @end
 
@@ -63,13 +66,19 @@
 @implementation JoinController
 @end
 
+@implementation JoinExistingController
+@end
+
 @implementation Kaitarako
+@end
+
+@implementation KaitakaroFbo
 @end
 
 @implementation Kapa
 @end
 
-@implementation KapaFirebaseObject
+@implementation KapaFbo
 @end
 
 @implementation Machine
@@ -87,10 +96,16 @@
 @implementation PlayerCell
 @end
 
+@implementation PouwhenuaFbo
+@end
+
 @implementation ClayPathMaker
 @end
 
 @implementation Scout
+@end
+
+@implementation SelectCharacterController
 @end
 
 @implementation SettingsController
@@ -100,6 +115,9 @@
 @end
 
 @implementation Takaro
+@end
+
+@implementation TakaroFbo
 @end
 
 @implementation String

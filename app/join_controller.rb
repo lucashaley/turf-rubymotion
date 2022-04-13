@@ -1,4 +1,5 @@
 class JoinController < MachineViewController
+  
   # outlet :mapview, MKMapView
   outlet :gamecode, UITextField
   outlet :character_view, CharacterController
@@ -12,7 +13,8 @@ class JoinController < MachineViewController
 
   outlet :not_close_enough, UILabel
 
-  attr_accessor :takaro
+  attr_accessor :takaro,
+                :local_character
 
   DEBUGGING = true
   CELL_IDENTIFIER = "PlayerCell"
@@ -23,11 +25,9 @@ class JoinController < MachineViewController
 
     # get the current player's location
     Machine.instance.initialize_location_manager
-
-    # Never really got this to work
-    # Keep around, though, just in case
-    # table_team_a.registerClass(PlayerCell, forCellReuseIdentifier: CELL_IDENTIFIER)
-    # table_team_b.registerClass(PlayerCell, forCellReuseIdentifier: CELL_IDENTIFIER)
+    
+    # We can't do this yet, as we need to create it from the existing server version
+    # @takaro = Takaro.new
 
     # Listen for new players
     @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
@@ -145,6 +145,7 @@ class JoinController < MachineViewController
             # create the takaro
             puts "snapshot: #{snapshot.value}".focus
             @takaro = Takaro.new(snapshot.children.nextObject.key)
+            @takaro.local_kaitakaro.character = local_character
           end
         )
       #

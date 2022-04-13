@@ -38,7 +38,7 @@ class Takaro
   # [
   #   {
   #     "id" => id,
-  #     "players" => 
+  #     "players" =>
   #     [
   #       {
   #         'display_name',
@@ -105,23 +105,28 @@ class Takaro
 
   # def initialize(in_uuid = NSUUID.UUID.UUIDString
   def initialize(in_key = nil)
-    puts "TAKARO INITIALIZE".light_blue if DEBUGGING
+    puts 'TAKARO INITIALIZE'.light_blue if DEBUGGING
     puts "Creating new takaro with key: #{in_key}".pink if DEBUGGING
-    
-    unless in_key.nil?
-      @ref = Machine.instance.db.referenceWithPath("games/#{in_key}")
-    else
-      @ref = Machine.instance.db.referenceWithPath('games').childByAutoId
-    end
 
-    # TODO do we do this if we're not creating from scratch? Won't it overwrite?
-    # TODO yes it totally does
-    new_gamecode = generate_new_id
-    @ref.updateChildValues({"gamecode" => new_gamecode}, withCompletionBlock:
-      lambda do | error, game_ref |
-        App.notification_center.post("GamecodeNew", new_gamecode)
-      end
-    ) unless in_key
+    if in_key.nil?
+      @ref = Machine.instance.db.referenceWithPath('games').childByAutoId
+    else
+      @ref = Machine.instance.db.referenceWithPath("games/#{in_key}")
+    end
+    # unless in_key.nil?
+    #   @ref = Machine.instance.db.referenceWithPath("games/#{in_key}")
+    # else
+    #   @ref = Machine.instance.db.referenceWithPath('games').childByAutoId
+    # end
+
+    # # TODO do we do this if we're not creating from scratch? Won't it overwrite?
+    # # TODO yes it totally does
+    # new_gamecode = generate_new_id
+    # @ref.updateChildValues({"gamecode" => new_gamecode}, withCompletionBlock:
+    #   lambda do | error, game_ref |
+    #     App.notification_center.post("GamecodeNew", new_gamecode)
+    #   end
+    # ) unless in_key
 
     puts "New takaro: #{@ref.URL}" if DEBUGGING
 
@@ -139,7 +144,7 @@ class Takaro
 
     @machine = StateMachine::Base.new start_state: :start, verbose: DEBUGGING
     @machine.when :start do |state|
-      state.on_entry { puts "Takaro state start".pink }
+      state.on_entry { puts 'Takaro state start'.pink }
       state.transition_to :pull_remote_kapa, on: :go_to_pull_remote_kapa
     end
     @machine.when :pull_remote_kapa do |state|
@@ -166,7 +171,7 @@ class Takaro
 
     add_local_player
 
-    # TODO do we need this?
+    # TODO: do we need this?
     self
   end
 
@@ -176,13 +181,13 @@ class Takaro
   # Not entirely sure we need this.
 
   def start_syncing
-    puts "TAKARO START_SYNCING".blue if DEBUGGING
+    puts 'TAKARO START_SYNCING'.blue if DEBUGGING
     # keep everything up to date
     @ref.keepSynced true
   end
 
   def stop_syncing
-    puts "TAKARO STOP_SYNCING".blue if DEBUGGING
+    puts 'TAKARO STOP_SYNCING'.blue if DEBUGGING
     @ref.keepSynced false
   end
 
@@ -193,23 +198,25 @@ class Takaro
   # INITIALIZE THE KAPA (TEAMS)
   #
   def init_kapa
-    puts "TAKARO INIT_KAPA".blue if DEBUGGING
+    puts 'TAKARO INIT_KAPA'.blue if DEBUGGING
     
     @nga_kapa << Kapa.new(@ref.child('nga_kapa').childByAutoId)
     @nga_kapa << Kapa.new(@ref.child('nga_kapa').childByAutoId)
 
     # Check first for server kapa
-    @ref.child("kapa").getDataWithCompletionBlock(
+    @ref.child('kapa').getDataWithCompletionBlock(
       lambda do | error, kapa_snapshot |
         # childCount = kapa_snapshot?.hasChildren || 0
         childCount = kapa_snapshot.nil? ? 0 : kapa_snapshot.childrenCount
         TEAM_COUNT.times do |i|
+          puts "i: #{i}".yellow
+          puts "childCount: #{childCount}".yellow
           if childCount > i
             # There is already one on the server
             # get its data and add it to the local hash
             current_kapa_snapshot = kapa_snapshot.children.allObjects[i]
             # current_kapa_ref = current_kapa_snapshot.ref
-            
+
             # set up blank array
             @kapa_array[i] = {
               'id' => current_kapa_snapshot.key,
@@ -224,9 +231,14 @@ class Takaro
               'color' => random_color_string
             }
             puts "nga_kapa_hash: #{@nga_kapa_hash.inspect}".yellow
-            
+
             # and pull down the player names
+            puts "current_kapa_snapshot: #{current_kapa_snapshot.inspect}".yellow
             # kapa_snapshot.ref.child("kaitakaro").getDataWithCompletionBlock(
+
+            # TODO I'm totally not sure what is going on here
+            # can't we just use the snapshot?
+            # WHUT
             current_kapa_snapshot.ref.child('kaitakaro').getDataWithCompletionBlock(
               lambda do | error, player_snapshot |
                 player_snapshot.children.each do |current_player_snapshot|
@@ -250,10 +262,12 @@ class Takaro
             )
           else
             # We need to create a new one
+            # THIS IS APPARENTLY WHERE WE MAKE NEW SERVER KAPA
             current_kapa_ref = @ref.child("kapa").childByAutoId
-            current_kapa_ref.updateChildValues({"created" => FIRServerValue.timestamp})
+            current_kapa_ref.updateChildValues({ "created" => FIRServerValue.timestamp })
+            current_kapa_ref.child('kaitakaro').updateChildValues({ "testing" => "value" })
             new_color = random_color_string
-            current_kapa_ref.updateChildValues({'color' => new_color})
+            current_kapa_ref.updateChildValues({ 'color' => new_color })
             @kapa_array << {
               "id" => current_kapa_ref.key,
               "players" => [],
@@ -327,14 +341,12 @@ class Takaro
           player_character = player_snapshot.childSnapshotForPath("character/title").value
           # puts "player_display_name: #{player_display_name}"
 
-          puts "kapa_array (297): #{@kapa_array}".focus
           kapa_in_array = @kapa_array.find { |k| k["id"] == player_team_id }
-          puts "kapa_in_array: #{kapa_in_array}".focus
 
           # Here we check if the player is already in the kapa_array
           # and if not, we add it
           # and if so, we update with the character
-          player_index = kapa_in_array['players'].index {|p| p['display_name']==player_display_name}
+          player_index = kapa_in_array['players'].index { |p| p['display_name']==player_display_name }
           if player_index.nil?
             puts "ADDING TO KAPA!!! #{player_display_name}".blue
             kapa_in_array["players"] << {
@@ -348,7 +360,7 @@ class Takaro
           puts "Updated Kapa: #{@kapa_array}"
 
           # puts "takaro kapa_array: #{@kapa_array}".red
-          App.notification_center.post "PlayerChanged"
+          App.notification_center.post 'PlayerChanged'
         end
       end
     )
@@ -405,6 +417,8 @@ class Takaro
     @local_kaitakaro.display_name = in_user.displayName
     @local_kaitakaro.email = in_user.email
     @local_kaitakaro.is_local = true
+    
+    @k_fbo = KaitakaroFbo.new(@ref.child("kaitakaro").childByAutoId, {'user_id' => in_user.uid})
   end
 
   
@@ -432,11 +446,11 @@ class Takaro
         lats_average = lats.inject{ |sum, el| sum + el }.to_f / lats.size
         longs_average = longs.inject{ |sum, el| sum + el }.to_f / longs.size
         kapa_ref.updateChildValues(
-          {"coordinate" => {"latitude" => lats_average, "longitude" => longs_average}}
+          { "coordinate" => { "latitude" => lats_average, "longitude" => longs_average }}
         )
 
         # update local kapa array
-        @kapa_array.find { |k| k["id"] == kapa_ref.key}["coordinate"] = {
+        @kapa_array.find { |k| k["id"] == kapa_ref.key }["coordinate"] = {
           "latitude" => lats_average,
           "longitude" => longs_average
         }
@@ -453,7 +467,7 @@ class Takaro
   # Lists players for a given index.
   # TODO Not sure we need this
   def list_player_names_for_index(in_index)
-    puts "TAKARO LIST_PLAYER_NAMES_FOR_INDEX".blue if DEBUGGING
+    puts 'TAKARO LIST_PLAYER_NAMES_FOR_INDEX'.blue if DEBUGGING
     puts "in_index: #{in_index}".red
     
     puts "Kapa array: #{@kapa_array[in_index]['players'].inspect}".red
@@ -463,12 +477,12 @@ class Takaro
   ##
   # Returns player count for a given index.
   def player_count_for_index(in_index)
-    puts "TAKARO PLAYER_COUNT_FOR_INDEX".blue if DEBUGGING
+    puts 'TAKARO PLAYER_COUNT_FOR_INDEX'.blue if DEBUGGING
     # return 0 if @nga_kapa_hash.values[in_index].nil?
     # @nga_kapa_hash.values[in_index].count
 
     return 0 if @kapa_array.empty? || @kapa_array[in_index].empty? || @kapa_array[in_index]["players"].empty?
-    @kapa_array[in_index]["players"].count
+    @kapa_array[in_index]['players'].count
   end
 
   #################
@@ -476,7 +490,7 @@ class Takaro
   #################
 
   def generate_new_id
-    puts "TAKARO GENERATE_NEW_ID".blue if DEBUGGING
+    puts 'TAKARO GENERATE_NEW_ID'.blue if DEBUGGING
     # update the UI with the gamecode
     # https://gist.github.com/mbajur/2aba832a6df3fc31fe7a82d3109cb626
     rand(36**6).to_s(36)
@@ -495,7 +509,7 @@ class Takaro
   # Takes the first two kapa's locations as the starting Pouwhenua.
   #
   def set_initial_pouwhenua
-    puts "TAKARO SET_INITIAL_POUWHENUA".blue if DEBUGGING
+    puts 'TAKARO SET_INITIAL_POUWHENUA'.blue if DEBUGGING
 
     coord_array = []
 
@@ -507,15 +521,15 @@ class Takaro
       # puts "Creating remote instance".focus
       # this uses the same local color for each!
       # TODO change to use the kapa colors
-      create_new_pouwhenua(k["coordinate"], k['color'])
+      create_new_pouwhenua(k['coordinate'], k['color'])
 
       # add to local coords
-      coord_array << k["coordinate"]
+      coord_array << k['coordinate']
     end
 
     # use coords to calculate play area
-    lats = coord_array.map {|c| c["latitude"]}.minmax
-    longs = coord_array.map {|c| c["longitude"]}.minmax
+    lats = coord_array.map {|c| c['latitude']}.minmax
+    longs = coord_array.map {|c| c['longitude']}.minmax
 
     # This is a hack way to find the midpoint
     # A more accurate solution is here:
@@ -543,14 +557,14 @@ class Takaro
 
     # Then send us to the game
     # TODO should this be here?
-    Machine.instance.segue("ToGame")
+    Machine.instance.segue('ToGame')
   end
 
   def start_observing_pouwhenua
-    puts "TAKARO START_OBSERVING_POUWHENUA".blue if DEBUGGING
+    puts 'TAKARO START_OBSERVING_POUWHENUA'.blue if DEBUGGING
     # puts "TAKARO START_OBSERVING_POUWHENUA".focus
 
-    @ref.child("pouwhenua").observeEventType(FIRDataEventTypeChildAdded,
+    @ref.child('pouwhenua').observeEventType(FIRDataEventTypeChildAdded,
       withBlock: lambda do | data |
         # puts "\n\nPOUWHENUA ADDED\n\n".focus
 
@@ -573,13 +587,13 @@ class Takaro
   end
 
   def create_new_pouwhenua(coord = @local_player_locationCoords, color = @nga_kapa_hash[@local_kaitakaro.kapa_ref.key]['color'])
-    puts "TAKARO CREATE_NEW_POUWHENUA".blue if DEBUGGING
+    puts 'TAKARO CREATE_NEW_POUWHENUA'.blue if DEBUGGING
     coord = Utilities::format_to_location_coord(coord)
     
     # we also need to get the color
     puts "local_kaitakaro: #{local_kaitakaro.inspect}".green
     puts "nga_kapa_hash: #{@nga_kapa_hash[@local_kaitakaro.kapa_ref.key]['color'].inspect}".green
-    @ref.child("pouwhenua").childByAutoId.updateChildValues(
+    @ref.child('pouwhenua').childByAutoId.updateChildValues(
       {
         'created' => FIRServerValue.timestamp,
         'color' => color,
@@ -598,8 +612,8 @@ class Takaro
   # For the voronoi to calculate
   # TODO figure out a FIRDatabaseQuery for this
   def get_all_pouwhenua_coords
-    puts "TAKARO get_all_pouwhenua_coords".blue if DEBUGGING
-    @ref.child("pouwhenua").observeSingleEventOfType(FIRDataEventTypeValue, withBlock:
+    puts 'TAKARO get_all_pouwhenua_coords'.blue if DEBUGGING
+    @ref.child('pouwhenua').observeSingleEventOfType(FIRDataEventTypeValue, withBlock:
       lambda do |pouwhenua_snapshot|
 
       end
@@ -614,9 +628,9 @@ class Takaro
     puts "TAKARO CREATE_BOT_PLAYER".blue if DEBUGGING
 
     # TODO this doesn't create a real player?
-    @bot = Kaitarako.new(@ref.child("players").childByAutoId, { "takaro" => self })
+    @bot = Kaitarako.new(@ref.child('players').childByAutoId, { 'takaro' => self })
     @bot.display_name = "Bot McBotface #{rand(30)}"
-    @bot.email = "lucashaley@yahoo.com"
+    @bot.email = 'lucashaley@yahoo.com'
     @bot.character = {
       'deploy_time' => 4,
       'lifespan_ms' => 280000,

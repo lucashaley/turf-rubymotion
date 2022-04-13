@@ -63,8 +63,8 @@ end
 # end
 
 class CLLocation
-  def to_firebase
-    coordinate.to_firebase
+  def to_hash
+    coordinate.to_hash
   end
 end
 
@@ -73,16 +73,16 @@ class CLLocationCoordinate2D
     to_firebase.to_s
   end
 
-  def to_firebase
-    {latitude: latitude, longitude: longitude}
+  def to_hash
+    { latitude: latitude, longitude: longitude }
   end
 
-  def +(loc)
-    CLLocationCoordinate2DMake(latitude + loc.latitude, longitude + loc.longitude)
+  def +(other)
+    CLLocationCoordinate2DMake(latitude + other.latitude, longitude + other.longitude)
   end
 
-  def /(denom)
-    CLLocationCoordinate2DMake(latitude/denom, longitude/denom)
+  def /(other)
+    CLLocationCoordinate2DMake(latitude / other, longitude / other)
   end
 
   def to_cgpoint
@@ -109,7 +109,7 @@ end
 
 class Hash
   def to_CLLocationCoordinate2D
-    CLLocationCoordinate2DMake(self["latitude"], self["longitude"])
+    CLLocationCoordinate2DMake(self['latitude'], self['longitude'])
   end
 end
 
@@ -123,7 +123,7 @@ module Debugging
     when Hash
       Hash[
         h.map do |k, v|
-          [ k.respond_to?(:to_sym) ? k.to_sym : k, recursive_symbolize_keys(v) ]
+          [k.respond_to?(:to_sym) ? k.to_sym : k, recursive_symbolize_keys(v)]
         end
       ]
     when Enumerable
@@ -138,32 +138,28 @@ module Utilities
   module_function
 
   def get_distance(coord_a, coord_b)
-    puts "UTILITIES GET_DISTANCE".blue
+    puts 'UTILITIES GET_DISTANCE'.blue
     distance = MKMetersBetweenMapPoints(
       MKMapPointForCoordinate(
         format_to_location_coord(coord_a)),
       MKMapPointForCoordinate(
         format_to_location_coord(coord_b))
     )
-    # puts "UTILITIES GET_DISTANCE Distance: #{distance}"
-
-    # Not sure we need this return
-    distance
   end
 
   def format_to_location_coord(input)
-    puts "TAKARO FORMAT_TO_LOCATION_COORD".blue
+    puts 'TAKARO FORMAT_TO_LOCATION_COORD'.blue
     # puts "Input: #{input}".red
     case input
     when Hash
-      return CLLocationCoordinate2DMake(input["latitude"], input["longitude"])
+      return CLLocationCoordinate2DMake(input['latitude'], input['longitude'])
     when CLLocationCoordinate2D
       return input
     end
     0
   end
-  
+
   def random_color
-    "#{rand().round(2)} #{rand().round(2)} #{rand().round(2)} 1"
+    "#{rand.round(2)} #{rand.round(2)} #{rand.round(2)} 1"
   end
 end

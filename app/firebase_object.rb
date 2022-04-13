@@ -1,81 +1,72 @@
 class FirebaseObject
   attr_accessor :ref,
-                :variables_to_save,
-                :data_hash
+                :data_hash,
+                :class_name
 
   DEBUGGING = true
 
-  def initialize(in_ref, in_data_hash)
-    puts "#{__FILE__} #{__method__} line: #{__LINE__}".green if DEBUGGING
-    puts "FIREBASEOBJECT INITIALIZE".green if DEBUGGING
-
+  def initialize(in_ref, in_data_hash = {})
     @ref = in_ref
     @data_hash = in_data_hash
-    
+    @class_name = self.class.name.capitalize
+
+    puts "FBO:#{@class_name} INITIALIZE".green if DEBUGGING
+
+    push unless in_data_hash.nil?
+    pull if in_data_hash.nil?
+
+    start_observing
+  
     self
   end
 
+  def push
+    puts "FBO:#{@class_name} PUSH".green if DEBUGGING
+    @ref.setValue(@data_hash, withCompletionBlock:
+      lambda do |error, ref|
+        puts 'apparently this saved'.red
+      end
+    )
+  end
+
   def pull
-    puts "FIREBASEOBJECT PULL".green if DEBUGGING
+    puts "FBO:#{@class_name} PULL".green if DEBUGGING
     @ref.getDataWithCompletionBlock(
-      lambda do | error, data_snapshot |
+      lambda do |error, data_snapshot|
         puts "Error: #{error.localizedDescription}".red if error
         @data_hash = data_snapshot.valueInExportFormat
+        puts "data_hash: #{@data_hash.inspect}".yellow
       end
     )
   end
 
   def start_observing
-    @ref.observeEventType(FIRDataEventTypeChildChanged, withBlock: 
+    @ref.observeEventType(FIRDataEventTypeChildChanged, withBlock:
       lambda do |data_snapshot|
-        puts "FIREBASEOBJECT CHILDCHANGED".red if DEBUGGING
-        App.notification_center.post("#{self.class.name.upcase}Changed", data_snapshot)
+        puts "FBO:#{@class_name} CHILDCHANGED".red if DEBUGGING
+        App.notification_center.post("#{@class_name}Changed", data_snapshot.valueInExportFormat)
+        pull
     end)
 
-    @ref.observeEventType(FIRDataEventTypeChildAdded, withBlock: 
+    @ref.observeEventType(FIRDataEventTypeChildAdded, withBlock:
       lambda do |data_snapshot|
-        puts "FIREBASEOBJECT CHILDADDED".red if DEBUGGING
-        App.notification_center.post("#{self.class.name.upcase}New", data_snapshot)
+        puts "FBO:#{@class_name} CHILDADDED".red if DEBUGGING
+        App.notification_center.post("#{self.class.name.upcase}New", data_snapshot.valueInExportFormat)
+        pull
     end)
   end
 
-  def update_all
-    puts "FIREBASEOBJECT UPDATE_ALL".blue if DEBUGGING
-    @ref.setValue(data_hash, withCompletionBlock: 
-      lambda do |error, ref|
-        puts "FIREBASEOBJECT UPDATED".green
-        puts "Updated: #{ref.key}".green
-      end
-    )
-  end
+  def update(node_hash)
+    puts "FBO:#{@class_name} UPDATE #{node_hash}".blue if DEBUGGING
 
-  def update(node)
-    puts "FIREBASEOBJECT UPDATE #{node}".blue if DEBUGGING
-    temp_variable = instance_variable_get("@#{node}")
-    # puts "temp_variable: #{temp_variable}"
-    @ref.child("#{node}").setValue(temp_variable.to_firebase)
-  end
-  
-  def get_node(node)
-    @ref.child(node).getDataWithCompletionBlock(
-      lambda do | error, data_snapshot |
-        puts "Error: #{error.localizedDescription}".red if error
-        return data_snapshot.valueInExportFormat
-      end
-    )
-  end
-  
-  def do_node_completion(node, &completion)
-    @ref.child(node).getDataWithCompletionBlock(
-      lambda do | error, data_snapshot |
-        puts "Error: #{error.localizedDescription}".red if error
-        
-        completion.call(data_snapshot.valueInExportFormat)
-      end
-    )
+    # this merges in place, so be careful!
+    @data_hash.merge!(node_hash)
+
+    @ref.updateChildValues(node_hash)
+    puts "Updated data_hash: #{@data_hash}".blue
   end
 
   def to_s
-    "FirebaseObject: #{self.class.name}\n\tref: #{@ref}\n\tdata_hash: #{@data_hash}\n"
+    "FirebaseObject: #{@class_name}\n\tref: #{@ref}\n\tdata_hash: #{@data_hash}\n"
   end
 end

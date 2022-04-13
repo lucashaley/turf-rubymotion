@@ -1,5 +1,4 @@
 class NewController < MachineViewController
-  extend IB
   
   # outlet :mapview, MKMapView
   outlet :gamecode, UILabel
@@ -16,7 +15,8 @@ class NewController < MachineViewController
 
   # Should this switch to Machine?
   # Maybe only when we exit?
-  attr_accessor :takaro
+  attr_accessor :takaro,
+                :local_character
 
   DEBUGGING = false
   CELL_IDENTIFIER = "PlayerCell"
@@ -27,6 +27,9 @@ class NewController < MachineViewController
 
     # get the current player's location
     Machine.instance.initialize_location_manager
+    
+    # testing the game_options_controller
+    puts "game_duration: #{Machine.instance.game_duration}".blue
 
     @takaro = Takaro.new
 
@@ -50,6 +53,12 @@ class NewController < MachineViewController
       puts "GAMECODE NEW".yellow
 
       gamecode.text = notification.object
+    end
+    
+    # listen for the character selection
+    @character_select_observer = App.notification_center.observe "SelectCharacter" do |notification|
+      puts "CHARACTER SELECT".yellow
+      @takaro.local_kaitakaro.character = notification.data
     end
 
     Machine.instance.tracking = true

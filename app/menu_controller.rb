@@ -24,7 +24,7 @@ class MenuController < MachineViewController
 
   def action_login(sender)
     puts "MENUCONTROLLER ACTION_LOGIN".blue if DEBUGGING
-    Machine.instance.set_state(:log_in)
+    Machine.instance.state(:log_in)
 
     # # Stuff for FirebaseAuthUI
     # # Never got this to work

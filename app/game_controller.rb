@@ -100,16 +100,30 @@ class GameController < MachineViewController
     super
     puts "GAMECONTROLLER: VIEWDIDLOAD".light_blue
     
+    # # with the new new/join system, we have the gamecode
+    # puts "Machine gamecode: #{Machine.instance.gamecode}".red
+    # # and need to set up the takaro
+    # # move this to the character selection?
+    # Machine.instance.db.referenceWithPath("games")
+    # .queryOrderedByChild("gamecode")
+    # .queryEqualToValue(Machine.instance.gamecode)
+    # .queryLimitedToLast(1)
+    # .getDataWithCompletionBlock(
+    #   lambda do | error, snapshot |
+    #     # create the takaro
+    #     puts "snapshot: #{snapshot.value}".focus
+    #     Machine.instance.takaro = Takaro.new(snapshot.children.nextObject.key)
+    #     Machine.instance.takaro.local_kaitakaro.character = local_character
+    #   end
+    # )
+    
     Machine.instance.takaro.start_observing_pouwhenua
-
+    
     deploy_time = Machine.instance.takaro.local_kaitakaro_hash['player_class']['deploy_time']
     puts "deploy_time: #{deploy_time}".pink
-
+    
     map_view.setRegion(Machine.instance.takaro.taiapa_region, animated: false)
     map_view.setCameraBoundary(MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro.taiapa_region), animated: true)
-
-    # map_view.regionThatFits(region) # this adjusts the region to fir the current view
-    # Machine.instance.bounding_box = mkmaprect_for_coord_region(region)
 
     @voronoi_map = VoronoiMap.new
 
