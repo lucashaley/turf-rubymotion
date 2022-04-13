@@ -1,0 +1,19 @@
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+# This is because we're also using Cocoa methods
+Naming/MethodName:
+  Enabled: false
+
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/MethodLength:
+  # Enabled: false
+  Max: 40
+  
+Metrics/AbcSize:
+  Max: 30
+
+Style/Documentation:
+  Enabled: false
