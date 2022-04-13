@@ -59,4 +59,21 @@ class KaitakaroFbo < FirebaseObject
       # check here
     end
   end
+
+  # Helpers
+  def character
+    data_hash['character']
+  end
+
+  def character=(in_character)
+    update({ 'character' => in_character })
+  end
+
+  def deploy_time
+    data_hash['character']['deploy_time']
+  end
+
+  def lifespan_ms
+    data_hash['character']['lifespan_ms']
+  end
 end
