@@ -97,6 +97,8 @@ class SelectCharacterController < MachineViewController
     # post notification for New Controller
     App.notification_center.post('SelectCharacter', character)
 
-    Machine.instance.segue('ToGame')
+    # Machine.instance.segue('ToGame')
+    # Machine.instance.segue('ToWaitingRoom')
+    performSegueWithIdentifier('ToWaitingRoom', sender: self)
   end
 end

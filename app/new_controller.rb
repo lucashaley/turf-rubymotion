@@ -26,12 +26,17 @@ class NewController < MachineViewController
     puts "NEWCONTROLLER: VIEWDIDLOAD".light_blue
 
     # get the current player's location
-    Machine.instance.initialize_location_manager
+    # this should already have happened
+    # Machine.instance.initialize_location_manager
     
     # testing the game_options_controller
-    puts "game_duration: #{Machine.instance.game_duration}".blue
+    # puts "game_duration: #{Machine.instance.game_duration}".blue
+    puts "duration: #{Machine.instance.takaro_fbo.duration}".blue
 
-    @takaro = Takaro.new
+    # @takaro = Takaro.new
+    @takaro = Machine.instance.takaro_fbo
+
+    gamecode.text = @takaro.gamecode
 
     # Listen for new players
     @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
@@ -61,9 +66,9 @@ class NewController < MachineViewController
       @takaro.local_kaitakaro.character = notification.data
     end
 
-    Machine.instance.tracking = true
+    # Machine.instance.tracking = true
 
-    Machine.instance.segue("ToCharacter")
+    # Machine.instance.segue("ToCharacter")
   end
 
 
@@ -84,6 +89,7 @@ class NewController < MachineViewController
       else 'poop'
     end
     player = @takaro.list_player_names_for_index(table)[index_path.row]
+    puts "PLAYER: #{player.inspect}".yellow
     cell.textLabel.text = player['display_name']
     cell.detailTextLabel.text = player['character']
 

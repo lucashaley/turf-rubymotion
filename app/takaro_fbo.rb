@@ -89,6 +89,25 @@ class TakaroFbo < FirebaseObject
 
     puts @kaitakaro_array.inspect
     puts @kaitakaro_hash.inspect
+
+    # add to kapa, just as a test
+    @kapa_array[0].add_kaitakaro(in_kaitakaro)
+  end
+
+  # TableView methods
+  def player_count_for_index(in_index)
+    puts "FBO:#{@class_name} player_count_for_index".green if DEBUGGING
+    # return 0 if @kapa_array.empty? || @kapa_array[in_index].empty? || @kapa_array[in_index]['kaitakaro'].empty?
+    return 0 if @kapa_array.empty? || @kapa_array[in_index].empty? || @kapa_array[in_index].kaitakaro.empty?
+    @kapa_array[in_index].kaitakaro.count
+  end
+
+  def list_player_names_for_index(in_index)
+    puts 'TAKARO LIST_PLAYER_NAMES_FOR_INDEX'.blue if DEBUGGING
+    puts "in_index: #{in_index}".red
+    
+    puts "Kapa array: #{@kapa_array[in_index].kaitakaro.inspect}".red
+    @kapa_array[in_index].list_display_names
   end
 
   # Helpers

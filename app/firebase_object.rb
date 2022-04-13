@@ -31,11 +31,9 @@ class FirebaseObject
 
   def pull
     puts "FBO:#{@class_name} PULL".green if DEBUGGING
-    @ref.getDataWithCompletionBlock(
-      lambda do |error, data_snapshot|
-        puts "Error: #{error.localizedDescription}".red if error
+    @ref.observeSingleEventOfType(FIRDataEventTypeValue, withBlock:
+      lambda do |data_snapshot|
         @data_hash = data_snapshot.valueInExportFormat
-        puts "data_hash: #{@data_hash.inspect}".yellow
       end
     )
   end

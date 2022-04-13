@@ -26,6 +26,7 @@ class KaitakaroFbo < FirebaseObject
     @location_update_observer = nil
     super.tap do |k|
       k.init_observers
+      k.update({ 'display_name' => 'mung beans' })
     end
   end
 
@@ -61,6 +62,17 @@ class KaitakaroFbo < FirebaseObject
   end
 
   # Helpers
+  def display_name
+    data_hash['display_name']
+  end
+
+  def name_and_character
+    {
+      'display_name' => display_name,
+      'character' => character['title']
+    }
+  end
+
   def character
     data_hash['character']
   end

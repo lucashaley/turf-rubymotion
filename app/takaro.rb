@@ -418,7 +418,7 @@ class Takaro
     @local_kaitakaro.email = in_user.email
     @local_kaitakaro.is_local = true
     
-    @k_fbo = KaitakaroFbo.new(@ref.child("kaitakaro").childByAutoId, {'user_id' => in_user.uid})
+    # @k_fbo = KaitakaroFbo.new(@ref.child("kaitakaro").childByAutoId, {'user_id' => in_user.uid})
   end
 
   
