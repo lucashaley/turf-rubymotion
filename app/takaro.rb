@@ -250,7 +250,7 @@ class Takaro
                     'character' => current_player_character
                   }
                   puts current_kapa_ref.key
-                  @nga_kapa_hash[current_kapa_snapshot.key].merge 
+                  @nga_kapa_hash[current_kapa_snapshot.key].merge
                   {
                     'display_name' => current_player_name,
                     'character' => current_player_character
