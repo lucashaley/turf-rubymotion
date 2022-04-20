@@ -2,6 +2,7 @@ class AppDelegate
   attr_accessor :window
 
   def application(application, didFinishLaunchingWithOptions: launchOptions)
+    puts "\n\n\n\n\nSTARTING APPLICATION\n\n"
     @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
     storyboard = UIStoryboard.storyboardWithName("main", bundle: nil)
     @window.rootViewController = storyboard.instantiateInitialViewController
