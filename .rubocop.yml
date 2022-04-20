@@ -1,9 +1,19 @@
+AllCops:
+  TargetRubyVersion: 2.5
+
+Metrics/BlockLength:
+  IgnoredMethods:
+    - tableView
+    - viewDidLoad
+
 Style/FrozenStringLiteralComment:
   Enabled: false
 
 # This is because we're also using Cocoa methods
 Naming/MethodName:
-  Enabled: false
+  # Enabled: false
+  IgnoredPatterns:
+    - '\Amap\s*'
 
 Metrics/ClassLength:
   Max: 200
@@ -13,7 +23,10 @@ Metrics/MethodLength:
   Max: 40
   
 Metrics/AbcSize:
-  Max: 30
+  Max: 40
 
 Style/Documentation:
   Enabled: false
+
+Style/OptionalBooleanParameter:
+  AllowedMethods: ['initialize']
