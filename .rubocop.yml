@@ -1,10 +1,23 @@
 AllCops:
   TargetRubyVersion: 2.5
+  Exclude:
+    - 'unused/**/*'
+
+Lint/DuplicateMethods:
+  Enabled: false
+
+Lint/UnusedMethodArgument:
+  AllowUnusedKeywordArguments: true
 
 Metrics/BlockLength:
   IgnoredMethods:
     - tableView
     - viewDidLoad
+
+Metrics/ClassLength:
+  CountAsOne: ['array', 'hash']
+  Max: 300
+  Enabled: false
 
 Style/FrozenStringLiteralComment:
   Enabled: false
@@ -14,6 +27,37 @@ Naming/MethodName:
   # Enabled: false
   IgnoredPatterns:
     - '\Amap\s*'
+    - '\A\s*tableView\s*'
+    - 'tableView'
+    - 'viewDidLoad'
+    - 'viewWillAppear'
+    - 'messageComposeViewController'
+    - 'locationManager'
+    - 'authUI'
+
+Naming/VariableName:
+  AllowedIdentifiers:
+    - 'didDeselectRowAtIndexPath'
+    - 'numberOfRowsInSection'
+    - 'cellForRowAtIndexPath'
+    - 'didFinishWithResult'
+    - 'didUpdateToLocation'
+    - 'fromLocation'
+    - 'didFailWithError'
+    - 'didSignInWithAuthDataResult'
+    - 'authUI'
+
+Naming/MethodParameterName:
+  AllowedNames:
+    - 'didDeselectRowAtIndexPath'
+    - 'numberOfRowsInSection'
+    - 'cellForRowAtIndexPath'
+    - 'didFinishWithResult'
+    - 'didUpdateToLocation'
+    - 'fromLocation'
+    - 'didFailWithError'
+    - 'didSignInWithAuthDataResult'
+    - 'authUI'
 
 Metrics/ClassLength:
   Max: 200
