@@ -22,3 +22,6 @@ gem 'standard'
 
 # For RubyMine IDE debugging
 gem 'debase'
+
+# https://github.com/OTGApps/motion_print
+gem 'motion_print'
