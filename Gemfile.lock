@@ -230,6 +230,7 @@ GEM
     motion-provisioning (1.1.0)
       fastlane (~> 2.182)
     motion-state-machine (0.8.4)
+    motion_print (1.2.0)
     multi_json (1.15.0)
     multipart-post (2.0.0)
     nanaimo (0.3.0)
@@ -326,6 +327,7 @@ DEPENDENCIES
   motion-cocoapods!
   motion-provisioning
   motion-state-machine
+  motion_print
   rake
   standard
 
