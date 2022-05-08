@@ -396,6 +396,7 @@
                         <outlet property="not_close_enough" destination="AFw-8c-ST2" id="twh-B8-0Ii"/>
                         <outlet property="table_team_a" destination="AgA-Xk-jr9" id="txv-ZG-ZEt"/>
                         <outlet property="table_team_b" destination="4iH-LO-1V0" id="Wsb-ey-Qbr"/>
+                        <segue destination="DBm-GU-flj" kind="show" identifier="ToGameCountdown" id="qm1-1Y-u3f"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Qc1-zH-G8o" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -723,9 +724,28 @@
             </objects>
             <point key="canvasLocation" x="4116" y="2412"/>
         </scene>
+        <!--Game Countdown Controller-->
+        <scene sceneID="Qig-IZ-BRp">
+            <objects>
+                <viewController id="DBm-GU-flj" customClass="GameCountdownController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Ws2-Lv-6TM">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="HtH-9h-3Vc"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="Afh-1B-qER"/>
+                    <connections>
+                        <segue destination="Ba5-Em-l6K" kind="show" identifier="ToGame" id="uNv-a5-D9S"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="QP6-o5-4ce" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3679" y="3158"/>
+        </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="iED-yg-Ztn"/>
+        <segue reference="uNv-a5-D9S"/>
         <segue reference="Gh1-WF-AJg"/>
         <segue reference="7CE-HL-6xe"/>
     </inferredMetricsTieBreakers>

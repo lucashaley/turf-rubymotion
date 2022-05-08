@@ -9,22 +9,19 @@ class Wakawaka # < Cell
                 :pylon,
                 :site
 
-  DEBUGGING = true
+  DEBUGGING = false
 
   def initialize(in_cell, in_pylon)
     puts "WAKAWAKA: INITIALIZE".green if DEBUGGING
     @cell = in_cell
     @pylon = in_pylon
+
+    mp @cell
+    mp @pylon
   end
 
-  # def color
-  #   @pylon.color
-  # end
   def color
-    puts "WAKAWAKA: COLOR".blue if DEBUGGING
-    # puts @pylon if DEBUGGING
-    # @pylon.lifespan_color
-    # return CIColor.alloc.initWithColor(UIColor.systemYellowColor.colorWithAlphaComponent(0.2))
+    puts "WAKAWAKA: COLOR: #{@cell.site.color.stringRepresentation}".blue if DEBUGGING
     @cell.site.color
   end
 
@@ -34,17 +31,20 @@ class Wakawaka # < Cell
   end
 
   def vertices
-    puts "WAKAWAKA: VERTICES".blue if DEBUGGING
-    verts = vertices_from_cell(@cell)
+    puts 'WAKAWAKA: VERTICES'.blue if DEBUGGING
+    vertices_from_cell(@cell)
+    # verts = vertices_from_cell(@cell)
+    # mp verts
+    # verts
   end
 
   def overlay
     puts "WAKAWAKA: OVERLAY".blue if DEBUGGING
     # THIS IS OTHER PLACES TOO?
     overlay = overlay_from_vertices(vertices)
-    puts "Wakawaka overlay before setting color: #{overlay}".focus
+    # puts "Wakawaka overlay before setting color: #{overlay}".focus
     overlay.overlayColor = self.color
-    puts "Wakawaka overlay after setting color: #{overlay}".focus
+    # puts "Wakawaka overlay after setting color: #{overlay}".focus
     overlay
   end
 

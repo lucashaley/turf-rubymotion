@@ -19,7 +19,7 @@ class JoinExistingController < MachineViewController
     end
 
     puts 'Trying Firebase Object'.red
-    test_fbo = TakaroFbo.new(Machine.instance.db.referenceWithPath('tests').childByAutoId, { name: 'tomato' })
+    TakaroFbo.new(Machine.instance.db.referenceWithPath('tests').childByAutoId, { name: 'tomato' })
   end
 
   def textFieldShouldEndEditing(text_field)

@@ -29,9 +29,6 @@
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
 @end
 
-@interface Character: NSObject
-@end
-
 @interface CharacterController: UIViewController
 
 @property IBOutlet UIButton * scout_button;
@@ -56,23 +53,11 @@
 -(IBAction) push;
 -(IBAction) pull;
 -(IBAction) start_observing;
+-(IBAction) value_at:(id) node_string;
 -(IBAction) update:(id) node_hash;
+-(IBAction) delete;
+-(IBAction) key;
 -(IBAction) to_s;
-
-@end
-
-@interface Game: FirebaseObject
--(IBAction) initialize;
--(IBAction) generate_new_id;
--(IBAction) add_local_player:(id) user;
--(IBAction) create_new_pylon:(id) coord;
--(IBAction) create_new_pouwhenua:(id) coord;
--(IBAction) modify_pylon;
--(IBAction) start_observing_pylons;
--(IBAction) start_observing_pouwhenua;
--(IBAction) check_for_game:(id) gamecode;
--(IBAction) start_observing_players;
--(IBAction) start_observing_kapa;
 
 @end
 
@@ -88,7 +73,6 @@
 
 -(IBAction) setup_mapview;
 -(IBAction) setup_audio;
--(IBAction) viewWillAppear:(id) animated;
 -(IBAction) viewDidLoad;
 -(IBAction) renderOverlays;
 -(IBAction) touch_down;
@@ -107,19 +91,8 @@
 
 @end
 
-@interface GameOld: NSObject
--(IBAction) initialize;
--(IBAction) set_ref:(id) ref;
--(IBAction) generate_new_id;
--(IBAction) add_local_player:(id) user;
--(IBAction) create_new_pylon:(id) coord;
--(IBAction) create_new_pouwhenua:(id) coord;
--(IBAction) modify_pylon;
--(IBAction) start_observing_pylons;
--(IBAction) start_observing_pouwhenua;
--(IBAction) check_for_game:(id) gamecode;
--(IBAction) start_observing_players;
--(IBAction) start_observing_kapa;
+@interface GameCountdownController: MachineViewController
+-(IBAction) viewDidLoad;
 
 @end
 
@@ -201,28 +174,6 @@
 
 @end
 
-@interface JoinController: MachineViewController
-
-@property IBOutlet UITextField * gamecode;
-@property IBOutlet CharacterController * character_view;
-@property IBOutlet UIButton * cancel_button;
-@property IBOutlet UIButton * continue_button;
-@property IBOutlet UITableView * table_team_a;
-@property IBOutlet UITableView * table_team_b;
-@property IBOutlet UILabel * not_close_enough;
-
--(IBAction) viewDidLoad;
--(IBAction) viewWillAppear:(id) animated;
--(IBAction) reload_data;
--(IBAction) handle_new_player;
--(IBAction) cancel_new_game:(id) sender;
--(IBAction) dismiss_join:(id) sender;
--(IBAction) textFieldDidBeginEditing:(id) text_field;
--(IBAction) textFieldShouldEndEditing:(id) text_field;
--(IBAction) check_input_text;
-
-@end
-
 @interface JoinExistingController: MachineViewController
 
 @property IBOutlet UITextField * gamecode;
@@ -234,31 +185,34 @@
 
 @end
 
-@interface Kaitarako: NSObject
--(IBAction) display_name;
--(IBAction) get_remote_display_name;
--(IBAction) email;
--(IBAction) character;
--(IBAction) get_remote_email;
--(IBAction) user_id;
--(IBAction) coordinate;
--(IBAction) get_remote_data:(id) in_key;
-
-@end
-
 @interface KaitakaroFbo: FirebaseObject
 -(IBAction) init_observers;
--(IBAction) update_coordinate:(id) coordinate;
-
-@end
-
-@interface Kapa: FirebaseObject
--(IBAction) color;
--(IBAction) within_distance:(id) in_coordinate;
+-(IBAction) coordinate;
+-(IBAction) recalculate_kapa:(id) in_coordinate;
+-(IBAction) display_name;
+-(IBAction) name_and_character;
+-(IBAction) data_for_kapa;
+-(IBAction) character;
+-(IBAction) kapa;
+-(IBAction) deploy_time;
+-(IBAction) lifespan_ms;
 
 @end
 
 @interface KapaFbo: FirebaseObject
+-(IBAction) add_kaitakaro:(id) in_kaitakaro;
+-(IBAction) remove_kaitakaro:(id) in_kaitakaro;
+-(IBAction) check_distance:(id) in_coordinate;
+-(IBAction) recalculate_coordinate;
+-(IBAction) list_display_names_and_classes;
+-(IBAction) kaitakaro;
+-(IBAction) kaitakaro_hash;
+-(IBAction) color;
+-(IBAction) coordinate;
+-(IBAction) data_for_kaitakaro;
+-(IBAction) format_to_location_coord:(id) input;
+-(IBAction) recursive_symbolize_keys:(id) hsh;
+
 @end
 
 @interface Machine: NSObject
@@ -266,9 +220,6 @@
 -(IBAction) state;
 -(IBAction) segue:(id) name;
 -(IBAction) initialize_location_manager;
--(IBAction) set_player:(id) player;
--(IBAction) create_new_game;
--(IBAction) game;
 -(IBAction) create_new_pouwhenua;
 -(IBAction) check_for_game:(id) gamecode;
 -(IBAction) check_location_in_taiapa:(id) in_location;
@@ -304,21 +255,13 @@
 @property IBOutlet UILabel * not_close_enough;
 
 -(IBAction) viewDidLoad;
+-(IBAction) init_observers;
+-(IBAction) reload_table_data;
 -(IBAction) handle_new_player;
 -(IBAction) handle_changed_player;
 -(IBAction) cancel_new_game;
 -(IBAction) compose_sms;
--(IBAction) continue_button_action:(id) sender;
 -(IBAction) dismiss_new;
--(IBAction) add_bot_action:(id) sender;
-
-@end
-
-@interface Player: FirebaseObject
--(IBAction) initialize:(id) args;
--(IBAction) update_location:(id) in_location;
--(IBAction) to_hash;
--(IBAction) to_s;
 
 @end
 
@@ -331,14 +274,11 @@
 @end
 
 @interface PouwhenuaFbo: FirebaseObject
+-(IBAction) data_for_takaro;
+
 @end
 
 @interface ClayPathMaker: NSObject
-@end
-
-@interface Scout: Character
--(IBAction) initialize;
-
 @end
 
 @interface SelectCharacterController: MachineViewController
@@ -359,32 +299,28 @@
 
 @end
 
-@interface Takaro: NSObject
--(IBAction) initialize:(id) in_key;
--(IBAction) start_syncing;
--(IBAction) stop_syncing;
--(IBAction) init_kapa;
--(IBAction) set_up_observers;
--(IBAction) add_local_player:(id) in_user;
--(IBAction) update_kapa_location:(id) kapa_ref;
--(IBAction) list_player_names_for_index:(id) in_index;
--(IBAction) player_count_for_index:(id) in_index;
--(IBAction) generate_new_id;
--(IBAction) random_color_string;
--(IBAction) set_initial_pouwhenua;
--(IBAction) start_observing_pouwhenua;
--(IBAction) get_all_pouwhenua_coords;
--(IBAction) create_bot_player;
-
-@end
-
 @interface TakaroFbo: FirebaseObject
 -(IBAction) init_states;
 -(IBAction) init_kapa;
--(IBAction) init_local_kaitakaro;
+-(IBAction) init_local_kaitakaro:(id) in_character;
+-(IBAction) create_kapa:(id) coordinate;
+-(IBAction) remove_kapa:(id) in_ref;
+-(IBAction) create_bot_player;
 -(IBAction) add_kaitakaro:(id) in_kaitakaro;
+-(IBAction) kapa_with_key:(id) in_key;
+-(IBAction) get_kapa_for_coordinate:(id) coordinate;
+-(IBAction) set_initial_pouwhenua;
+-(IBAction) create_new_pouwhenua:(id) in_kapa;
+-(IBAction) player_count_for_index:(id) in_index;
+-(IBAction) list_player_names_for_index:(id) in_index;
 -(IBAction) gamecode;
 -(IBAction) duration;
+-(IBAction) kapa_hash;
+-(IBAction) kapa_array;
+-(IBAction) pouwhenua_array;
+-(IBAction) taiapa;
+-(IBAction) waiting;
+-(IBAction) playing;
 
 @end
 
@@ -421,7 +357,6 @@
 -(IBAction) to_hash;
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
--(IBAction) to;
 
 @end
 
@@ -431,7 +366,6 @@
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
 -(IBAction) to_CLLocationCoordinate2D;
--(IBAction) recursive_symbolize_keys:(id) h;
 
 @end
 
@@ -441,6 +375,7 @@
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
 -(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
 -(IBAction) recursive_symbolize_keys:(id) h;
 
 @end
@@ -449,15 +384,16 @@
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
 -(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
 -(IBAction) recursive_symbolize_keys:(id) h;
 -(IBAction) format_to_location_coord:(id) input;
--(IBAction) random_color;
 
 @end
 
 @interface MKMapRect: NSObject
 -(IBAction) to_cgrect;
 -(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
 -(IBAction) recursive_symbolize_keys:(id) h;
 -(IBAction) format_to_location_coord:(id) input;
 -(IBAction) random_color;
@@ -466,6 +402,7 @@
 
 @interface Hash: NSObject
 -(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
 -(IBAction) recursive_symbolize_keys:(id) h;
 -(IBAction) format_to_location_coord:(id) input;
 -(IBAction) random_color;

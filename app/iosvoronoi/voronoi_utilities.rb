@@ -6,6 +6,9 @@ module VoronoiUtilities
     puts "VORONOI_UTILITIES: VERTICES_FROM_CELL".blue if DEBUGGING
     vertices = []
 
+    puts 'Cell: '.red
+    mp cell
+
     cell.halfedges.each do |halfedge|
       start_point = halfedge.getStartpoint
       end_point = halfedge.getEndpoint
@@ -34,7 +37,7 @@ module VoronoiUtilities
 
   def overlay_from_vertices(vertices)
     puts "VORONOI_UTILITIES: OVERLAY_FROM_VERTICES".blue if DEBUGGING
-    puts "vertices: #{vertices.length}".red
+    # puts "vertices: #{vertices.length}".red
 
     points = []
 
@@ -66,6 +69,7 @@ module VoronoiUtilities
     # MKPolygon.polygonWithPoints(new_ptr, count: vertices.length)
   end
   alias :overlayFromVertices :overlay_from_vertices
+  # alias overlay_from_vertices overlayFromVertices
 
   def site_from_pylon
     # puts "\n\nVoronoiUtilities::site_from_pylon"

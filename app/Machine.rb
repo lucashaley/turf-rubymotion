@@ -5,7 +5,7 @@ class Machine
                 :rootview,
                 :db_app,
                 :user,
-                :player,
+                # :player,
                 :bounding_box,
                 # :db_game_ref,
                 # :db_ref,
@@ -22,10 +22,9 @@ class Machine
                 :is_waiting,
                 :is_playing
 
-  attr_reader :handleDataResult
-
   DEBUGGING = true
 
+  # rubocop:disable Metrics, Layout/LineLength
   def initialize
     puts 'MACHINE: INITIALIZE'.green if DEBUGGING
 
@@ -39,7 +38,7 @@ class Machine
     # @bounding_box = UIScreen.mainScreen.bounds
 
     # @player = Player.new
-    @player
+    # @player
 
     ####################
     # FIREBASE
@@ -138,6 +137,7 @@ class Machine
     # calling this from the application instead
     # @fsm.start!
   end
+  # rubocop:enable Metrics, Layout/LineLength
 
   #####################
   # SINGLETON
@@ -189,53 +189,16 @@ class Machine
   # https://github.com/HipByte/RubyMotionSamples/blob/a387842594fd0ac9d8560d2dc64eff4d87534093/ios/Locations/app/locations_controller.rb
   def locationManager(manager, didUpdateToLocation: new_location, fromLocation: old_location)
     puts 'MACHINE: DIDUPDATETOLOCATION'.blue if DEBUGGING
-    # return unless @tracking
 
-    # Check if the local player has left the play area
-    # We don't need to do this in the NewController
-    # if MKMapRectContainsPoint(@bounding_box, MKMapPointForCoordinate(new_location.coordinate))
-    #   @player.machine.event(:enter_bounds)
-    # else
-    #   @player.machine.event(:exit_bounds)
-    # end
-
-    # puts "Updating location to: #{new_location.coordinate.longitude}, #{new_location.coordinate.latitude}".red
-    # puts "old_location: #{old_location.coordinate}" unless old_location.nil?
-
-    # switching to using CLLocation
-    App.notification_center.post('UpdateLocation',
-      {'new_location' => new_location, 'old_location' => old_location}
+    App.notification_center.post(
+      'UpdateLocation',
+      { 'new_location' => new_location, 'old_location' => old_location }
     )
   end
 
   def locationManager(manager, didFailWithError: error)
     puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
     App.notification_center.post 'PlayerDisappear'
-  end
-
-  def set_player(player)
-    puts 'MACHINE: SET_PLAYER'.blue if DEBUGGING
-    @player = player
-  end
-
-  def create_new_game
-    puts 'MACHINE: CREATE_NEW_GAME'.blue if DEBUGGING
-    # Old version not FirebaseObject
-    # @game = Game.init_new_game
-
-    # New version FirebaseObject
-    @game = Game.new
-  end
-
-  def game=(game)
-    puts 'MACHINE: SET_GAME'.blue if DEBUGGING
-    puts game
-    @game = game
-  end
-
-  def create_new_pouwhenua
-    puts 'MACHINE: CREATE_NEW_POUWHENUA'.blue if DEBUGGING
-    @game.create_new_pouwhenua(@player.location.coordinate)
   end
 
   def check_for_game(gamecode)
@@ -247,7 +210,7 @@ class Machine
     # puts this_query.ref.URL
     # puts "_this_query: #{_this_query}"
     this_query.getDataWithCompletionBlock(
-      lambda do | error, snapshot |
+      lambda do |_error, snapshot|
         puts "#{snapshot.key}: #{snapshot.value}".red
         next_snapshot = snapshot.children.nextObject # rename this, not a ref
         # game = Game.init_with_hash({key: next_ref.key}.merge(next_ref.value))
@@ -262,5 +225,6 @@ class Machine
 
   def check_location_in_taiapa(in_location)
     puts 'MACHINE check_location_in_taiapa'.blue if DEBUGGING
+    puts "in_location: #{in_location}"
   end
 end

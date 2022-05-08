@@ -6,9 +6,6 @@
 @implementation AppDelegate
 @end
 
-@implementation Character
-@end
-
 @implementation CharacterController
 @end
 
@@ -21,16 +18,13 @@
 @implementation FirebaseObject
 @end
 
-@implementation Game
-@end
-
 @implementation MachineViewController
 @end
 
 @implementation GameController
 @end
 
-@implementation GameOld
+@implementation GameCountdownController
 @end
 
 @implementation GameOptionsController
@@ -63,19 +57,10 @@
 @implementation Wakawaka
 @end
 
-@implementation JoinController
-@end
-
 @implementation JoinExistingController
 @end
 
-@implementation Kaitarako
-@end
-
 @implementation KaitakaroFbo
-@end
-
-@implementation Kapa
 @end
 
 @implementation KapaFbo
@@ -90,9 +75,6 @@
 @implementation NewController
 @end
 
-@implementation Player
-@end
-
 @implementation PlayerCell
 @end
 
@@ -102,9 +84,6 @@
 @implementation ClayPathMaker
 @end
 
-@implementation Scout
-@end
-
 @implementation SelectCharacterController
 @end
 
@@ -112,9 +91,6 @@
 @end
 
 @implementation SplashController
-@end
-
-@implementation Takaro
 @end
 
 @implementation TakaroFbo

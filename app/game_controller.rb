@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/ClassLength
 class GameController < MachineViewController
   include VoronoiUtilities
 
@@ -9,8 +10,9 @@ class GameController < MachineViewController
                 :player_location,
                 :boundary_audio
 
-  DEBUGGING = false
-  
+  DEBUGGING = true
+  PYLON_VIEW_IDENTIFIER = 'PylonViewIdentifier'.freeze
+
   def setup_mapview
     map_view.showsUserLocation = true
     map_view.showsPitchControl = false
@@ -18,112 +20,112 @@ class GameController < MachineViewController
 
   def setup_audio
     # AUDIO SETUP
-    @boundary_audio = player_for_audio("boundary")
+    @boundary_audio = player_for_audio('boundary')
   end
 
-  def viewWillAppear(animated)
-    puts "GAME_CONTROLLER: VIEWWILLAPPEAR".light_blue
+  def viewWillAppear(_animated)
+    puts 'GAME_CONTROLLER: VIEWWILLAPPEAR'.light_blue
+
     # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
     setup_mapview
     setup_audio
-    
+
     add_overlays_and_annotations
-    
-    @pouwhenua_new_observer = App.notification_center.observe "PouwhenuaNew" do |notification|
+
+    renderOverlays
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def viewDidLoad
+    super
+    puts 'GAMECONTROLLER: VIEWDIDLOAD'.light_blue
+
+    Machine.instance.is_playing = true
+
+    map_view.setRegion(Machine.instance.takaro_fbo.taiapa_region, animated: false)
+    map_view.setCameraBoundary(
+      MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro_fbo.taiapa_region), 
+      animated: true
+    )
+
+    @map_refresh = App.notification_center.observe 'MapRefresh' do |_notification|
+      puts 'map_refresh'.focus
       observe_new_pouwhenua
     end
-    @pylon_new_observer = App.notification_center.observe "PylonNew" do |notification|
-      observe_new_pylon(notification.object)
+    @pouwhenua_new_observer = App.notification_center.observe 'PouwhenuaNew' do |_notification|
+      puts 'pouwhenua_new_observer'.focus
+      observe_new_pouwhenua
     end
-    @pylon_observer = App.notification_center.observe "PylonChange" do |notification|
-      observe_change_pylon
+    @pouwhenuafbo_new_observer = App.notification_center.observe 'PouwhenuaFbo_New' do |_notification|
+      puts 'pouwhenuafbo_new_observer'.focus
+      observe_new_pouwhenua
     end
-    @pylon_death_observer = App.notification_center.observe "PylonDeath" do |notification|
-      observe_death_pylon(notification.object)
+    @pouwhenua_child_observer = App.notification_center.observe 'PouwhenuaFbo_ChildAdded' do |_notification|
+      puts 'pouwhenua_child_observer'.focus
+      observe_new_pouwhenua
     end
+    # @pylon_new_observer = App.notification_center.observe 'PylonNew' do |_notification|
+    #   observe_new_pylon(notification.object)
+    # end
+    # @pylon_observer = App.notification_center.observe 'PylonChange' do |_notification|
+    #   observe_change_pylon
+    # end
+    # @pylon_death_observer = App.notification_center.observe 'PylonDeath' do |_notification|
+    #   observe_death_pylon(notification.object)
+    # end
     
-    @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
-      puts "NEW PLAYER"
+    @player_new_observer = App.notification_center.observe 'PlayerNew' do |_notification|
+      puts 'NEW PLAYER'
     end
     # BOUNDARY EXIT
-    @exit_observer = App.notification_center.observe "BoundaryExit" do |notification|
-      puts "BOUNDARY EXIT".yellow
-
+    @exit_observer = App.notification_center.observe 'BoundaryExit' do |_notification|
+      # puts 'BOUNDARY EXIT'.yellow
+    
       # trying sounds
-      puts "Playing Sound"
-      # TODO make this work again
+      # puts 'Playing Sound'
+      # TODO: make this work again
       # boundary_audio.play
-
+    
       # set the player state
-
+    
       # disable the pylon button
       button_pylon.enabled = false
-
+    
       # mark the player's last location
     end
     # BOUNDARY ENTER
-    @enter_observer = App.notification_center.observe "BoundaryEnter" do |notification|
-      puts "BOUNDARY ENTER".yellow
-
+    @enter_observer = App.notification_center.observe 'BoundaryEnter' do |_notification|
+      # puts 'BOUNDARY ENTER'.yellow
+    
       # set the player state
-
+    
       # enable the pylon button
       button_pylon.enabled = true
-
+    
       # remove the players last location
     end
     # PLAYER DISAPPEAR
-    @disappear_observer = App.notification_center.observe "PlayerDisappear" do |notification|
-      puts "PLAYER DISAPPEAR".yellow
-
+    @disappear_observer = App.notification_center.observe 'PlayerDisappear' do |_notification|
+      # puts 'PLAYER DISAPPEAR'.yellow
+    
       # set the player state
-
+    
       # disable the pylon button
       # button_pylon.enabled = false
-
+    
       # mark the player's last location
     end
     # PLAYER APPEAR
-    @appear_observer = App.notification_center.observe "PlayerAppear" do |notification|
-      puts "PLAYER APPEAR".yellow
-
+    @appear_observer = App.notification_center.observe 'PlayerAppear' do |_notification|
+      # puts 'PLAYER APPEAR'.yellow
+    
       # set the player state
-
+    
       # enable the pylon button
       button_pylon.enabled = true
-
+    
       # remove the players last location
     end
-  end
-
-  def viewDidLoad
-    super
-    puts "GAMECONTROLLER: VIEWDIDLOAD".light_blue
-    
-    # # with the new new/join system, we have the gamecode
-    # puts "Machine gamecode: #{Machine.instance.gamecode}".red
-    # # and need to set up the takaro
-    # # move this to the character selection?
-    # Machine.instance.db.referenceWithPath("games")
-    # .queryOrderedByChild("gamecode")
-    # .queryEqualToValue(Machine.instance.gamecode)
-    # .queryLimitedToLast(1)
-    # .getDataWithCompletionBlock(
-    #   lambda do | error, snapshot |
-    #     # create the takaro
-    #     puts "snapshot: #{snapshot.value}".focus
-    #     Machine.instance.takaro = Takaro.new(snapshot.children.nextObject.key)
-    #     Machine.instance.takaro.local_kaitakaro.character = local_character
-    #   end
-    # )
-    
-    Machine.instance.takaro.start_observing_pouwhenua
-    
-    deploy_time = Machine.instance.takaro.local_kaitakaro_hash['player_class']['deploy_time']
-    puts "deploy_time: #{deploy_time}".pink
-    
-    map_view.setRegion(Machine.instance.takaro.taiapa_region, animated: false)
-    map_view.setCameraBoundary(MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro.taiapa_region), animated: true)
 
     @voronoi_map = VoronoiMap.new
 
@@ -136,7 +138,8 @@ class GameController < MachineViewController
     @button_fsm.when :down do |state|
       state.on_entry { set_button_color(UIColor.systemRedColor) }
       state.transition_to :primed,
-        after: deploy_time
+        # after: deploy_time
+        after: Machine.instance.takaro_fbo.local_kaitakaro.deploy_time
       state.transition_to :up,
         on: :button_up
     end
@@ -144,25 +147,20 @@ class GameController < MachineViewController
       state.on_entry { set_button_color(UIColor.systemGreenColor) }
       state.transition_to :up,
         on: :button_up,
-        # action: proc { create_new_pylon } # CREATE NEW PYLON!
-        # TODO switch to Takaro
-        # action: proc { Machine.instance.game.create_new_pouwhenua }
-        action: proc { Machine.instance.takaro.create_new_pouwhenua }
+        action: proc { handle_new_pouwhenua }
     end
 
-    puts "Starting button state machine\n\n"
+    # puts 'Starting button state machine'
     @button_fsm.start!
 
     add_overlays_and_annotations
   end
 
-  PYLON_VIEW_IDENTIFIER = "PylonViewIdentifier"
-
   ### Makes an annotation image for the map ###
   def mapView(map_view, viewForAnnotation: annotation)
-    puts "GAME_CONTROLLER: MAPVIEW.VIEWFORANNOTATION".blue if DEBUGGING
+    # puts 'GAME_CONTROLLER: MAPVIEW.VIEWFORANNOTATION'.blue if DEBUGGING
     if annotation == map_view.userLocation
-      puts "PLAYER"
+      # puts 'PLAYER'
       return nil
     end
     # puts "viewForAnnotation: #{annotation.class}"
@@ -177,7 +175,10 @@ class GameController < MachineViewController
         lambda do |context|
           path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
           # UIColor.blueColor.setFill
+          puts "Annotation color for #{annotation.coordinate.to_hash}"
+          mp annotation.color.CIColor.stringRepresentation
           annotation.color.setStroke
+          path.lineWidth = 4.0
           path.stroke
         end
       )
@@ -186,23 +187,24 @@ class GameController < MachineViewController
     end
     annotation_view
   end
+  # rubocop:enable Metrics/AbcSize
 
   ### Called after annotations have been added ###
   def mapView(map_view, didAddAnnotationViews: views)
-    puts "didAddAnnotationViews!!".focus
+    puts 'didAddAnnotationViews!!'.focus
   end
 
   def mapView(map_view, rendererForOverlay: overlay)
-    puts "GAME_CONTROLLER: MAPVIEW.RENDERFOROVERLAY".blue if DEBUGGING
+    # puts 'GAME_CONTROLLER: MAPVIEW.RENDERFOROVERLAY'.blue if DEBUGGING
     rend = MKPolygonRenderer.alloc.initWithOverlay(overlay)
     rend.lineWidth = 0.75
-    rend.strokeColor = UIColor.colorWithHue(0.2, saturation: 0.9, brightness: 0.9, alpha: 1.0)
+    rend.strokeColor = UIColor.colorWithHue(1.0, saturation: 1.0, brightness: 1.0, alpha: 1.0)
     # overlay.fillColor = UIColor.systemGreenColor
-    rend.fillColor = UIColor.colorWithHue(0.2, saturation: 0.9, brightness: 0.9, alpha: 0.3)
+    rend.fillColor = UIColor.colorWithHue(1.0, saturation: 1.0, brightness: 1.0, alpha: 0.3)
     unless overlay.overlayColor.nil?
       # rend.fillColor = UIColor.colorWithCGColor(overlay.overlayColor.CGColor)
-      puts "overlayColor: #{overlay.overlayColor}".focus
-      rend.fillColor = UIColor.colorWithCIColor(overlay.overlayColor).colorWithAlphaComponent(0.2)
+      # puts "overlayColor: #{overlay.overlayColor}".focus
+      rend.fillColor = UIColor.colorWithCIColor(overlay.overlayColor).colorWithAlphaComponent(0.5)
     end
     rend.lineJoin = KCGLineJoinMiter
     rend
@@ -210,7 +212,9 @@ class GameController < MachineViewController
 
   # REFACTOR with method below?
   def renderOverlays
-    puts "GAME_CONTROLLER RENDEROVERLAYS".blue if DEBUGGING
+    puts 'GAME_CONTROLLER RENDEROVERLAYS'.blue if DEBUGGING
+    mp caller
+    mp Machine.instance.takaro_fbo.pouwhenua_array
 
     if map_view.overlays
       overlaysToRemove = map_view.overlays.mutableCopy
@@ -223,32 +227,34 @@ class GameController < MachineViewController
 
     # This is a hack to get past having one pylon
     # return if @voronoi_map.pylons.length < 2
-    return if Machine.instance.takaro.pouwhenua_array.length < 2
+    # return if Machine.instance.takaro.pouwhenua_array.length < 2
+    return if Machine.instance.takaro_fbo.pouwhenua_array.length < 2
 
-    puts "Adding annotations: #{@voronoi_map.annotations}".focus
+    # puts "Adding annotations: #{@voronoi_map.annotations}".focus
     map_view.addAnnotations(@voronoi_map.annotations)
 
-    puts "GAME_CONTROLLER getting the cells"
+    puts 'GAME_CONTROLLER getting the cells'
     vcells = @voronoi_map.voronoiCells
+    mp vcells
 
     vcells.each do |cell|
-      puts "cell: #{cell}".focus
+      # puts "cell: #{cell}".focus
       map_view.addOverlay(cell.overlay)
     end
   end
 
   def touch_down
-    puts "touch down"
+    puts 'touch down'
     @button_fsm.event(:button_down)
   end
 
   def touch_up
-    puts "touch up"
+    puts 'touch up'
     @button_fsm.event(:button_up)
   end
 
   def touch_out
-    puts "touch out"
+    puts 'touch out'
     @button_fsm.event(:button_up)
   end
 
@@ -257,20 +263,21 @@ class GameController < MachineViewController
   end
 
   def add_overlays_and_annotations
-    puts "add_overlays_and_annotations"
+    # puts 'add_overlays_and_annotations'
     add_overlays
     add_annotations
   end
 
   def add_overlays
-    puts "GAME_CONTROLLER: ADD_OVERLAYS".blue if DEBUGGING
+    puts 'GAME_CONTROLLER: ADD_OVERLAYS'.blue if DEBUGGING
     @voronoi_map.voronoi_cells.each do |cell|
+      mp cell
       map_view.addOverlay(cell.overlay)
     end
   end
 
   def add_annotations
-    puts "GAME_CONTROLLER: ADD_ANNOTATIIONS".blue if DEBUGGING
+    puts 'GAME_CONTROLLER: ADD_ANNOTATIIONS'.blue if DEBUGGING
     map_view.addAnnotations(@voronoi_map.annotations)
   end
   #
@@ -289,70 +296,39 @@ class GameController < MachineViewController
     puts "AVAudioPlayer error: #{error_ptr[0]}" if error_ptr[0]
   end
 
-  # def create_new_pylon
-  #   puts "GAME_CONTROLLER: CREATE_NEW_PYLON".blue if DEBUGGING
-  #
-  #   # this gets it into the DB, but not on screen
-  #   # @fb_game.create_new_pylon(@player_location)
-  #   # Machine.instance.create_new_pylon(@player_location)
-  #   # Machine.instance.create_new_pylon(Machine.instance.player.location)
-  #   Machine.instance.create_new_pylon
-  # end
+  def handle_new_pouwhenua
+    puts 'GAME_CONTROLLER: HANDLE_NEW_POUWHENUA'.blue if DEBUGGING
 
-#   def create_new_pouwhenua
-# 
-#   end
-# 
-#   def handle_new_pylon(data)
-#     puts "GAME_CONTROLLER: HANDLE_NEW_PYLON".blue if DEBUGGING
-# 
-#     p = Pylon.initWithHash(data)
-#     p.set_uuid data[:uuID]
-# 
-#     @voronoi_map.add_pylon(p)
-# 
-#     renderOverlays
-#   end
+    Machine.instance.takaro_fbo.create_new_pouwhenua_from_hash
 
-  def handle_new_pouwhenua(data)
-    puts "GAME_CONTROLLER: HANDLE_NEW_POUWHENUA".blue if DEBUGGING
-    # data.each do |k, v|
-    #   puts "#{k}: #{v}"
-    # end
-    # puts data["title"]
-
-    p = Pouwhenua.new(data["location"], {color: data["color"], title: data["title"], birthdate: data["birthdate"]})
-    # puts data[:uuID]
-    # puts data["uuID"]
-    p.set_uuid data[:uuID]
-
-    # @voronoi_map.add_pylon(p)
-    @voronoi_map.add_pouwhenua(p)
-
-    renderOverlays
+    # renderOverlays
   end
-  
+
   def observe_new_pouwhenua
-    puts "-game_controller observe_new_pouwhenua".blue if DEBUGGING
+    puts 'game_controller observe_new_pouwhenua'.blue if DEBUGGING
     renderOverlays
   end
+
   def observe_new_pylon(notification_object)
     puts "-game_controller observe_new_pylon".blue if DEBUGGING
     handle_new_pylon({uuID: notification_object.key}.merge(notification_object.value))
-    
+
     add_overlays_and_annotations
     renderOverlays
   end
+
   def observe_change_pylon
     puts "-game_controller observe_change_pylon".blue if DEBUGGING
     renderOverlays
     add_overlays_and_annotations
   end
+
   def observe_death_pylon(notification_object)
-    puts "-game_controller observe_death_pylon".blue if DEBUGGING
+    puts '-game_controller observe_death_pylon'.blue if DEBUGGING
     removed_pylon = @voronoi_map.pylons.delete(notification.object[:object].uuID)
     map_view.removeAnnotation(notification.object[:object].annotation)
     renderOverlays
     add_overlays_and_annotations
   end
 end
+# rubocop:enable Metrics/ClassLength

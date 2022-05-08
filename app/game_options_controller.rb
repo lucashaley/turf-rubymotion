@@ -6,11 +6,11 @@ class GameOptionsController < MachineViewController
     puts 'Location?'.red
     Machine.instance.initialize_location_manager
 
-    @takaro_fbo = TakaroFbo.new(
+    Machine.instance.takaro_fbo = TakaroFbo.new(
       Machine.instance.db.referenceWithPath('games').childByAutoId,
       { 'gamecode' => rand(36**6).to_s(36) }
     )
-    Machine.instance.takaro_fbo = @takaro_fbo
+    @takaro_fbo = Machine.instance.takaro_fbo
   end
 
   def select_duration(sender)
