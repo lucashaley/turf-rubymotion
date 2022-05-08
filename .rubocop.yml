@@ -22,6 +22,9 @@ Metrics/ClassLength:
 Style/FrozenStringLiteralComment:
   Enabled: false
 
+Style/ColonMethodCall:
+  Enabled: false
+
 # This is because we're also using Cocoa methods
 Naming/MethodName:
   # Enabled: false
