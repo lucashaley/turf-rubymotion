@@ -19,9 +19,11 @@ class PouwhenuaFbo < FirebaseObject
       k.machine = StateMachine::Base.new start_state: :start, verbose: DEBUGGING
       k.machine.when :start do |state|
         state.on_entry { puts 'Pouwhenua state start'.pink }
-        state.transition_to :kapa_death,
-                            after: in_data_hash['lifespan_ms'],
-                            action: proc { destroy }
+        state.transition_to :death,
+                            after: in_data_hash['lifespan_ms'] / 1000
+      end
+      k.machine.when :death do |state|
+        state.on_entry { destroy }
       end
       k.machine.start!
     end
@@ -30,6 +32,6 @@ class PouwhenuaFbo < FirebaseObject
 
   def destroy
     puts "FBO:#{@class_name} destroy".red if DEBUGGING
-    update({ 'enabled' => 'false' })
+    update_with_block({ 'enabled' => 'false' }, Proc.new { App.notification_center.post 'MapRefresh' })
   end
 end

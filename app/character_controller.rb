@@ -11,33 +11,36 @@ class CharacterController < UIViewController
     puts 'CHARACTERCONTROLLER VIEWDIDLOAD'.blue if DEBUGGING
     @player_classes = {
       'scout' => {
-        "deploy_time" => 4,
-        "lifespan_ms" => 2 * 60 * 1000,
-        "pouwhenua_start" => 8,
+        'deploy_time' => 4,
+        # "lifespan_ms" => 2 * 60 * 1000,
+        'lifespan_ms' => 4 * 1000,
+        'pouwhenua_start' => 8,
         'title' => 'Scout'
       },
-      "tank" => {
-        "deploy_time" => 6,
-        "lifespan_ms" => 8 * 60 * 1000,
-        "pouwhenua_start" => 3,
+      'tank' => {
+        'deploy_time' => 6,
+        # "lifespan_ms" => 8 * 60 * 1000,
+        'lifespan_ms' => 8 * 1000,
+        'pouwhenua_start' => 3,
         'title' => 'Tank'
       },
-      "commander" => {
-        "deploy_time" => 8,
-        "lifespan_ms" => 5 * 60 * 1000,
-        "pouwhenua_start" => 4,
+      'commander' => {
+        'deploy_time' => 8,
+        # "lifespan_ms" => 5 * 60 * 1000,
+        'lifespan_ms' => 5 * 1000,
+        'pouwhenua_start' => 4,
         'title' => 'Commander'
       }
     }
     @player_classes.each_with_index do |pc, index|
       button_width = 200
       button = UIButton.buttonWithType(UIButtonTypeSystem)
-      button.setTitle(pc[0], forState:UIControlStateNormal)
+      button.setTitle(pc[0], forState: UIControlStateNormal)
       button.titleLabel.font = UIFont.systemFontOfSize(30, weight: UIFontWeightSemibold)
       # button.setTitleColor(color, forState:UIControlStateNormal)
       button.sizeToFit
       button.frame = CGRectMake(
-        self.view.center.x-(button.frame.size.width/2), (index * button.frame.size.height + 20) + 180,
+        self.view.center.x - (button.frame.size.width / 2), (index * button.frame.size.height + 20) + 180,
         200, button.frame.size.height
       )
       button.autoresizingMask =

@@ -33,9 +33,8 @@ class FirebaseObject
     # puts "FBO:#{@class_name} PUSH".green if DEBUGGING
     @ref.setValue(
       @data_hash, withCompletionBlock:
-      lambda do |_error, ref|
+      lambda do |_error, _ref|
         puts "FBO:#{@class_name} setValue".green
-        # App.notification_center.post("#{@class_name}_New", ref)
       end
     )
   end
@@ -117,6 +116,21 @@ class FirebaseObject
     @data_hash.merge!(node_hash)
 
     @ref.updateChildValues(node_hash)
+  end
+
+  def update_with_block(node_hash, &in_proc)
+    puts "FBO:#{@class_name} update_with_block #{node_hash}".blue if DEBUGGING
+
+    # this merges in place, so be careful!
+    @data_hash.merge!(node_hash)
+
+    @ref.updateChildValues(
+      node_hash,
+      withCompletionBlock:
+        lambda do |_error, _ref|
+          in_proc.call
+        end
+    )
   end
 
   def delete

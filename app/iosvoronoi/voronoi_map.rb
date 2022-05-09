@@ -27,9 +27,11 @@ class VoronoiMap
     voronoi.boundingBox = bounding_box
 
     # TODO: rename this with pouwhenua
-    pylons_array = Machine.instance.takaro.pouwhenua_array
+    # pylons_array = Machine.instance.takaro.pouwhenua_array
+    pylons_array = Machine.instance.takaro.pouwhenua_array_enabled_only
 
-    site_array_map = Machine.instance.takaro.pouwhenua_array.map do |p|
+    # site_array_map = Machine.instance.takaro.pouwhenua_array.map do |p|
+    site_array_map = Machine.instance.takaro.pouwhenua_array_enabled_only.map do |p|
       # puts "coordinate: #{p['coordinate']}".focus
       loc_coord = format_to_location_coord(p['coordinate'])
       color = CIColor.colorWithString(p['color'])
@@ -74,7 +76,8 @@ class VoronoiMap
     puts 'VORONOI_MAP ANNOTATIONS'.focus
     annotations = []
 
-    Machine.instance.takaro.pouwhenua_array.each do |p|
+    # Machine.instance.takaro.pouwhenua_array.each do |p|
+    Machine.instance.takaro.pouwhenua_array_enabled_only.each do |p|
       # puts "Adding p: #{p}".focus
       pa = PouAnnotation.alloc.initWithCoordinate(
         format_to_location_coord(p['coordinate'])

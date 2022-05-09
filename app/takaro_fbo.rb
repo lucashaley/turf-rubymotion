@@ -50,7 +50,6 @@ class TakaroFbo < FirebaseObject
     super.tap do |t|
       t.init_states
       t.init_kapa
-      # t.init_local_kaitakaro
       t.init_pouwhenua
     end
     Utilities::puts_close
@@ -125,7 +124,7 @@ class TakaroFbo < FirebaseObject
     k
   end
 
-  def remove_kapa(in_ref)
+  def remove_kapa(_in_ref)
     puts "FBO:#{@class_name} remove_kapa".green if DEBUGGING
     # puts "in_ref: #{in_ref}".focus
   end
@@ -142,7 +141,12 @@ class TakaroFbo < FirebaseObject
       'pouwhenua_start' => 3,
       'title' => 'Bot Character'
     }
-    bot.coordinate = { 'latitude' => '37.331892252796344', 'longitude' => '-122.04088743633027' }
+    coord = @local_kaitakaro.coordinate
+
+    bot.coordinate = {
+      'latitude' => coord['latitude'] + rand(-0.01..0.01),
+      'longitude' => coord['longitude'] + rand(-0.01..0.01)
+    }
 
     add_kaitakaro(bot)
   end
@@ -152,23 +156,6 @@ class TakaroFbo < FirebaseObject
 
     @kaitakaro_array << in_kaitakaro
     @kaitakaro_hash[in_kaitakaro.data_hash['display_name']] = in_kaitakaro
-
-#     puts 'After add_kaitakaro'
-#     puts @kaitakaro_array.inspect
-#     puts @kaitakaro_hash.inspect
-# 
-#     puts 'add_kaitakaro: recalculate_kapa'
-
-    # add to kapa, just as a test
-    # this should now be handled in the Kaitarako
-    # but what about the bot?
-    # @kapa_array[0].add_kaitakaro(in_kaitakaro)
-
-    # This is too soon?
-    # In Kaitarako instead?
-    # @kapa_array.each do |k|
-    #   k.check_distance(in_kaitakaro.coordinate)
-    # end
 
     # send update to UI
     # This should ultimately be in the Kapa
@@ -227,7 +214,12 @@ class TakaroFbo < FirebaseObject
       # mp k
       # create_new_pouwhenua(k['coordinate'], k['color'])
       # create_new_pouwhenua(k)
-      create_new_pouwhenua_from_hash(k.data_for_pouwhenua)
+      data = k.data_for_pouwhenua
+
+      # TODO: Should these initial pouwhenua ever die?
+      data.merge!('lifespan_ms' => 120_000)
+      # create_new_pouwhenua_from_hash(k.data_for_pouwhenua)
+      create_new_pouwhenua_from_hash(data)
 
       # add to local coords
       coord_array << k.coordinate
@@ -368,8 +360,16 @@ class TakaroFbo < FirebaseObject
   end
 
   def pouwhenua_array
-    # value_at('pouwhenua')
+    puts "pouwhenua_array: #{@data_hash['pouwhenua']&.values}"
     @data_hash['pouwhenua']&.values
+
+    # TODO: This doesn't seem to work
+    # h = @data_hash['pouwhenua']&.select { |p| p['enabled'] == 'true' }
+    # h&.values
+  end
+
+  def pouwhenua_array_enabled_only
+    pouwhenua_array.select { |p| p['enabled'] == 'true' }
   end
 
   def taiapa=(in_region)
