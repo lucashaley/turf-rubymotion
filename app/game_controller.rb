@@ -44,7 +44,7 @@ class GameController < MachineViewController
 
     map_view.setRegion(Machine.instance.takaro_fbo.taiapa_region, animated: false)
     map_view.setCameraBoundary(
-      MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro_fbo.taiapa_region), 
+      MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro_fbo.taiapa_region),
       animated: true
     )
 
@@ -73,57 +73,57 @@ class GameController < MachineViewController
     # @pylon_death_observer = App.notification_center.observe 'PylonDeath' do |_notification|
     #   observe_death_pylon(notification.object)
     # end
-    
+
     @player_new_observer = App.notification_center.observe 'PlayerNew' do |_notification|
       puts 'NEW PLAYER'
     end
     # BOUNDARY EXIT
     @exit_observer = App.notification_center.observe 'BoundaryExit' do |_notification|
       # puts 'BOUNDARY EXIT'.yellow
-    
+
       # trying sounds
       # puts 'Playing Sound'
       # TODO: make this work again
       # boundary_audio.play
-    
+
       # set the player state
-    
+
       # disable the pylon button
       button_pylon.enabled = false
-    
+
       # mark the player's last location
     end
     # BOUNDARY ENTER
     @enter_observer = App.notification_center.observe 'BoundaryEnter' do |_notification|
       # puts 'BOUNDARY ENTER'.yellow
-    
+
       # set the player state
-    
+
       # enable the pylon button
       button_pylon.enabled = true
-    
+
       # remove the players last location
     end
     # PLAYER DISAPPEAR
     @disappear_observer = App.notification_center.observe 'PlayerDisappear' do |_notification|
       # puts 'PLAYER DISAPPEAR'.yellow
-    
+
       # set the player state
-    
+
       # disable the pylon button
       # button_pylon.enabled = false
-    
+
       # mark the player's last location
     end
     # PLAYER APPEAR
     @appear_observer = App.notification_center.observe 'PlayerAppear' do |_notification|
       # puts 'PLAYER APPEAR'.yellow
-    
+
       # set the player state
-    
+
       # enable the pylon button
       button_pylon.enabled = true
-    
+
       # remove the players last location
     end
 
@@ -214,7 +214,7 @@ class GameController < MachineViewController
   def renderOverlays
     puts 'GAME_CONTROLLER RENDEROVERLAYS'.blue if DEBUGGING
     mp caller
-    mp Machine.instance.takaro_fbo.pouwhenua_array
+    mp Machine.instance.takaro_fbo.pouwhenua_array_enabled_only
 
     if map_view.overlays
       overlaysToRemove = map_view.overlays.mutableCopy

@@ -35,7 +35,7 @@ class NewController < MachineViewController
 
     gamecode.text = @takaro.gamecode
 
-    puts "new_controller: initing local player".focus
+    puts 'new_controller: initing local player'.focus
     @takaro.init_local_kaitakaro(Machine.instance.local_character)
   end
 

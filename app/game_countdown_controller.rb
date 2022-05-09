@@ -10,7 +10,7 @@ class GameCountdownController < MachineViewController
     end
     machine.when :starting do |state|
       state.on_entry do
-        puts "STARTING".focus
+        puts 'STARTING'.focus
         performSegueWithIdentifier('ToGame', sender: self)
       end
     end
