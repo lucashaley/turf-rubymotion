@@ -32,6 +32,7 @@ class PouwhenuaFbo < FirebaseObject
 
   def destroy
     puts "FBO:#{@class_name} destroy".red if DEBUGGING
-    update_with_block({ 'enabled' => 'false' }, Proc.new { App.notification_center.post 'MapRefresh' })
+    notification = -> { App.notification_center.post 'MapRefresh' }
+    update_with_block({ 'enabled' => 'false' }, &notification)
   end
 end
