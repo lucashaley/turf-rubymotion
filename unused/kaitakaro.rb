@@ -44,8 +44,8 @@ class Kaitarako
     @display_name = in_name
     @kaitakaro_ref.updateChildValues(
       {"display_name" => in_name}, withCompletionBlock:
-      lambda do | error, ref |
-        puts "KAITAKARO SET DISPLAY_NAME COMPLETE".blue if DEBUGGING
+      lambda do |_error, _ref |
+        puts 'KAITAKARO SET DISPLAY_NAME COMPLETE'.blue if DEBUGGING
       end
     )
   end
@@ -58,7 +58,7 @@ class Kaitarako
   def get_remote_display_name
     puts "KAITAKARO GET_REMOTE_DISPLAY_NAME".blue if DEBUGGING
     @kaitakaro_ref.child("display_name").getDataWithCompletionBlock(
-      lambda do | error, data |
+      lambda do | _error, data |
         puts "KAITAKARO GET_REMOTE_DISPLAY_NAME: #{data.value}"
         return data.value
       end
