@@ -32,6 +32,9 @@ Metrics/AbcSize:
 Style/FrozenStringLiteralComment:
   Enabled: false
 
+Style/Alias:
+  Enabled: false
+
 Style/ColonMethodCall:
   Enabled: false
 
