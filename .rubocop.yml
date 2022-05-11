@@ -19,11 +19,27 @@ Metrics/ClassLength:
   Max: 300
   Enabled: false
 
+Metrics/ClassLength:
+  Max: 200
+  
+Metrics/MethodLength:
+  # Enabled: false
+  Max: 40
+  
+Metrics/AbcSize:
+  Max: 40
+
 Style/FrozenStringLiteralComment:
   Enabled: false
 
 Style/ColonMethodCall:
   Enabled: false
+
+Style/Documentation:
+  Enabled: false
+  
+Style/OptionalBooleanParameter:
+  AllowedMethods: ['initialize']
 
 # This is because we're also using Cocoa methods
 Naming/MethodName:
@@ -49,6 +65,9 @@ Naming/VariableName:
     - 'didFailWithError'
     - 'didSignInWithAuthDataResult'
     - 'authUI'
+    - 'viewForAnnotation'
+    - 'didAddAnnotationViews'
+    - 'rendererForOverlay'
 
 Naming/MethodParameterName:
   AllowedNames:
@@ -61,19 +80,6 @@ Naming/MethodParameterName:
     - 'didFailWithError'
     - 'didSignInWithAuthDataResult'
     - 'authUI'
-
-Metrics/ClassLength:
-  Max: 200
-
-Metrics/MethodLength:
-  # Enabled: false
-  Max: 40
-  
-Metrics/AbcSize:
-  Max: 40
-
-Style/Documentation:
-  Enabled: false
-
-Style/OptionalBooleanParameter:
-  AllowedMethods: ['initialize']
+    - 'viewForAnnotation'
+    - 'didAddAnnotationViews'
+    - 'rendererForOverlay'
