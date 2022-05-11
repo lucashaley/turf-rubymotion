@@ -280,8 +280,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="New Game." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2oC-9l-tj4">
-                                <rect key="frame" x="70" y="20" width="235" height="51"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Waiting room." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2oC-9l-tj4">
+                                <rect key="frame" x="43" y="20" width="290" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" weight="black" pointSize="42"/>
                                 <nil key="textColor"/>
@@ -306,15 +306,6 @@
                                 <connections>
                                     <action selector="cancel_new_game" destination="lpe-LN-HM1" eventType="touchUpInside" id="JiZ-pX-GVn"/>
                                     <action selector="dismiss_new" destination="lpe-LN-HM1" eventType="touchUpInside" id="G9R-L7-8V9"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UmA-Sh-xgH">
-                                <rect key="frame" x="238" y="602" width="121" height="45"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
-                                <state key="normal" title="Continue"/>
-                                <connections>
-                                    <action selector="continue_button_action:" destination="lpe-LN-HM1" eventType="primaryActionTriggered" id="nMU-Se-doc"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Game Code:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MBt-Hy-jQ0">
@@ -382,6 +373,15 @@
                                     <action selector="add_bot_action:" destination="lpe-LN-HM1" eventType="primaryActionTriggered" id="Blv-Ou-bAQ"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UmA-Sh-xgH">
+                                <rect key="frame" x="276" y="602" width="83" height="45"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
+                                <state key="normal" title="Ready"/>
+                                <connections>
+                                    <action selector="continue_button_action:" destination="lpe-LN-HM1" eventType="primaryActionTriggered" id="nMU-Se-doc"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="WUd-Gz-JaK"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -393,12 +393,27 @@
                         <outlet property="not_close_enough" destination="AFw-8c-ST2" id="twh-B8-0Ii"/>
                         <outlet property="table_team_a" destination="AgA-Xk-jr9" id="txv-ZG-ZEt"/>
                         <outlet property="table_team_b" destination="4iH-LO-1V0" id="Wsb-ey-Qbr"/>
-                        <segue destination="DBm-GU-flj" kind="show" identifier="ToGameCountdown" id="qm1-1Y-u3f"/>
+                        <segue destination="DBm-GU-flj" kind="presentation" identifier="ToGameCountdown" id="qm1-1Y-u3f"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Qc1-zH-G8o" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3129" y="2378"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="FQ6-gj-9BU">
+            <objects>
+                <viewController id="c1K-WN-1x1" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="V2S-kq-Ytb">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="5FK-K6-Q9X"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xc8-0A-BZr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3881" y="2378"/>
         </scene>
         <!--Login Controller-->
         <scene sceneID="uw0-iv-ilF">
@@ -617,8 +632,25 @@
                     <view key="view" contentMode="scaleToFill" id="Ws2-Lv-6TM">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Game starting." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tb8-SN-Upb">
+                                <rect key="frame" x="33" y="20" width="310" height="51"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="black" pointSize="42"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" restorationIdentifier="distance_warning" text="Please wait." textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FpM-ZL-SHu">
+                                <rect key="frame" x="58" y="124" width="258" height="78"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <accessibility key="accessibilityConfiguration" label="You are not close enough to other players."/>
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="21"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="HtH-9h-3Vc"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </view>
                     <navigationItem key="navigationItem" id="Afh-1B-qER"/>
                     <connections>
