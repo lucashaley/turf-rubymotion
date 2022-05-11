@@ -228,9 +228,6 @@
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="40"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no"/>
-                                <connections>
-                                    <outlet property="delegate" destination="xlE-BF-66s" id="ye2-ap-Mdi"/>
-                                </connections>
                             </textField>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="u0U-09-dUu"/>
@@ -402,117 +399,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Qc1-zH-G8o" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3129" y="2378"/>
-        </scene>
-        <!--Join Controller-->
-        <scene sceneID="DQb-xS-lsx">
-            <objects>
-                <viewController modalPresentationStyle="fullScreen" id="xlE-BF-66s" customClass="JoinController" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="g3i-R6-Ybn">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Join Game." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BIy-GT-daY">
-                                <rect key="frame" x="71" y="20" width="233" height="51"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="black" pointSize="42"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Enter your game code:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pWp-Cq-5CI">
-                                <rect key="frame" x="52" y="79" width="270" height="35"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="25"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DnS-vh-auM">
-                                <rect key="frame" x="238" y="602" width="121" height="45"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
-                                <state key="normal" title="Continue"/>
-                                <connections>
-                                    <segue destination="Ba5-Em-l6K" kind="show" identifier="" id="iED-yg-Ztn"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lIx-pz-Dmn">
-                                <rect key="frame" x="16" y="602" width="92" height="45"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
-                                <state key="normal" title="Cancel">
-                                    <color key="titleColor" systemColor="systemRedColor"/>
-                                </state>
-                                <connections>
-                                    <action selector="dismiss_join:" destination="xlE-BF-66s" eventType="touchUpInside" id="3LR-2A-pIn"/>
-                                </connections>
-                            </button>
-                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" restorationIdentifier="distance_warning" text="You are not close enough to other players." textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" enabled="NO" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lBb-o7-YTJ">
-                                <rect key="frame" x="58" y="465" width="258" height="78"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <accessibility key="accessibilityConfiguration" label="You are not close enough to other players."/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="21"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <textField opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="center" adjustsFontSizeToFit="NO" minimumFontSize="25" translatesAutoresizingMaskIntoConstraints="NO" id="DJd-Ms-8Ex">
-                                <rect key="frame" x="128" y="122" width="118" height="40"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="25"/>
-                                <textInputTraits key="textInputTraits" textContentType="one-time-code"/>
-                                <connections>
-                                    <outlet property="delegate" destination="xlE-BF-66s" id="uyF-PY-QGA"/>
-                                </connections>
-                            </textField>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Team A" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fbj-mf-Wv7">
-                                <rect key="frame" x="16" y="189" width="154" height="35"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="25"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="Join Game Team B" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="4EA-X1-DF8">
-                                <rect key="frame" x="205" y="232" width="154" height="225"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <sections/>
-                                <connections>
-                                    <outlet property="dataSource" destination="xlE-BF-66s" id="LM2-PR-HDS"/>
-                                    <outlet property="delegate" destination="xlE-BF-66s" id="LeL-3i-b3y"/>
-                                </connections>
-                            </tableView>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="Join Game Team A" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="ul9-ui-GFs">
-                                <rect key="frame" x="16" y="232" width="154" height="225"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <sections/>
-                                <connections>
-                                    <outlet property="dataSource" destination="xlE-BF-66s" id="WgA-9J-7Ou"/>
-                                    <outlet property="delegate" destination="xlE-BF-66s" id="N6p-Kv-EiH"/>
-                                </connections>
-                            </tableView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Team B" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KpJ-7o-J7k">
-                                <rect key="frame" x="205" y="189" width="154" height="35"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="25"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="p73-mu-0lb"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                    <navigationItem key="navigationItem" id="ZdS-Yv-jhC"/>
-                    <connections>
-                        <outlet property="cancel_button" destination="lIx-pz-Dmn" id="n9H-S8-4By"/>
-                        <outlet property="continue_button" destination="DnS-vh-auM" id="Kh9-0k-Igy"/>
-                        <outlet property="gamecode" destination="DJd-Ms-8Ex" id="3at-Rr-cax"/>
-                        <outlet property="not_close_enough" destination="lBb-o7-YTJ" id="w7O-mU-L4z"/>
-                        <outlet property="table_team_a" destination="ul9-ui-GFs" id="sNM-nT-dvp"/>
-                        <outlet property="table_team_b" destination="4EA-X1-DF8" id="0k2-IK-q3t"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="2if-JT-Ztx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="4790" y="1452"/>
         </scene>
         <!--Login Controller-->
         <scene sceneID="uw0-iv-ilF">
@@ -722,7 +608,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mg8-gS-fEk" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4116" y="2412"/>
+            <point key="canvasLocation" x="4790" y="2378"/>
         </scene>
         <!--Game Countdown Controller-->
         <scene sceneID="Qig-IZ-BRp">
@@ -747,7 +633,7 @@
     <inferredMetricsTieBreakers>
         <segue reference="uNv-a5-D9S"/>
         <segue reference="Gh1-WF-AJg"/>
-        <segue reference="7CE-HL-6xe"/>
+        <segue reference="zAq-bV-BBM"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="10.square" catalog="system" width="128" height="114"/>

@@ -6,21 +6,27 @@ class FirebaseObject
                 :data_hash,
                 :class_name
 
-  DEBUGGING = false
+  DEBUGGING = true
 
   # rubocop:disable Lint/Void
   def initialize(in_ref, in_data_hash = {})
     @ref = in_ref
     @data_hash = in_data_hash
-    @data_hash.merge!('key' => @ref.key)
-    @data_hash.merge!('created' => FIRServerValue.timestamp)
+
+    mp in_data_hash.empty?
+
+    unless in_data_hash.empty?
+      @data_hash.merge!('key' => @ref.key)
+      @data_hash.merge!('created' => FIRServerValue.timestamp)
+    end
+
     @class_name = self.class.name.capitalize
 
     Utilities::puts_open
     puts "FBO:#{@class_name} INITIALIZE".green if DEBUGGING
 
-    push unless in_data_hash.nil?
-    pull if in_data_hash.nil?
+    push unless in_data_hash.empty?
+    pull if in_data_hash.empty?
 
     start_observing
 
@@ -40,10 +46,11 @@ class FirebaseObject
   end
 
   def pull
-    # puts "FBO:#{@class_name} PULL".green if DEBUGGING
+    puts "FBO:#{@class_name} PULL".green if DEBUGGING
     @ref.observeSingleEventOfType(
       FIRDataEventTypeValue, withBlock:
       lambda do |data_snapshot|
+        mp data_snapshot.valueInExportFormat
         @data_hash = data_snapshot.valueInExportFormat
       end
     )

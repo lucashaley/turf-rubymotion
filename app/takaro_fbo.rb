@@ -48,9 +48,11 @@ class TakaroFbo < FirebaseObject
 
     puts 'TakaroFbo initialize'.red
     super.tap do |t|
-      t.init_states
-      t.init_kapa
-      t.init_pouwhenua
+      unless in_data_hash.nil?
+        t.init_states
+        t.init_kapa
+        t.init_pouwhenua
+      end
     end
     Utilities::puts_close
   end

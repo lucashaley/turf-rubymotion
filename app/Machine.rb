@@ -22,7 +22,7 @@ class Machine
                 :is_waiting,
                 :is_playing
 
-  DEBUGGING = true
+  DEBUGGING = false
 
   # rubocop:disable Metrics, Layout/LineLength
   def initialize

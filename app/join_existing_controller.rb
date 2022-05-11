@@ -32,6 +32,7 @@ class JoinExistingController < MachineViewController
     false
   end
 
+  # rubocop:disable Metrics/AbcSize
   def check_input_text
     puts 'JOINCONTROLLER CHECK_INPUT_TEXT'.blue if DEBUGGING
 
@@ -45,21 +46,27 @@ class JoinExistingController < MachineViewController
              .queryEqualToValue(gamecode.text)
              .queryLimitedToLast(1)
              .getDataWithCompletionBlock(
-          lambda do |_error, snapshot|
+          lambda do |error, snapshot|
+            mp error unless error.nil?
+
             game_snapshot = snapshot.children.nextObject
-            puts "game_snapshot: #{game_snapshot.valueInExportFormat.inspect}".focus
+            game_hash = game_snapshot.valueInExportFormat
+
+            puts 'OHHH JESUS HERE WE GO'.focus
+            Machine.instance.takaro_fbo = TakaroFbo.new(game_snapshot.ref, {})
+            mp Machine.instance.takaro_fbo
 
             # Machine.instance.takaro = Takaro.new(snapshot.children.nextObject.key)
-            Machine.instance.gamecode = gamecode.text
+            # Machine.instance.gamecode = gamecode.text
             continue_button.enabled = true
 
-            # can we get all the players?
-            if game_snapshot.hasChild('players')
-              player_hash = game_snapshot.childSnapshotForPath('players').valueInExportFormat
-              player_names = player_hash.values.map { |p| p['display_name'] }
-              puts "player_names: #{player_names}".red
-              # oh yeah this worked
-            end
+            # # can we get all the players?
+            # if game_snapshot.hasChild('players')
+            #   player_hash = game_snapshot.childSnapshotForPath('players').valueInExportFormat
+            #   player_names = player_hash.values.map { |p| p['display_name'] }
+            #   puts "player_names: #{player_names}".red
+            #   # oh yeah this worked
+            # end
           end
         )
       #
@@ -70,4 +77,5 @@ class JoinExistingController < MachineViewController
       continue_button.enabled = false
     end
   end
+  # rubocop:enable Metrics/AbcSize
 end
