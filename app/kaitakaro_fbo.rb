@@ -61,10 +61,33 @@ class KaitakaroFbo < FirebaseObject
     # or we can use this algorithm: https://stackoverflow.com/a/23546284
     if Machine.instance.is_playing
       # check here
+      # puts "BOUNDARY".focus unless check_taiapa
+      App.notification_center.post 'BoundaryExit'unless check_taiapa
     end
 
     # check if we are outside the kapa starting zone
     recalculate_kapa(in_coordinate) if Machine.instance.is_waiting
+  end
+
+  # https://stackoverflow.com/a/23546284
+  def check_taiapa
+    puts "FBO:#{@class_name}:#{__LINE__} check_taiapa".green if DEBUGGING
+
+    coord = coordinate.to_CLLocationCoordinate2D
+    # CLLocationCoordinate2D center = region.center;
+    center = Machine.instance.takaro_fbo.taiapa_region.center
+    # MKCoordinateSpan span = region.span;
+    span = Machine.instance.takaro_fbo.taiapa_region.span
+
+    # BOOL result = YES;
+    result = true
+
+    # result &= cos((center.latitude - coord.latitude)*M_PI/180.0) > cos(span.latitudeDelta/2.0*M_PI/180.0);
+    result &= Math.cos((center.latitude - coord.latitude) * Math::PI / 180) > Math.cos(span.latitudeDelta / 2.0 * Math::PI / 180.0)
+    # result &= cos((center.longitude - coord.longitude)*M_PI/180.0) > cos(span.longitudeDelta/2.0*M_PI/180.0);
+    result &= Math.cos((center.longitude - coord.longitude) * Math::PI / 180) > Math.cos(span.longitudeDelta / 2.0 * Math::PI / 180.0)
+    # return result;
+    result
   end
 
   # TODO: Couldn't this all be in the .kapa method?

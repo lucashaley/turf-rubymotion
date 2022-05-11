@@ -135,9 +135,7 @@ class NewController < MachineViewController
             when @table_team_b then TABLEVIEW_TEAM_B
             else 'poop'
             end
-    count = @takaro.player_count_for_index(table)
-    puts "table: #{table}; count: #{count}"
-    return count
+    @takaro.player_count_for_index(table)
   end
 
   def reload_table_data
@@ -164,13 +162,17 @@ class NewController < MachineViewController
   # https://stackoverflow.com/questions/16668436/how-to-send-in-app-sms-using-rubymotion
   def compose_sms
     puts 'compose_sms'
+
+    return unless MFMessageComposeViewController.canSendText
+
     MFMessageComposeViewController.alloc.init.tap do |sms|
       sms.messageComposeDelegate = self
       sms.body = "You've been invited to a game of Turf. "
       sms.body += "The game code is #{@gamecode.text}. "
       sms.body += 'Open your Turf app on your device and select Join Game.'
       presentModalViewController(sms, animated: true)
-    end if MFMessageComposeViewController.canSendText
+      # end if MFMessageComposeViewController.canSendText
+    end
   end
 
   def messageComposeViewController(controller, didFinishWithResult: result)

@@ -19,35 +19,12 @@ class GameController < MachineViewController
   end
 
   def setup_audio
-    # AUDIO SETUP
     @boundary_audio = player_for_audio('boundary')
+    mp @boundary_audio
+    @boundary_audio.prepareToPlay
   end
 
-  def viewWillAppear(_animated)
-    puts 'GAME_CONTROLLER: VIEWWILLAPPEAR'.light_blue
-
-    # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
-    setup_mapview
-    setup_audio
-
-    add_overlays_and_annotations
-
-    renderOverlays
-  end
-
-  # rubocop:disable Metrics/AbcSize
-  def viewDidLoad
-    super
-    puts 'GAMECONTROLLER: VIEWDIDLOAD'.light_blue
-
-    Machine.instance.is_playing = true
-
-    map_view.setRegion(Machine.instance.takaro_fbo.taiapa_region, animated: false)
-    map_view.setCameraBoundary(
-      MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro_fbo.taiapa_region),
-      animated: true
-    )
-
+  def init_observers
     @map_refresh = App.notification_center.observe 'MapRefresh' do |_notification|
       puts 'map_refresh'.focus
       observe_new_pouwhenua
@@ -64,27 +41,19 @@ class GameController < MachineViewController
       puts 'pouwhenua_child_observer'.focus
       observe_new_pouwhenua
     end
-    # @pylon_new_observer = App.notification_center.observe 'PylonNew' do |_notification|
-    #   observe_new_pylon(notification.object)
-    # end
-    # @pylon_observer = App.notification_center.observe 'PylonChange' do |_notification|
-    #   observe_change_pylon
-    # end
-    # @pylon_death_observer = App.notification_center.observe 'PylonDeath' do |_notification|
-    #   observe_death_pylon(notification.object)
-    # end
 
     @player_new_observer = App.notification_center.observe 'PlayerNew' do |_notification|
       puts 'NEW PLAYER'
     end
     # BOUNDARY EXIT
     @exit_observer = App.notification_center.observe 'BoundaryExit' do |_notification|
-      # puts 'BOUNDARY EXIT'.yellow
+      puts 'BOUNDARY EXIT'.yellow
 
       # trying sounds
-      # puts 'Playing Sound'
+      puts '|' * 90
+      puts 'Playing Sound'
       # TODO: make this work again
-      # boundary_audio.play
+      @boundary_audio.play
 
       # set the player state
 
@@ -126,17 +95,46 @@ class GameController < MachineViewController
 
       # remove the players last location
     end
+  end
+
+  def viewWillAppear(_animated)
+    puts 'GAME_CONTROLLER: VIEWWILLAPPEAR'.light_blue
+
+    # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
+    setup_mapview
+    # setup_audio
+
+    add_overlays_and_annotations
+
+    render_overlays
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def viewDidLoad
+    super
+    puts 'GAMECONTROLLER: VIEWDIDLOAD'.light_blue
+
+    Machine.instance.is_playing = true
+
+    map_view.setRegion(Machine.instance.takaro_fbo.taiapa_region, animated: false)
+    map_view.setCameraBoundary(
+      MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro_fbo.taiapa_region),
+      animated: true
+    )
+
+    init_observers
+    setup_audio
 
     @voronoi_map = VoronoiMap.new
 
     @button_fsm = StateMachine::Base.new start_state: :up, verbose: true
     @button_fsm.when :up do |state|
-      state.on_entry { set_button_color(UIColor.systemBlueColor) }
+      state.on_entry { button_color(UIColor.systemBlueColor) }
       state.transition_to :down,
         on: :button_down
     end
     @button_fsm.when :down do |state|
-      state.on_entry { set_button_color(UIColor.systemRedColor) }
+      state.on_entry { button_color(UIColor.systemRedColor) }
       state.transition_to :primed,
         # after: deploy_time
         after: Machine.instance.takaro_fbo.local_kaitakaro.deploy_time
@@ -144,7 +142,7 @@ class GameController < MachineViewController
         on: :button_up
     end
     @button_fsm.when :primed do |state|
-      state.on_entry { set_button_color(UIColor.systemGreenColor) }
+      state.on_entry { button_color(UIColor.systemGreenColor) }
       state.transition_to :up,
         on: :button_up,
         action: proc { handle_new_pouwhenua }
@@ -159,10 +157,8 @@ class GameController < MachineViewController
   ### Makes an annotation image for the map ###
   def mapView(map_view, viewForAnnotation: annotation)
     # puts 'GAME_CONTROLLER: MAPVIEW.VIEWFORANNOTATION'.blue if DEBUGGING
-    if annotation == map_view.userLocation
-      # puts 'PLAYER'
-      return nil
-    end
+    return nil if annotation == map_view.userLocation
+
     # puts "viewForAnnotation: #{annotation.class}"
     # check to see if it exists and has been queued
     if annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PYLON_VIEW_IDENTIFIER)
@@ -172,7 +168,7 @@ class GameController < MachineViewController
       ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
 
       annotation_view.image = ui_renderer.imageWithActions(
-        lambda do |context|
+        lambda do |_context|
           path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
           # UIColor.blueColor.setFill
           puts "Annotation color for #{annotation.coordinate.to_hash}"
@@ -190,11 +186,11 @@ class GameController < MachineViewController
   # rubocop:enable Metrics/AbcSize
 
   ### Called after annotations have been added ###
-  def mapView(map_view, didAddAnnotationViews: views)
-    puts 'didAddAnnotationViews!!'.focus
-  end
+  # def mapView(map_view, didAddAnnotationViews: views)
+  #   puts 'didAddAnnotationViews!!'.focus
+  # end
 
-  def mapView(map_view, rendererForOverlay: overlay)
+  def mapView(_map_view, rendererForOverlay: overlay)
     # puts 'GAME_CONTROLLER: MAPVIEW.RENDERFOROVERLAY'.blue if DEBUGGING
     rend = MKPolygonRenderer.alloc.initWithOverlay(overlay)
     rend.lineWidth = 0.75
@@ -211,14 +207,14 @@ class GameController < MachineViewController
   end
 
   # REFACTOR with method below?
-  def renderOverlays
+  def render_overlays
     puts 'GAME_CONTROLLER RENDEROVERLAYS'.blue if DEBUGGING
     mp caller
     mp Machine.instance.takaro_fbo.pouwhenua_array_enabled_only
 
     if map_view.overlays
-      overlaysToRemove = map_view.overlays.mutableCopy
-      map_view.removeOverlays(overlaysToRemove)
+      overlays_to_remove = map_view.overlays.mutableCopy
+      map_view.removeOverlays(overlays_to_remove)
     end
     if map_view.annotations
       annotations_to_remove = map_view.annotations.mutableCopy
@@ -258,7 +254,7 @@ class GameController < MachineViewController
     @button_fsm.event(:button_up)
   end
 
-  def set_button_color(color)
+  def button_color(color)
     button_pylon.tintColor = color
   end
 
@@ -289,11 +285,12 @@ class GameController < MachineViewController
   # end
 
   def player_for_audio(filename)
-    sound_path = NSBundle.mainBundle.pathForResource(filename, ofType: "mp3")
+    sound_path = NSBundle.mainBundle.pathForResource(filename, ofType: 'mp3')
     sound_url = NSURL.fileURLWithPath(sound_path)
     error_ptr = Pointer.new(:object)
-    player_audio = AVAudioPlayer.alloc.initWithContentsOfURL(sound_url, error: error_ptr)
-    puts "AVAudioPlayer error: #{error_ptr[0]}" if error_ptr[0]
+    # player_audio = AVAudioPlayer.alloc.initWithContentsOfURL(sound_url, error: error_ptr)
+    # puts "AVAudioPlayer error: #{error_ptr[0]}" if error_ptr[0]
+    AVAudioPlayer.alloc.initWithContentsOfURL(sound_url, error: error_ptr)
   end
 
   def handle_new_pouwhenua
@@ -301,34 +298,34 @@ class GameController < MachineViewController
 
     Machine.instance.takaro_fbo.create_new_pouwhenua_from_hash
 
-    # renderOverlays
+    # render_overlays
   end
 
   def observe_new_pouwhenua
     puts 'game_controller observe_new_pouwhenua'.blue if DEBUGGING
-    renderOverlays
+    render_overlays
   end
-
-  def observe_new_pylon(notification_object)
-    puts "-game_controller observe_new_pylon".blue if DEBUGGING
-    handle_new_pylon({uuID: notification_object.key}.merge(notification_object.value))
-
-    add_overlays_and_annotations
-    renderOverlays
-  end
-
-  def observe_change_pylon
-    puts "-game_controller observe_change_pylon".blue if DEBUGGING
-    renderOverlays
-    add_overlays_and_annotations
-  end
-
-  def observe_death_pylon(notification_object)
-    puts '-game_controller observe_death_pylon'.blue if DEBUGGING
-    removed_pylon = @voronoi_map.pylons.delete(notification.object[:object].uuID)
-    map_view.removeAnnotation(notification.object[:object].annotation)
-    renderOverlays
-    add_overlays_and_annotations
-  end
+# 
+#   def observe_new_pylon(notification_object)
+#     puts '-game_controller observe_new_pylon'.blue if DEBUGGING
+#     handle_new_pylon({ uuID: notification_object.key }.merge(notification_object.value))
+# 
+#     add_overlays_and_annotations
+#     render_overlays
+#   end
+# 
+#   def observe_change_pylon
+#     puts '-game_controller observe_change_pylon'.blue if DEBUGGING
+#     render_overlays
+#     add_overlays_and_annotations
+#   end
+# 
+#   def observe_death_pylon(_notification_object)
+#     puts '-game_controller observe_death_pylon'.blue if DEBUGGING
+#     removed_pylon = @voronoi_map.pylons.delete(notification.object[:object].uuID)
+#     map_view.removeAnnotation(notification.object[:object].annotation)
+#     render_overlays
+#     add_overlays_and_annotations
+#   end
 end
 # rubocop:enable Metrics/ClassLength

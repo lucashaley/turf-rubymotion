@@ -376,6 +376,10 @@ class TakaroFbo < FirebaseObject
     update({ 'taiapa' => in_region })
   end
 
+  def taiapa
+    @data_hash['taiapa']
+  end
+
   def waiting?
     @data_hash['waiting']
   end

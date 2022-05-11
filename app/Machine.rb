@@ -187,7 +187,7 @@ class Machine
   end
 
   # https://github.com/HipByte/RubyMotionSamples/blob/a387842594fd0ac9d8560d2dc64eff4d87534093/ios/Locations/app/locations_controller.rb
-  def locationManager(manager, didUpdateToLocation: new_location, fromLocation: old_location)
+  def locationManager(_manager, didUpdateToLocation: new_location, fromLocation: old_location)
     puts 'MACHINE: DIDUPDATETOLOCATION'.blue if DEBUGGING
 
     App.notification_center.post(
@@ -196,7 +196,7 @@ class Machine
     )
   end
 
-  def locationManager(manager, didFailWithError: error)
+  def locationManager(_manager, didFailWithError: error)
     puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
     App.notification_center.post 'PlayerDisappear'
   end
