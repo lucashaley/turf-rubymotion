@@ -6,7 +6,7 @@ class FirebaseObject
                 :data_hash,
                 :class_name
 
-  DEBUGGING = true
+  DEBUGGING = false
 
   # rubocop:disable Lint/Void
   def initialize(in_ref, in_data_hash = {})

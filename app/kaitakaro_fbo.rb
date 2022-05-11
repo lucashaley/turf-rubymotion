@@ -18,18 +18,40 @@
 # }
 
 class KaitakaroFbo < FirebaseObject
-  attr_reader :location_update_observer,
-              :is_bot
+  attr_accessor :is_bot,
+                :in_boundary,
+                :machine
+  attr_reader :location_update_observer
 
-  DEBUGGING = true
+  DEBUGGING = false
 
   def initialize(in_ref, in_data_hash, in_bot = false)
     @location_update_observer = nil
     super(in_ref, in_data_hash).tap do |k|
       @is_bot = in_bot
+      @in_boundary = true
       k.init_observers unless @is_bot
       k.update({ 'display_name' => "mung #{rand(1..10)}" })
       App.notification_center.post 'PlayerNew'
+
+      # STATE MACHINE
+      k.machine = StateMachine::Base.new start_state: :in_bounds, verbose: DEBUGGING
+      k.machine.when :in_bounds do |state|
+        state.on_entry { enter_bounds }
+        state.transition_to :out_of_bounds,
+                            on: :exit_bounds
+      end
+      k.machine.when :out_of_bounds do |state|
+        state.on_entry { exit_bounds }
+        state.transition_to :in_bounds,
+                            on: :enter_bounds
+        state.transition_to :ejected,
+                            after: 3
+      end
+      k.machine.when :ejected do |state|
+        state.on_entry { eject }
+      end
+      k.machine.start!
     end
     Utilities::puts_close
   end
@@ -61,8 +83,8 @@ class KaitakaroFbo < FirebaseObject
     # or we can use this algorithm: https://stackoverflow.com/a/23546284
     if Machine.instance.is_playing
       # check here
-      # puts "BOUNDARY".focus unless check_taiapa
-      App.notification_center.post 'BoundaryExit'unless check_taiapa
+      # App.notification_center.post 'BoundaryExit' unless check_taiapa
+      check_taiapa
     end
 
     # check if we are outside the kapa starting zone
@@ -80,14 +102,16 @@ class KaitakaroFbo < FirebaseObject
     span = Machine.instance.takaro_fbo.taiapa_region.span
 
     # BOOL result = YES;
-    result = true
+    in_taiapa = true
 
     # result &= cos((center.latitude - coord.latitude)*M_PI/180.0) > cos(span.latitudeDelta/2.0*M_PI/180.0);
-    result &= Math.cos((center.latitude - coord.latitude) * Math::PI / 180) > Math.cos(span.latitudeDelta / 2.0 * Math::PI / 180.0)
+    in_taiapa &= Math.cos((center.latitude - coord.latitude) * Math::PI / 180) > Math.cos(span.latitudeDelta / 2.0 * Math::PI / 180.0)
     # result &= cos((center.longitude - coord.longitude)*M_PI/180.0) > cos(span.longitudeDelta/2.0*M_PI/180.0);
-    result &= Math.cos((center.longitude - coord.longitude) * Math::PI / 180) > Math.cos(span.longitudeDelta / 2.0 * Math::PI / 180.0)
+    in_taiapa &= Math.cos((center.longitude - coord.longitude) * Math::PI / 180) > Math.cos(span.longitudeDelta / 2.0 * Math::PI / 180.0)
     # return result;
-    result
+
+    @machine.event(:exit_bounds) if !in_taiapa && @in_boundary
+    @machine.event(:enter_bounds) if in_taiapa && !@in_boundary
   end
 
   # TODO: Couldn't this all be in the .kapa method?
@@ -123,6 +147,22 @@ class KaitakaroFbo < FirebaseObject
 
       new_kapa.add_kaitakaro(self)
     end
+  end
+
+  def exit_bounds
+    puts 'Kaitakaro exit_bounds'.pink
+    @in_boundary = false
+    App.notification_center.post 'BoundaryExit'
+  end
+
+  def enter_bounds
+    puts 'Kaitakaro enter_bounds'.pink
+    @in_boundary = true
+    App.notification_center.post 'BoundaryEnter'
+  end
+
+  def eject
+    puts 'EJECTED!!!!'.focus
   end
 
   # Helpers

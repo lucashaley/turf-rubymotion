@@ -360,7 +360,7 @@ class TakaroFbo < FirebaseObject
   end
 
   def pouwhenua_array
-    puts "pouwhenua_array: #{@data_hash['pouwhenua']&.values}"
+    # puts "pouwhenua_array: #{@data_hash['pouwhenua']&.values}"
     @data_hash['pouwhenua']&.values
 
     # TODO: This doesn't seem to work

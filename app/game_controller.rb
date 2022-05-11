@@ -10,7 +10,7 @@ class GameController < MachineViewController
                 :player_location,
                 :boundary_audio
 
-  DEBUGGING = true
+  DEBUGGING = false
   PYLON_VIEW_IDENTIFIER = 'PylonViewIdentifier'.freeze
 
   def setup_mapview
@@ -20,8 +20,9 @@ class GameController < MachineViewController
 
   def setup_audio
     @boundary_audio = player_for_audio('boundary')
-    mp @boundary_audio
-    @boundary_audio.prepareToPlay
+
+    @boundary_audio.numberOfLoops = -1  # looping
+    @boundary_audio.prepareToPlay       # make sure it's ready
   end
 
   def init_observers
@@ -47,15 +48,7 @@ class GameController < MachineViewController
     end
     # BOUNDARY EXIT
     @exit_observer = App.notification_center.observe 'BoundaryExit' do |_notification|
-      puts 'BOUNDARY EXIT'.yellow
-
-      # trying sounds
-      puts '|' * 90
-      puts 'Playing Sound'
-      # TODO: make this work again
       @boundary_audio.play
-
-      # set the player state
 
       # disable the pylon button
       button_pylon.enabled = false
@@ -64,10 +57,7 @@ class GameController < MachineViewController
     end
     # BOUNDARY ENTER
     @enter_observer = App.notification_center.observe 'BoundaryEnter' do |_notification|
-      # puts 'BOUNDARY ENTER'.yellow
-
-      # set the player state
-
+      @boundary_audio.stop
       # enable the pylon button
       button_pylon.enabled = true
 

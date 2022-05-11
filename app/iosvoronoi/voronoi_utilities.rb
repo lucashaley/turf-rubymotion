@@ -3,11 +3,11 @@ module VoronoiUtilities
   DEBUGGING = true
 
   def vertices_from_cell(cell)
-    puts "VORONOI_UTILITIES: VERTICES_FROM_CELL".blue if DEBUGGING
+    puts 'VORONOI_UTILITIES: VERTICES_FROM_CELL'.blue if DEBUGGING
     vertices = []
 
-    puts 'Cell: '.red
-    mp cell
+    # puts 'Cell: '.red
+    # mp cell
 
     cell.halfedges.each do |halfedge|
       start_point = halfedge.getStartpoint
