@@ -6,18 +6,18 @@ $:.unshift("~/.rubymotion/rubymotion-templates")
 # 1. Be sure to read `readme.md`.
 # ===========================================================================================
 
-require "motion/project/template/ios"
+require 'motion/project/template/ios'
 
 begin
-  require "bundler"
+  require 'bundler'
   Bundler.require
 rescue LoadError
 end
 
 # https://github.com/rubymotion-community/BubbleWrap
-require "bubble-wrap"
+require 'bubble-wrap'
 # https://github.com/rubymotion-community/ib
-require "ib"
+require 'ib'
 # https://github.com/clayallsopp/geomotion
 # require "geomotion"
 
