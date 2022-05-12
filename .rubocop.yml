@@ -25,7 +25,7 @@ Metrics/ClassLength:
   
 Metrics/MethodLength:
   # Enabled: false
-  Max: 40
+  Max: 60
   
 Metrics/AbcSize:
   Max: 40
