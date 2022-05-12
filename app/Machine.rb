@@ -110,11 +110,9 @@ class Machine
       state.on_exit { puts 'Machine end splash'.pink }
 
       state.transition_to :menu,
-        after: 10,
-        on: :splashToMenu,
-        # on: :ready_for_splash,
-        action: proc { segue('ToMenu') }
-        # action: Proc.new { UIApplication.sharedApplication.delegate.window.rootViewController.performSegueWithIdentifier("ToMenu", sender: self) }
+                          after: 10,
+                          on: :splashToMenu,
+                          action: proc { segue('ToMenu') }
     end
 
     ####################
@@ -222,9 +220,4 @@ class Machine
       end
     )
   end
-# 
-#   def check_location_in_taiapa(in_location)
-#     puts 'MACHINE check_location_in_taiapa'.blue if DEBUGGING
-#     puts "in_location: #{in_location}"
-#   end
 end

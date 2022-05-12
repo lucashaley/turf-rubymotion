@@ -69,11 +69,10 @@ module VoronoiUtilities
     # MKPolygon.polygonWithPoints(new_ptr, count: vertices.length)
   end
   alias :overlayFromVertices :overlay_from_vertices
-  # alias overlay_from_vertices overlayFromVertices
 
-  def site_from_pylon
-    # puts "\n\nVoronoiUtilities::site_from_pylon"
-  end
+  # def site_from_pylon
+  #   # puts "\n\nVoronoiUtilities::site_from_pylon"
+  # end
 
   def mkmaprect_for_coord_region(region)
     # puts "\nmkmaprect_for_coord_region region:#{region.center.latitude}, delta: #{region.span.latitudeDelta}"

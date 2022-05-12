@@ -33,7 +33,7 @@ class KaitakaroFbo < FirebaseObject
       @is_bot = in_bot
       @in_boundary = true
       k.init_observers unless @is_bot
-      k.update({ 'display_name' => "mung #{rand(1..10)}" })
+      # k.update({ 'display_name' => "mung #{rand(1..10)}" })
       App.notification_center.post 'PlayerNew'
 
       # STATE MACHINE
@@ -105,10 +105,12 @@ class KaitakaroFbo < FirebaseObject
     # BOOL result = YES;
     in_taiapa = true
 
+    radian = Math::PI / 180.0
     # result &= cos((center.latitude - coord.latitude)*M_PI/180.0) > cos(span.latitudeDelta/2.0*M_PI/180.0);
-    in_taiapa &= Math.cos((center.latitude - coord.latitude) * Math::PI / 180) > Math.cos(span.latitudeDelta / 2.0 * Math::PI / 180.0)
+    # in_taiapa &= Math.cos((center.latitude - coord.latitude) * Math::PI / 180) > Math.cos(span.latitudeDelta / 2.0 * Math::PI / 180.0)
+    in_taiapa &= Math.cos((center.latitude - coord.latitude) * radian) > Math.cos(span.latitudeDelta / 2 * radian)
     # result &= cos((center.longitude - coord.longitude)*M_PI/180.0) > cos(span.longitudeDelta/2.0*M_PI/180.0);
-    in_taiapa &= Math.cos((center.longitude - coord.longitude) * Math::PI / 180) > Math.cos(span.longitudeDelta / 2.0 * Math::PI / 180.0)
+    in_taiapa &= Math.cos((center.longitude - coord.longitude) * radian) > Math.cos(span.longitudeDelta / 2 * radian)
     # return result;
 
     @machine.event(:exit_bounds) if !in_taiapa && @in_boundary
