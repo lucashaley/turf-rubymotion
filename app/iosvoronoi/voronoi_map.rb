@@ -41,17 +41,10 @@ class VoronoiMap
     puts 'COMPUTEWITHSITES'.red if DEBUGGING
     result = voronoi.computeWithSites(site_array_map, andBoundingBox: bounding_box)
     puts 'COMPUTEWITHSITES FINISHED'.red if DEBUGGING
-    # puts 'results:'.focus
-    # result.cells.each do |c|
-    #   mp c.halfedges
-    # end
 
     result.cells.each_with_index do |cell, _index|
-      # puts "cell: #{cell.site}".focus
-
       # In the old version, this would cross-reference the pylon list
       # for us, we need to access the kapa
-      # pylon = pylons.objectForKey(cell.site.uuID)
       p = pylons_array.detect { |h| h['key'] == cell.site.pouwhenua_key }
 
       c = Wakawaka.new(cell, p)
@@ -89,16 +82,4 @@ class VoronoiMap
     # puts "Annotations: #{annotations}".focus
     annotations
   end
-
-  # def add_pylon(pylon)
-  #   puts 'VORONOI_MAP ADD_PYLON'.blue if DEBUGGING
-  #   # puts "pylon: #{pylon}"
-  #   @pylons.setObject(pylon, forKey: pylon.uuID.UUIDString)
-  # end
-
-#   def add_pouwhenua(pouwhenua)
-#     puts 'VORONOI_MAP ADD_POUWHENUA'.blue if DEBUGGING
-# 
-#     @pylons.setObject(pouwhenua, forKey: pouwhenua.uuid_string)
-#   end
 end

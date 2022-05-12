@@ -2,7 +2,7 @@
 # This is the marker, which has a particular location. This location contributes
 # to the creation of the Voronoi map through the Wakawaka cell.
 
-class Pouwhenua < Site # Fake subclass of Site
+class Pouwhenua < Site
   extend Debugging
 
   attr_accessor :location,
@@ -28,26 +28,13 @@ class Pouwhenua < Site # Fake subclass of Site
   def initialize(coords, args = {})
     puts "POUWHENUA INITIALIZE".green if DEBUGGING
 
-    # puts "coords: #{coords}".green if DEBUGGING
-    # puts "args: #{args}".green if DEBUGGING
     symbol_args = args ? recursive_symbolize_keys(args) : {}
-    # puts "Pouwhenua symbol_args: #{symbol_args}".red if DEBUGGING
-
-    # @site = Site.new
 
     # check for what kind of coords we got
     case coords
       when CLLocationCoordinate2D
-        # puts "CLLocationCoordinate2D"
-        # @location = CLLocation.alloc.initWithLatitude(coords.latitude, longitude: coords.longitude)
         @location = coords
       when Hash
-        # puts "Hash"
-        # puts coords["latitude"]
-        # puts coords["longitude"]
-        # @location = CLLocation.alloc.initWithLatitude(
-        #   coords["latitude"], longitude: coords["longitude"]
-        # )
         @location = CLLocationCoordinate2DMake(coords["latitude"], coords["longitude"])
       else
         puts "Empty?".focus
@@ -138,26 +125,20 @@ class Pouwhenua < Site # Fake subclass of Site
     @uuid = NSUUID.alloc.initWithUUIDString(new_uuid)
     # puts "uuid: #{@uuid}"
   end
-  # def uuid
-  #   @site.uuID
-  # end
-  # alias :uuID :uuid
+
   # def uuid_string
-  #   @site.uuID.UUIDString
+  #   puts 'POUWHENUA UUID_STRING'.blue if DEBUGGING
+  #   uuID.UUIDString
   # end
-  def uuid_string
-    puts "POUWHENUA UUID_STRING".blue if DEBUGGING
-    uuID.UUIDString
-  end
 
   def set_annotation(new_annotation)
-    puts "POUWHENUA SET_ANNOTATION".blue if DEBUGGING
+    puts 'POUWHENUA SET_ANNOTATION'.blue if DEBUGGING
 
     @annotation = new_annotation # if new_annotation.class == MKAnnotation
   end
 
   def get_uicolor
-    puts "POUWHENUA GET_UICOLOR".blue if DEBUGGING
+    puts 'POUWHENUA GET_UICOLOR'.blue if DEBUGGING
 
     UIColor.colorWithCIColor(@color)
   end

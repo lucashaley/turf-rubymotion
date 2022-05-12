@@ -6,14 +6,12 @@ class FirebaseObject
                 :data_hash,
                 :class_name
 
-  DEBUGGING = true
+  DEBUGGING = false
 
   # rubocop:disable Lint/Void
   def initialize(in_ref, in_data_hash = {})
     @ref = in_ref
     @data_hash = in_data_hash
-
-    mp in_data_hash.empty?
 
     unless in_data_hash.empty?
       @data_hash.merge!('key' => @ref.key)
@@ -50,7 +48,7 @@ class FirebaseObject
     @ref.observeSingleEventOfType(
       FIRDataEventTypeValue, withBlock:
       lambda do |data_snapshot|
-        mp data_snapshot.valueInExportFormat
+        # mp data_snapshot.valueInExportFormat
         @data_hash = data_snapshot.valueInExportFormat
       end
     )

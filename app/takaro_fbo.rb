@@ -225,8 +225,9 @@ class TakaroFbo < FirebaseObject
       data = k.data_for_pouwhenua
 
       # TODO: Should these initial pouwhenua ever die?
-      data.merge!('lifespan_ms' => 120_000)
-      # create_new_pouwhenua_from_hash(k.data_for_pouwhenua)
+      # data.merge!('lifespan_ms' => 120_000)
+      data.merge!('lifespan_ms' => duration * 60 * 1000)
+
       create_new_pouwhenua_from_hash(data)
 
       # add to local coords

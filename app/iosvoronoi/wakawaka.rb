@@ -15,9 +15,6 @@ class Wakawaka # < Cell
     puts "WAKAWAKA: INITIALIZE".green if DEBUGGING
     @cell = in_cell
     @pylon = in_pylon
-
-    mp @cell
-    mp @pylon
   end
 
   def color
@@ -26,16 +23,12 @@ class Wakawaka # < Cell
   end
 
   def edges
-    # puts "\n\nWakawaka::edges"
     @cell.halfedges
   end
 
   def vertices
     puts 'WAKAWAKA: VERTICES'.blue if DEBUGGING
     vertices_from_cell(@cell)
-    # verts = vertices_from_cell(@cell)
-    # mp verts
-    # verts
   end
 
   def overlay

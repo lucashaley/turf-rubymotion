@@ -12,13 +12,6 @@ module VoronoiUtilities
     cell.halfedges.each do |halfedge|
       start_point = halfedge.getStartpoint
       end_point = halfedge.getEndpoint
-      # puts "Points: #{start_point}, #{end_point}"
-
-      # not sure if this is correct
-      # add to array if not already there
-      # https://stackoverflow.com/questions/14004325/add-element-to-an-array-if-its-not-there-already
-      # vertices | [start_point]
-      # vertices | [end_point]
 
       unless vertices.containsObject(start_point)
         vertices.addObject(start_point)
@@ -27,16 +20,13 @@ module VoronoiUtilities
         vertices.addObject(end_point)
       end
     end
-    # puts "vertices:".red
-    # vertices.each do |v|
-    #   puts v
-    # end
+
     vertices
   end
   alias :verticesFromCell :vertices_from_cell
 
   def overlay_from_vertices(vertices)
-    puts "VORONOI_UTILITIES: OVERLAY_FROM_VERTICES".blue if DEBUGGING
+    puts 'VORONOI_UTILITIES: OVERLAY_FROM_VERTICES'.blue if DEBUGGING
     # puts "vertices: #{vertices.length}".red
 
     points = []
@@ -70,25 +60,19 @@ module VoronoiUtilities
   end
   alias :overlayFromVertices :overlay_from_vertices
 
-  # def site_from_pylon
-  #   # puts "\n\nVoronoiUtilities::site_from_pylon"
-  # end
-
   def mkmaprect_for_coord_region(region)
-    # puts "\nmkmaprect_for_coord_region region:#{region.center.latitude}, delta: #{region.span.latitudeDelta}"
-
     a = MKMapPointForCoordinate(CLLocationCoordinate2DMake( \
       region.center.latitude + region.span.latitudeDelta / 2, \
       region.center.longitude - region.span.longitudeDelta / 2
       )
     )
-    # puts "a: #{a.x}, #{a.y}"
+
     b = MKMapPointForCoordinate(CLLocationCoordinate2DMake( \
       region.center.latitude - region.span.latitudeDelta / 2, \
       region.center.longitude + region.span.longitudeDelta / 2
       )
     )
-    # puts "b: #{b.x}, #{b.y}"
+
     MKMapRectMake([a.x, b.x].min, [a.y, b.y].min, (a.x - b.x).abs, (a.y - b.y).abs)
   end
 end

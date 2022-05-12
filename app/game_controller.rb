@@ -8,7 +8,7 @@ class GameController < MachineViewController
                 :game,
                 :player_location
 
-  DEBUGGING = false
+  DEBUGGING = true
   PYLON_VIEW_IDENTIFIER = 'PylonViewIdentifier'.freeze
 
   def setup_mapview
@@ -138,15 +138,15 @@ class GameController < MachineViewController
     @button_fsm.when :primed do |state|
       state.on_entry { button_color(UIColor.systemGreenColor) }
       state.transition_to :placing,
-                          on: :button_up,
-                          action: proc { handle_new_pouwhenua }
+                          on: :button_up
       state.transition_to :up,
                           on: :button_cancel
     end
     @button_fsm.when :placing do |state|
       state.on_entry { handle_new_pouwhenua }
       state.transition_to :up,
-                          on: :button_placed
+                          # this is a hack to get around thread timing
+                          after: 0.2
     end
 
     # puts 'Starting button state machine'
@@ -190,8 +190,8 @@ class GameController < MachineViewController
         lambda do |_context|
           path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
           # UIColor.blueColor.setFill
-          puts "Annotation color for #{annotation.coordinate.to_hash}"
-          mp annotation.color.CIColor.stringRepresentation
+          # puts "Annotation color for #{annotation.coordinate.to_hash}"
+          # mp annotation.color.CIColor.stringRepresentation
           annotation.color.setStroke
           path.lineWidth = 4.0
           path.stroke
@@ -228,8 +228,6 @@ class GameController < MachineViewController
   # REFACTOR with method below?
   def render_overlays
     puts 'GAME_CONTROLLER RENDEROVERLAYS'.blue if DEBUGGING
-    mp caller
-    mp Machine.instance.takaro_fbo.pouwhenua_array_enabled_only
 
     if map_view.overlays
       overlays_to_remove = map_view.overlays.mutableCopy
@@ -249,10 +247,10 @@ class GameController < MachineViewController
     map_view.addAnnotations(@voronoi_map.annotations)
 
     puts 'GAME_CONTROLLER getting the cells'
-    vcells = @voronoi_map.voronoiCells
-    mp vcells
-
-    vcells.each do |cell|
+#     vcells = @voronoi_map.voronoiCells
+# 
+#     vcells.each do |cell|
+    @voronoi_map.voronoiCells.each do |cell|
       # puts "cell: #{cell}".focus
       map_view.addOverlay(cell.overlay)
     end
@@ -286,7 +284,6 @@ class GameController < MachineViewController
   def add_overlays
     puts 'GAME_CONTROLLER: ADD_OVERLAYS'.blue if DEBUGGING
     @voronoi_map.voronoi_cells.each do |cell|
-      mp cell
       map_view.addOverlay(cell.overlay)
     end
   end
@@ -308,9 +305,11 @@ class GameController < MachineViewController
   def handle_new_pouwhenua
     puts 'GAME_CONTROLLER: HANDLE_NEW_POUWHENUA'.blue if DEBUGGING
 
-    Machine.instance.takaro_fbo.create_new_pouwhenua_from_hash
-
+    puts "SENDING EVENT".focus
     @button_fsm.event(:button_placed)
+
+    puts "HANDLING POUWHENUA".focus
+    Machine.instance.takaro_fbo.create_new_pouwhenua_from_hash
   end
 
   def observe_new_pouwhenua
