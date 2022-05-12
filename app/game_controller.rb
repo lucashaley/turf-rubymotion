@@ -86,7 +86,7 @@ class GameController < MachineViewController
     end
 
     @placement_observer = App.notification_center.observe 'CrossedPlacementLimit' do |_notification|
-      @button_fsm.event(:button_up)
+      @button_fsm.event(:button_cancel)
     end
   end
   # rubocop:enable Metrics/AbcSize
@@ -132,12 +132,21 @@ class GameController < MachineViewController
                           after: Machine.instance.takaro_fbo.local_kaitakaro.deploy_time
       state.transition_to :up,
                           on: :button_up
+      state.transition_to :up,
+                          on: :button_cancel
     end
     @button_fsm.when :primed do |state|
       state.on_entry { button_color(UIColor.systemGreenColor) }
-      state.transition_to :up,
+      state.transition_to :placing,
                           on: :button_up,
                           action: proc { handle_new_pouwhenua }
+      state.transition_to :up,
+                          on: :button_cancel
+    end
+    @button_fsm.when :placing do |state|
+      state.on_entry { handle_new_pouwhenua }
+      state.transition_to :up,
+                          on: :button_placed
     end
 
     # puts 'Starting button state machine'
@@ -261,7 +270,7 @@ class GameController < MachineViewController
 
   def touch_out
     puts 'touch out'
-    @button_fsm.event(:button_up)
+    @button_fsm.event(:button_cancel)
   end
 
   def button_color(color)
@@ -301,7 +310,7 @@ class GameController < MachineViewController
 
     Machine.instance.takaro_fbo.create_new_pouwhenua_from_hash
 
-    # render_overlays
+    @button_fsm.event(:button_placed)
   end
 
   def observe_new_pouwhenua
