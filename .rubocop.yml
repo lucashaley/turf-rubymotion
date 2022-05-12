@@ -3,6 +3,10 @@ AllCops:
   Exclude:
     - 'unused/**/*'
 
+Layout/LineLength:
+  IgnoredPatterns:
+    - '#\s*'
+
 Lint/DuplicateMethods:
   Enabled: false
 
