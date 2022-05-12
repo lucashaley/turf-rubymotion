@@ -222,9 +222,9 @@ class Machine
       end
     )
   end
-
-  def check_location_in_taiapa(in_location)
-    puts 'MACHINE check_location_in_taiapa'.blue if DEBUGGING
-    puts "in_location: #{in_location}"
-  end
+# 
+#   def check_location_in_taiapa(in_location)
+#     puts 'MACHINE check_location_in_taiapa'.blue if DEBUGGING
+#     puts "in_location: #{in_location}"
+#   end
 end

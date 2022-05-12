@@ -20,10 +20,12 @@
 class KaitakaroFbo < FirebaseObject
   attr_accessor :is_bot,
                 :in_boundary,
-                :machine
+                :machine,
+                :button_down_location
   attr_reader :location_update_observer
 
   DEBUGGING = false
+  PLACEMENT_LIMIT = 2
 
   def initialize(in_ref, in_data_hash, in_bot = false)
     @location_update_observer = nil
@@ -82,9 +84,8 @@ class KaitakaroFbo < FirebaseObject
     # We could use MKMapRectContainsPoint, but we would need to MapView MKMapRect
     # or we can use this algorithm: https://stackoverflow.com/a/23546284
     if Machine.instance.is_playing
-      # check here
-      # App.notification_center.post 'BoundaryExit' unless check_taiapa
       check_taiapa
+      check_placing
     end
 
     # check if we are outside the kapa starting zone
@@ -112,6 +113,26 @@ class KaitakaroFbo < FirebaseObject
 
     @machine.event(:exit_bounds) if !in_taiapa && @in_boundary
     @machine.event(:enter_bounds) if in_taiapa && !@in_boundary
+  end
+
+  def placing(in_bool)
+    puts "FBO:#{@class_name}:#{__LINE__} placing".green if DEBUGGING
+
+    @button_down_location = in_bool ? coordinate : nil
+  end
+
+  def check_placing
+    puts "FBO:#{@class_name}:#{__LINE__} check_placing".green if DEBUGGING
+
+    return if @button_down_location.nil?
+
+    distance = Utilities::get_distance(@button_down_location, coordinate)
+    puts "Distance: #{distance}".focus
+
+    return if distance < PLACEMENT_LIMIT
+
+    puts 'MOVED TOO FAR!!'.focus
+    App.notification_center.post 'CrossedPlacementLimit'
   end
 
   # TODO: Couldn't this all be in the .kapa method?
