@@ -3,10 +3,18 @@ class GameController < MachineViewController
 
   outlet :map_view, MKMapView
   outlet :button_pylon, UIButton
+  outlet :timer_label, UILabel
+  outlet :pouwhenua_label, UILabel
+  outlet :left_score_label, UILabel
+  outlet :right_score_label, UILabel
 
   attr_accessor :voronoi_map,
                 :game,
-                :player_location
+                :player_location,
+                :timer,
+                :timer_count,
+                :scores,
+                :scores_hash
 
   DEBUGGING = true
   PYLON_VIEW_IDENTIFIER = 'PylonViewIdentifier'.freeze
@@ -21,7 +29,102 @@ class GameController < MachineViewController
 
     @boundary_audio.numberOfLoops = -1  # looping
     @boundary_audio.prepareToPlay       # make sure it's ready
+
+    @button_cancel_audio = player_for_audio('button_cancel')
+    @button_cancel_audio.prepareToPlay
   end
+
+  def update_pouwhenua_label
+    pouwhenua_label.text = '•' * Machine.instance.takaro_fbo.local_kaitakaro.pouwhenua_current
+  end
+
+  # https://www.raywenderlich.com/2156-rubymotion-tutorial-for-beginners-part-2
+  def setup_timers
+    puts 'SETUP_TIMERS'.yellow
+    @timer_count = Machine.instance.takaro_fbo.duration * 60
+    mp @timer_count
+    timer_label.text = format_seconds(@timer_count)
+    @timer = NSTimer.timerWithTimeInterval(1, target: self, selector: 'timer_decrement', userInfo: nil, repeats: true)
+    NSRunLoop.currentRunLoop.addTimer(@timer, forMode: NSDefaultRunLoopMode)
+
+    @score_timer = NSTimer.timerWithTimeInterval(0.2, target: self, selector: 'calculate_score', userInfo: nil, repeats: true)
+    NSRunLoop.currentRunLoop.addTimer(@score_timer, forMode: NSDefaultRunLoopMode)
+  end
+
+  def timer_decrement
+    puts 'TIMER_DECREMENT'.yellow
+    @timer_count -= 1
+    timer_label.text = format_seconds(@timer_count)
+  end
+
+  def format_seconds(in_seconds)
+    minutes = (in_seconds / 60).floor
+    seconds = (in_seconds % 60).round
+
+    "#{minutes}:#{seconds.to_s.rjust(2, '0')}"
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def calculate_score
+    Machine.instance.takaro_fbo.calculate_score
+
+    return if @voronoi_map.nil?
+
+    areas = []
+    areas_hash = {}
+
+    # we can get MKPolygon
+    @voronoi_map.voronoi_cells.each do |vc|
+      mp vc.pylon['kapa_key']
+      verts = vc.vertices
+
+      area = 0.0
+      verts.each_with_index do |point, index|
+        if index + 1 < verts.length
+          point2 = verts[index +1]
+        end
+        if point2
+          # shoelace algorithm
+          area = area + ((point.x * point2.y) - (point2.x * point.y))
+        else
+          # use the first point with the last point when all the other points have been done
+          area = area + ((point.x * verts[0].y) - (verts[0].x * point.y))
+        end
+      end
+      # divide by 2 and get the absolute. I  have converted the result to metres but that is optional. Leave it in square inches if you prefer.
+      area = (area / (2.0 * 100_000)).abs.round(1)
+      areas << area
+      if areas_hash.key?(vc.pylon['kapa_key'])
+        areas_hash[vc.pylon['kapa_key']] += area
+      else
+        areas_hash[vc.pylon['kapa_key']] = area
+      end
+      puts "area: #{area}".focus
+    end
+
+    total_areas_hash = areas_hash.values.inject(0, :+)
+    deltas = areas_hash.values.map { |a| ((a / total_areas_hash) * 100).round - 50 }
+
+    # TODO: use transform_value?
+
+    areas_hash.each { |key, value| Machine.instance.takaro_fbo.score(key, value) }
+    areas_hash.each do |key, value| 
+      if @scores_hash.key?(key)
+        @scores_hash[key] += value
+      else
+        @scores_hash[key] = value
+      end
+    end
+
+    # total_area = areas.inject(0, :+)
+    # deltas = areas.map { |a| ((a / total_area) * 100).round - 50 }
+
+    mp deltas
+
+    left_score_label.text = @scores_hash[0].to_s
+    right_score_label.text = @scores_hash[1].to_s
+  end
+  # rubocop:disable Metrics/AbcSize
 
   # rubocop:disable Metrics/AbcSize
   def init_observers
@@ -86,6 +189,7 @@ class GameController < MachineViewController
     end
 
     @placement_observer = App.notification_center.observe 'CrossedPlacementLimit' do |_notification|
+      @button_cancel_audio.play
       @button_fsm.event(:button_cancel)
     end
   end
@@ -108,6 +212,8 @@ class GameController < MachineViewController
     puts 'GAMECONTROLLER: VIEWDIDLOAD'.light_blue
 
     Machine.instance.is_playing = true
+    @scores = [0, 0]
+    @scores_hash = {}
 
     map_view.setRegion(Machine.instance.takaro_fbo.taiapa_region, animated: false)
     map_view.setCameraBoundary(
@@ -117,6 +223,8 @@ class GameController < MachineViewController
 
     init_observers
     setup_audio
+    setup_timers
+    update_pouwhenua_label
 
     @voronoi_map = VoronoiMap.new
 
@@ -305,10 +413,7 @@ class GameController < MachineViewController
   def handle_new_pouwhenua
     puts 'GAME_CONTROLLER: HANDLE_NEW_POUWHENUA'.blue if DEBUGGING
 
-    puts "SENDING EVENT".focus
-    @button_fsm.event(:button_placed)
-
-    puts "HANDLING POUWHENUA".focus
+    # @button_fsm.event(:button_placed)
     Machine.instance.takaro_fbo.create_new_pouwhenua_from_hash
   end
 

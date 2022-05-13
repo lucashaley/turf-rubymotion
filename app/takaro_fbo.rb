@@ -140,15 +140,19 @@ class TakaroFbo < FirebaseObject
   def create_bot_player
     puts "FBO:#{@class_name} create_bot_player".green if DEBUGGING
 
-    bot_ref = @ref.child('kaitakaro').childByAutoId
-    bot = KaitakaroFbo.new(bot_ref, { id: 666 }, true)
-    bot.display_name = 'Jimmy Bot'
-    bot.character = {
-      'deploy_time' => 4,
-      'lifespan_ms' => 280_000,
-      'pouwhenua_start' => 3,
-      'title' => 'Bot Character'
+    bot_data = {
+      'display_name' => 'Jimmy Bot',
+      'character' => {
+        'deploy_time' => 4,
+        'lifespan_ms' => 280_000,
+        'pouwhenua_start' => 3,
+        'title' => 'Bot Character'
+      }
     }
+
+    bot_ref = @ref.child('kaitakaro').childByAutoId
+    bot = KaitakaroFbo.new(bot_ref, bot_data, true)
+
     coord = @local_kaitakaro.coordinate
 
     bot.coordinate = {
@@ -219,16 +223,14 @@ class TakaroFbo < FirebaseObject
     puts "FBO:#{@class_name}:#{__LINE__} set_initial_pouwhenua".green if DEBUGGING
     coord_array = []
     @local_kapa_array.each do |k|
-      # mp k
-      # create_new_pouwhenua(k['coordinate'], k['color'])
-      # create_new_pouwhenua(k)
       data = k.data_for_pouwhenua
+      mp data
 
       # TODO: Should these initial pouwhenua ever die?
       # data.merge!('lifespan_ms' => 120_000)
       data.merge!('lifespan_ms' => duration * 60 * 1000)
 
-      create_new_pouwhenua_from_hash(data)
+      create_new_pouwhenua_from_hash(data, true)
 
       # add to local coords
       coord_array << k.coordinate
@@ -273,8 +275,12 @@ class TakaroFbo < FirebaseObject
   end
   # rubocop:enable Metrics/AbcSize
 
-  def create_new_pouwhenua_from_hash(arg_hash = {})
+  def create_new_pouwhenua_from_hash(arg_hash = {}, is_initial = false)
     puts "FBO:#{@class_name}:#{__LINE__} create_new_pouwhenua_from_hash".green if DEBUGGING
+
+    # Check if the player still has available pouwhenua
+    # puts @local_kaitakaro.pouwhenua_current.to_s.focus
+    return if @local_kaitakaro.pouwhenua_current <= 0
 
     # the format we want to end up with:
     # color,
@@ -291,34 +297,7 @@ class TakaroFbo < FirebaseObject
     )
     @local_pouwhenua << p
 
-    pull
-  end
-
-  def create_new_pouwhenua(in_kapa = @local_kaitakaro.kapa)
-    puts "FBO:#{@class_name}:#{__LINE__} create_new_pouwhenua".green if DEBUGGING
-
-    # check if we're receiving a kapa
-    # in which case we're probably setting up the initial pouwhenua
-    # and we use the local player's coordinate
-    # otherwise we use the kapa coordinate
-
-    # check what format the kapa data is coming in as
-    in_kapa = in_kapa.data_hash if in_kapa.is_a?(KapaFbo)
-
-    # hash version
-    p = PouwhenuaFbo.new(
-      @ref.child('pouwhenua').childByAutoId,
-      {
-        'color' => in_kapa['color'],
-        'coordinate' => in_kapa['coordinate'],
-        'title' => 'Fbo Version',
-        'kapa' => in_kapa['key'],
-        # This should be a generic value across all teams
-        # or perhaps based on number of people on a team
-        'lifespan_ms' => 3000
-      }
-    )
-    @local_pouwhenua << p
+    @local_kaitakaro.pouwhenua_decrement unless is_initial
 
     pull
   end
@@ -335,12 +314,15 @@ class TakaroFbo < FirebaseObject
 
   def list_player_names_for_index(in_index)
     puts "FBO:#{@class_name} list_player_names_for_index".green if DEBUGGING
-    # puts "in_index: #{in_index}".red
 
     return nil if kapa_array.nil?
 
     nga_kaitakaro = kapa_array[in_index]['kaitakaro'].values
     nga_kaitakaro.flatten(1).map { |k| { 'display_name' => k['display_name'], 'character' => k['character'] } }
+  end
+
+  def calculate_score
+    puts 'calculate_score'
   end
 
   # Helpers
@@ -403,6 +385,12 @@ class TakaroFbo < FirebaseObject
 
   def playing=(in_playing)
     update({ 'playing' => in_playing })
+  end
+
+  def score(kapa_key, score)
+    puts "Score for #{kapa_key}: #{score}".focus
+    mp kapa_hash
+    mp local_kapa_array
   end
 end
 # rubocop:enable Metrics/ClassLength

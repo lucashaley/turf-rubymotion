@@ -15,6 +15,8 @@
 class KapaFbo < FirebaseObject
   attr_reader :kaitakaro_array
 
+  DEBUGGING = true
+
   def initialize(in_ref, in_data_hash)
     puts "FBO:#{@class_name}:#{__LINE__} initialize".green if DEBUGGING
     @team_distance = 50
@@ -28,7 +30,12 @@ class KapaFbo < FirebaseObject
 
   def add_kaitakaro(in_kaitakaro)
     puts "FBO:#{@class_name}:#{__LINE__} add_kaitakaro".green if DEBUGGING
+    mp in_kaitakaro
+
     in_kaitakaro.kapa = self
+
+    mp in_kaitakaro
+
     @kaitakaro_array << in_kaitakaro
 
     # this is the old version, when the data_for_kapa was the argument
@@ -38,8 +45,8 @@ class KapaFbo < FirebaseObject
     # kaitakaro_hash[in_kaitakaro.key] = in_kaitakaro.data_for_kapa
 
     update({ 'kaitakaro' => kaitakaro_hash })
-    puts "add_kaitakaro @kaitakaro_hash: #{@kaitakaro_hash.inspect}".light_blue
-    puts "add_kaitakaro @kaitakaro_array: #{@kaitakaro_array.inspect}".light_blue
+    # puts "add_kaitakaro @kaitakaro_hash: #{@kaitakaro_hash.inspect}".light_blue
+    # puts "add_kaitakaro @kaitakaro_array: #{@kaitakaro_array.inspect}".light_blue
     App.notification_center.post 'PlayerChanged'
     recalculate_coordinate
   end
@@ -150,7 +157,7 @@ class KapaFbo < FirebaseObject
 
   def data_for_kaitakaro
     {
-      'id' => @ref.key,
+      'kapa_key' => @ref.key,
       'color' => color,
       'coordinate' => coordinate
     }
@@ -158,7 +165,7 @@ class KapaFbo < FirebaseObject
 
   def data_for_pouwhenua
     {
-      'id' => @ref.key,
+      'kapa_key' => key,
       'color' => color,
       'coordinate' => coordinate
     }

@@ -70,24 +70,33 @@
 
 @property IBOutlet MKMapView * map_view;
 @property IBOutlet UIButton * button_pylon;
+@property IBOutlet UILabel * timer_label;
+@property IBOutlet UILabel * pouwhenua_label;
+@property IBOutlet UILabel * left_score_label;
+@property IBOutlet UILabel * right_score_label;
 
 -(IBAction) setup_mapview;
 -(IBAction) setup_audio;
+-(IBAction) update_pouwhenua_label;
+-(IBAction) setup_timers;
+-(IBAction) timer_decrement;
+-(IBAction) format_seconds:(id) in_seconds;
+-(IBAction) calculate_score;
+-(IBAction) init_observers;
 -(IBAction) viewDidLoad;
--(IBAction) renderOverlays;
+-(IBAction) button_down;
+-(IBAction) button_up;
+-(IBAction) render_overlays;
 -(IBAction) touch_down;
 -(IBAction) touch_up;
 -(IBAction) touch_out;
--(IBAction) set_button_color:(id) color;
+-(IBAction) button_color:(id) color;
 -(IBAction) add_overlays_and_annotations;
 -(IBAction) add_overlays;
 -(IBAction) add_annotations;
 -(IBAction) player_for_audio:(id) filename;
--(IBAction) handle_new_pouwhenua:(id) data;
+-(IBAction) handle_new_pouwhenua;
 -(IBAction) observe_new_pouwhenua;
--(IBAction) observe_new_pylon:(id) notification_object;
--(IBAction) observe_change_pylon;
--(IBAction) observe_death_pylon:(id) notification_object;
 
 @end
 
@@ -117,7 +126,6 @@
 -(IBAction) set_location:(id) location;
 -(IBAction) lifespan_color;
 -(IBAction) set_uuid:(id) new_uuid;
--(IBAction) uuid_string;
 -(IBAction) set_annotation:(id) new_annotation;
 -(IBAction) get_uicolor;
 -(IBAction) to_hash;
@@ -157,11 +165,8 @@
 
 @interface VoronoiMap: NSObject
 -(IBAction) initialize;
--(IBAction) voronoi_cells_from_pylons:(id) in_pylons;
 -(IBAction) voronoi_cells;
 -(IBAction) annotations;
--(IBAction) add_pylon:(id) pylon;
--(IBAction) add_pouwhenua:(id) pouwhenua;
 
 @end
 
@@ -188,14 +193,24 @@
 @interface KaitakaroFbo: FirebaseObject
 -(IBAction) init_observers;
 -(IBAction) coordinate;
+-(IBAction) check_taiapa;
+-(IBAction) placing:(id) in_bool;
+-(IBAction) check_placing;
 -(IBAction) recalculate_kapa:(id) in_coordinate;
+-(IBAction) exit_bounds;
+-(IBAction) enter_bounds;
+-(IBAction) eject;
 -(IBAction) display_name;
 -(IBAction) name_and_character;
 -(IBAction) data_for_kapa;
+-(IBAction) data_for_pouwhenua;
 -(IBAction) character;
 -(IBAction) kapa;
 -(IBAction) deploy_time;
 -(IBAction) lifespan_ms;
+-(IBAction) pouwhenua_current;
+-(IBAction) pouwhenua_decrement;
+-(IBAction) pouwhenua_increment;
 
 @end
 
@@ -210,6 +225,7 @@
 -(IBAction) color;
 -(IBAction) coordinate;
 -(IBAction) data_for_kaitakaro;
+-(IBAction) data_for_pouwhenua;
 -(IBAction) format_to_location_coord:(id) input;
 -(IBAction) recursive_symbolize_keys:(id) hsh;
 
@@ -220,9 +236,7 @@
 -(IBAction) state;
 -(IBAction) segue:(id) name;
 -(IBAction) initialize_location_manager;
--(IBAction) create_new_pouwhenua;
 -(IBAction) check_for_game:(id) gamecode;
--(IBAction) check_location_in_taiapa:(id) in_location;
 
 @end
 
@@ -274,7 +288,7 @@
 @end
 
 @interface PouwhenuaFbo: FirebaseObject
--(IBAction) data_for_takaro;
+-(IBAction) destroy;
 
 @end
 
@@ -301,23 +315,24 @@
 
 @interface TakaroFbo: FirebaseObject
 -(IBAction) init_states;
+-(IBAction) init_pouwhenua;
 -(IBAction) init_kapa;
 -(IBAction) init_local_kaitakaro:(id) in_character;
 -(IBAction) create_kapa:(id) coordinate;
--(IBAction) remove_kapa:(id) in_ref;
 -(IBAction) create_bot_player;
 -(IBAction) add_kaitakaro:(id) in_kaitakaro;
 -(IBAction) kapa_with_key:(id) in_key;
 -(IBAction) get_kapa_for_coordinate:(id) coordinate;
 -(IBAction) set_initial_pouwhenua;
--(IBAction) create_new_pouwhenua:(id) in_kapa;
 -(IBAction) player_count_for_index:(id) in_index;
 -(IBAction) list_player_names_for_index:(id) in_index;
+-(IBAction) calculate_score;
 -(IBAction) gamecode;
 -(IBAction) duration;
 -(IBAction) kapa_hash;
 -(IBAction) kapa_array;
 -(IBAction) pouwhenua_array;
+-(IBAction) pouwhenua_array_enabled_only;
 -(IBAction) taiapa;
 -(IBAction) waiting;
 -(IBAction) playing;
@@ -406,6 +421,8 @@
 -(IBAction) recursive_symbolize_keys:(id) h;
 -(IBAction) format_to_location_coord:(id) input;
 -(IBAction) random_color;
+-(IBAction) puts_open;
+-(IBAction) puts_close;
 
 @end
 

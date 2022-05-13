@@ -29,6 +29,10 @@ class KaitakaroFbo < FirebaseObject
 
   def initialize(in_ref, in_data_hash, in_bot = false)
     @location_update_observer = nil
+
+    # set the current pouwhenua
+    in_data_hash.merge!('pouwhenua_current' => in_data_hash['character']['pouwhenua_start'])
+
     super(in_ref, in_data_hash).tap do |k|
       @is_bot = in_bot
       @in_boundary = true
@@ -214,12 +218,13 @@ class KaitakaroFbo < FirebaseObject
   end
 
   def data_for_pouwhenua
+    puts "data_for_pouwhenua kapa_key: #{kapa['kapa_key']}".focus
     {
       'key' => @ref.key,
       'coordinate' => coordinate,
       'lifespan_ms' => character['lifespan_ms'],
       'color' => kapa['color'],
-      'kapa_key' => kapa['key']
+      'kapa_key' => kapa['kapa_key']
     }
   end
 
@@ -250,5 +255,17 @@ class KaitakaroFbo < FirebaseObject
 
   def lifespan_ms
     @data_hash['character']['lifespan_ms']
+  end
+
+  def pouwhenua_current
+    @data_hash['pouwhenua_current']
+  end
+
+  def pouwhenua_decrement
+    update({ 'pouwhenua_current' => pouwhenua_current - 1 })
+  end
+
+  def pouwhenua_increment
+    update({ 'pouwhenua_current' => pouwhenua_current + 1 })
   end
 end
