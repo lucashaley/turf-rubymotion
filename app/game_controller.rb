@@ -47,7 +47,7 @@ class GameController < MachineViewController
     @timer = NSTimer.timerWithTimeInterval(1, target: self, selector: 'timer_decrement', userInfo: nil, repeats: true)
     NSRunLoop.currentRunLoop.addTimer(@timer, forMode: NSDefaultRunLoopMode)
 
-    @score_timer = NSTimer.timerWithTimeInterval(0.2, target: self, selector: 'calculate_score', userInfo: nil, repeats: true)
+    @score_timer = NSTimer.timerWithTimeInterval(0.1, target: self, selector: 'calculate_score', userInfo: nil, repeats: true)
     NSRunLoop.currentRunLoop.addTimer(@score_timer, forMode: NSDefaultRunLoopMode)
   end
 
@@ -66,14 +66,10 @@ class GameController < MachineViewController
 
   # rubocop:disable Metrics/AbcSize
   def calculate_score
-    Machine.instance.takaro_fbo.calculate_score
-
     return if @voronoi_map.nil?
 
-    areas = []
     areas_hash = {}
 
-    # we can get MKPolygon
     @voronoi_map.voronoi_cells.each do |vc|
       mp vc.pylon['kapa_key']
       verts = vc.vertices
@@ -93,22 +89,28 @@ class GameController < MachineViewController
       end
       # divide by 2 and get the absolute. I  have converted the result to metres but that is optional. Leave it in square inches if you prefer.
       area = (area / (2.0 * 100_000)).abs.round(1)
-      areas << area
+
       if areas_hash.key?(vc.pylon['kapa_key'])
         areas_hash[vc.pylon['kapa_key']] += area
       else
         areas_hash[vc.pylon['kapa_key']] = area
       end
-      puts "area: #{area}".focus
+      # puts "area: #{area}".focus
     end
 
     total_areas_hash = areas_hash.values.inject(0, :+)
-    deltas = areas_hash.values.map { |a| ((a / total_areas_hash) * 100).round - 50 }
 
-    # TODO: use transform_value?
+    delta_hash = {}
+    areas_hash.each do |key, v|
+      s = ((v / total_areas_hash) * 100).round - 50
+      s = s < 0 ? 0 : s
+      delta_hash[key] = (s / 10).round
+    end
 
-    areas_hash.each { |key, value| Machine.instance.takaro_fbo.score(key, value) }
-    areas_hash.each do |key, value| 
+    # This doesn't seem to work for this version?
+    # delta_hash = areas_hash.transform_values { |v| ((v / total_areas_hash) * 100).round - 50 }
+
+    delta_hash.each do |key, value| 
       if @scores_hash.key?(key)
         @scores_hash[key] += value
       else
@@ -116,13 +118,8 @@ class GameController < MachineViewController
       end
     end
 
-    # total_area = areas.inject(0, :+)
-    # deltas = areas.map { |a| ((a / total_area) * 100).round - 50 }
-
-    mp deltas
-
-    left_score_label.text = @scores_hash[0].to_s
-    right_score_label.text = @scores_hash[1].to_s
+    left_score_label.text = @scores_hash.values[0].to_s
+    right_score_label.text = @scores_hash.values[1].to_s
   end
   # rubocop:disable Metrics/AbcSize
 

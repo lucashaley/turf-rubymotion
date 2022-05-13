@@ -6,7 +6,7 @@ class VoronoiMap
   # This will be translated into Firebase structure.
   # attr_accessor :pylons
 
-  DEBUGGING = true
+  DEBUGGING = false
 
   def initialize
     puts 'VORONOI_MAP INITIALIZE'.green if DEBUGGING

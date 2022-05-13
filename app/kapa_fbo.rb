@@ -30,11 +30,8 @@ class KapaFbo < FirebaseObject
 
   def add_kaitakaro(in_kaitakaro)
     puts "FBO:#{@class_name}:#{__LINE__} add_kaitakaro".green if DEBUGGING
-    mp in_kaitakaro
 
     in_kaitakaro.kapa = self
-
-    mp in_kaitakaro
 
     @kaitakaro_array << in_kaitakaro
 

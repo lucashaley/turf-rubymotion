@@ -389,8 +389,8 @@ class TakaroFbo < FirebaseObject
 
   def score(kapa_key, score)
     puts "Score for #{kapa_key}: #{score}".focus
-    mp kapa_hash
-    mp local_kapa_array
+    # mp kapa_hash
+    # mp local_kapa_array
   end
 end
 # rubocop:enable Metrics/ClassLength

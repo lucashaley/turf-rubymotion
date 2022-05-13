@@ -1,6 +1,6 @@
 # https://github.com/DevRhys/iosvoronoi/blob/master/Example/iosvoronoi/BHEUtilities.m
 module VoronoiUtilities
-  DEBUGGING = true
+  DEBUGGING = false
 
   def vertices_from_cell(cell)
     puts 'VORONOI_UTILITIES: VERTICES_FROM_CELL'.blue if DEBUGGING
