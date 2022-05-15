@@ -27,15 +27,11 @@ class NewController < MachineViewController
 
     Machine.instance.is_waiting = true
 
-    # @takaro = Takaro.new
     @takaro = Machine.instance.takaro_fbo
     @takaro.update({ 'is_waiting' => 'true' })
-    puts 'DURR'
-    mp @takaro
 
     gamecode.text = @takaro.gamecode
 
-    puts 'new_controller: initing local player'.focus
     @takaro.init_local_kaitakaro(Machine.instance.local_character)
   end
 

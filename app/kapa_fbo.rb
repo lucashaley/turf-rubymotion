@@ -35,15 +35,8 @@ class KapaFbo < FirebaseObject
 
     @kaitakaro_array << in_kaitakaro
 
-    # this is the old version, when the data_for_kapa was the argument
-    # @kaitakaro_hash[in_kaitakaro['id']] = in_kaitakaro
-
-    # The kaitakaro_hash is now totally dynamic
-    # kaitakaro_hash[in_kaitakaro.key] = in_kaitakaro.data_for_kapa
-
     update({ 'kaitakaro' => kaitakaro_hash })
-    # puts "add_kaitakaro @kaitakaro_hash: #{@kaitakaro_hash.inspect}".light_blue
-    # puts "add_kaitakaro @kaitakaro_array: #{@kaitakaro_array.inspect}".light_blue
+
     App.notification_center.post 'PlayerChanged'
     recalculate_coordinate
   end
@@ -54,9 +47,7 @@ class KapaFbo < FirebaseObject
     puts 'Removing kaitakaro from kapa'.red
     puts "To remove: #{in_kaitakaro.inspect}"
     puts "To remove: #{@kaitakaro_array.inspect}"
-    # k_to_delete = @kaitakaro_array.select { |k| k.key == in_kaitakaro }.first
-    # puts "k_to_delete: #{k_to_delete}"
-    # k_to_delete = nil
+
     @kaitakaro_array.delete_if { |k| k.key == in_kaitakaro }
     puts "Array after delete: #{@kaitakaro_array}".yellow
     # @kaitakaro_hash.delete in_kaitakaro
@@ -92,11 +83,8 @@ class KapaFbo < FirebaseObject
     lat = 0
     long = 0
     @kaitakaro_array.each do |k|
-      # puts "Using: #{k['coordinate']}".red # from old data_for_kapa version
       coordinate = k.coordinate
-      puts "From: #{k}".red
-      # lat += k['coordinate']['latitude'].to_f
-      # long += k['coordinate']['longitude'].to_f
+
       lat += coordinate['latitude'].to_f
       long += coordinate['longitude'].to_f
     end

@@ -218,7 +218,6 @@ class KaitakaroFbo < FirebaseObject
   end
 
   def data_for_pouwhenua
-    puts "data_for_pouwhenua kapa_key: #{kapa['kapa_key']}".focus
     {
       'key' => @ref.key,
       'coordinate' => coordinate,

@@ -44,15 +44,27 @@ class GameController < MachineViewController
     @timer_count = Machine.instance.takaro_fbo.duration * 60
     mp @timer_count
     timer_label.text = format_seconds(@timer_count)
-    @timer = NSTimer.timerWithTimeInterval(1, target: self, selector: 'timer_decrement', userInfo: nil, repeats: true)
+    @timer = NSTimer.timerWithTimeInterval(
+      1,
+      target: self,
+      selector: 'timer_decrement',
+      userInfo: nil,
+      repeats: true
+    )
     NSRunLoop.currentRunLoop.addTimer(@timer, forMode: NSDefaultRunLoopMode)
 
-    @score_timer = NSTimer.timerWithTimeInterval(0.1, target: self, selector: 'calculate_score', userInfo: nil, repeats: true)
+    @score_timer = NSTimer.timerWithTimeInterval(
+      0.1,
+      target: self,
+      selector: 'calculate_score',
+      userInfo: nil,
+      repeats: true
+    )
     NSRunLoop.currentRunLoop.addTimer(@score_timer, forMode: NSDefaultRunLoopMode)
   end
 
   def timer_decrement
-    puts 'TIMER_DECREMENT'.yellow
+    # puts 'TIMER_DECREMENT'.yellow
     @timer_count -= 1
     timer_label.text = format_seconds(@timer_count)
   end
@@ -103,14 +115,14 @@ class GameController < MachineViewController
     delta_hash = {}
     areas_hash.each do |key, v|
       s = ((v / total_areas_hash) * 100).round - 50
-      s = s < 0 ? 0 : s
+      s = s.negative? ? 0 : s
       delta_hash[key] = (s / 10).round
     end
 
     # This doesn't seem to work for this version?
     # delta_hash = areas_hash.transform_values { |v| ((v / total_areas_hash) * 100).round - 50 }
 
-    delta_hash.each do |key, value| 
+    delta_hash.each do |key, value|
       if @scores_hash.key?(key)
         @scores_hash[key] += value
       else
@@ -352,9 +364,6 @@ class GameController < MachineViewController
     map_view.addAnnotations(@voronoi_map.annotations)
 
     puts 'GAME_CONTROLLER getting the cells'
-#     vcells = @voronoi_map.voronoiCells
-# 
-#     vcells.each do |cell|
     @voronoi_map.voronoiCells.each do |cell|
       # puts "cell: #{cell}".focus
       map_view.addOverlay(cell.overlay)
