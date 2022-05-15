@@ -6,22 +6,40 @@ class SelectCharacterController < MachineViewController
     @player_classes = {
       'scout' => {
         'deploy_time' => 4,
-        # 'lifespan_ms' => 2 * 60 * 1000,
+        # 'lifespan_ms' => 0.5.minutes * 1000,
         'lifespan_ms' => 8 * 1000,
         'pouwhenua_start' => 8,
-        'title' => 'Scout'
+        'title' => 'Scout',
+        'can_see_into_enemy_turf' => false,
+        'is_invisible_in_enemy_turf' => false,
+        'can_place_in_enemy_turf' => true
       },
       'tank' => {
         'deploy_time' => 6,
-        'lifespan_ms' => 8 * 60 * 1000,
+        'lifespan_ms' => 2.minutes * 1000,
         'pouwhenua_start' => 3,
-        'title' => 'Tank'
+        'title' => 'Tank',
+        'can_see_into_enemy_turf' => false,
+        'is_invisible_in_enemy_turf' => false,
+        'can_place_in_enemy_turf' => true
       },
       'commander' => {
-        'deploy_time' => 8,
-        'lifespan_ms' => 5 * 60 * 1000,
+        'deploy_time' => 5,
+        'lifespan_ms' => 1.minutes * 1000,
         'pouwhenua_start' => 4,
-        'title' => 'Commander'
+        'title' => 'Commander',
+        'can_see_into_enemy_turf' => true,
+        'is_invisible_in_enemy_turf' => false,
+        'can_place_in_enemy_turf' => true
+      },
+      'ghost' => {
+        'deploy_time' => 5,
+        'lifespan_ms' => 1.minutes * 1000,
+        'pouwhenua_start' => 4,
+        'title' => 'Ghost',
+        'can_see_into_enemy_turf' => true,
+        'is_invisible_in_enemy_turf' => true,
+        'can_place_in_enemy_turf' => false
       }
     }
     @player_classes.each_with_index do |pc, index|

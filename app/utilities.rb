@@ -126,6 +126,12 @@ class Hash
   end
 end
 
+class Numeric
+  def minutes
+    self * 60
+  end
+end
+
 
 module Debugging
   module_function
