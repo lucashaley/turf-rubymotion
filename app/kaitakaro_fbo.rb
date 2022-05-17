@@ -162,7 +162,7 @@ class KaitakaroFbo < FirebaseObject
       # if there is already a kapa, we need to remove the kaitakaro
       # ahh yes, we must remove it from the _existing_ one, not the new one
       puts "recalculate_kapa - existing data_hash kapa: #{@data_hash['kapa']}"
-      unless @data_hash['kapa'].nil?
+      unless @data_hash['kapa'].nil? or @data_hash['kapa'].count == 1
         # what if it's the last one? Surely we don't delete it
         KapaFbo.remove_kaitakaro_with_key(@ref.key, kapa['id'])
       end
@@ -223,7 +223,8 @@ class KaitakaroFbo < FirebaseObject
       'coordinate' => coordinate,
       'lifespan_ms' => character['lifespan_ms'],
       'color' => kapa['color'],
-      'kapa_key' => kapa['kapa_key']
+      'kapa_key' => kapa['kapa_key'],
+      'kaitakaro_key' => key
     }
   end
 
@@ -261,10 +262,12 @@ class KaitakaroFbo < FirebaseObject
   end
 
   def pouwhenua_decrement
-    update({ 'pouwhenua_current' => pouwhenua_current - 1 })
+    notification = -> { App.notification_center.post 'UpdatePouwhenuaLabel' }
+    update_with_block({ 'pouwhenua_current' => pouwhenua_current - 1 }, &notification)
   end
 
   def pouwhenua_increment
-    update({ 'pouwhenua_current' => pouwhenua_current + 1 })
+    notification = -> { App.notification_center.post 'UpdatePouwhenuaLabel' }
+    update_with_block({ 'pouwhenua_current' => pouwhenua_current + 1 }, &notification)
   end
 end

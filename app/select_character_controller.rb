@@ -8,7 +8,7 @@ class SelectCharacterController < MachineViewController
         'deploy_time' => 4,
         # 'lifespan_ms' => 0.5.minutes * 1000,
         'lifespan_ms' => 8 * 1000,
-        'pouwhenua_start' => 8,
+        'pouwhenua_start' => 4,
         'title' => 'Scout',
         'can_see_into_enemy_turf' => false,
         'is_invisible_in_enemy_turf' => false,
@@ -17,7 +17,7 @@ class SelectCharacterController < MachineViewController
       'tank' => {
         'deploy_time' => 6,
         'lifespan_ms' => 2.minutes * 1000,
-        'pouwhenua_start' => 3,
+        'pouwhenua_start' => 2,
         'title' => 'Tank',
         'can_see_into_enemy_turf' => false,
         'is_invisible_in_enemy_turf' => false,
@@ -26,7 +26,7 @@ class SelectCharacterController < MachineViewController
       'commander' => {
         'deploy_time' => 5,
         'lifespan_ms' => 1.minutes * 1000,
-        'pouwhenua_start' => 4,
+        'pouwhenua_start' => 3,
         'title' => 'Commander',
         'can_see_into_enemy_turf' => true,
         'is_invisible_in_enemy_turf' => false,
@@ -35,7 +35,7 @@ class SelectCharacterController < MachineViewController
       'ghost' => {
         'deploy_time' => 5,
         'lifespan_ms' => 1.minutes * 1000,
-        'pouwhenua_start' => 4,
+        'pouwhenua_start' => 2,
         'title' => 'Ghost',
         'can_see_into_enemy_turf' => true,
         'is_invisible_in_enemy_turf' => true,

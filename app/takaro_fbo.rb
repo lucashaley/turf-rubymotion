@@ -1,30 +1,3 @@
-# {
-#   duration,
-#   gamecode,
-#   is_playing,
-#   is_waiting,
-#   kaitakaro
-#   {
-#   },
-#   kapa
-#   {
-#     []
-#   },
-#   pouwhenua
-#   {
-#   },
-#   taiapa
-#   {
-#     center
-#     {
-#     },
-#     span
-#     {
-#     }
-#   }
-# }
-
-# rubocop:disable Metrics/ClassLength
 class TakaroFbo < FirebaseObject
   attr_accessor :kaitakaro_array,
                 :kaitakaro_hash,
@@ -194,6 +167,7 @@ class TakaroFbo < FirebaseObject
   end
 
   def kapa_with_key(in_key)
+    puts "takaro_fbo kapa_with_key: #{in_key}"
     @local_kapa_array.select { |k| k.ref.key == in_key }.first
   end
 
@@ -224,7 +198,7 @@ class TakaroFbo < FirebaseObject
     coord_array = []
     @local_kapa_array.each do |k|
       data = k.data_for_pouwhenua
-      mp data
+      # mp data
 
       # TODO: Should these initial pouwhenua ever die?
       # data.merge!('lifespan_ms' => 120_000)
@@ -292,6 +266,10 @@ class TakaroFbo < FirebaseObject
     # get the player info
     new_pouwhenua_hash = @local_kaitakaro.data_for_pouwhenua.merge arg_hash
 
+    # remove the kaitakaro for initial pouwhenua
+    # TODO: not sure we need this, it's also super clunky
+    new_pouwhenua_hash.delete('kaitakaro_key') if is_initial
+
     p = PouwhenuaFbo.new(
       @ref.child('pouwhenua').childByAutoId, new_pouwhenua_hash
     )
@@ -350,6 +328,14 @@ class TakaroFbo < FirebaseObject
     kapa_hash&.values
   end
 
+  def kaitakaro
+    @data_hash['kaitakaro']
+  end
+
+  def kaitakaro_for_kapa(kapa_key = @local_kaitakaro.kapa['kapa_key'])
+    kaitakaro.select { |_key, value| value['kapa']['kapa_key'] == kapa_key }
+  end
+
   def pouwhenua_array
     # puts "pouwhenua_array: #{@data_hash['pouwhenua']&.values}"
     @data_hash['pouwhenua']&.values
@@ -357,6 +343,10 @@ class TakaroFbo < FirebaseObject
     # TODO: This doesn't seem to work
     # h = @data_hash['pouwhenua']&.select { |p| p['enabled'] == 'true' }
     # h&.values
+  end
+
+  def pouwhenua_array_for_kapa(kapa_key = @local_kaitakaro.kapa['kapa_key'])
+    pouwhenua_array.select { |p| p['kapa_key'] == kapa_key && p['enabled'] == 'true' }
   end
 
   def pouwhenua_array_enabled_only
@@ -392,5 +382,42 @@ class TakaroFbo < FirebaseObject
     # mp kapa_hash
     # mp local_kapa_array
   end
+
+  def kaitakaro_annotations
+    annotations = []
+
+    # this just gets the local kaitakaro's kapa
+    kaitakaro_for_kapa.each do |k|
+      # TODO: this is a hack
+      # perhaps we need to massage in the kaitakaro method
+      k_hash = k[1]
+
+      ka = KaitakaroAnnotation.alloc.initWithCoordinate(
+        Utilities::format_to_location_coord(k_hash['coordinate'])
+      )
+      ka.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(k_hash['kapa']['color']))
+      ka.title = k_hash['display_name']
+      ka.subtitle = k_hash['character']['title']
+      annotations << ka
+    end
+
+    puts "Annotations: #{annotations}".focus
+    annotations
+  end
+
+  def pouwhenua_annotations
+    annotations = []
+
+    # this just gets the local kaitakaro's kapa
+    pouwhenua_array_for_kapa.each do |p|
+      pa = KaitakaroAnnotation.alloc.initWithCoordinate(
+        Utilities::format_to_location_coord(p['coordinate'])
+      )
+      pa.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(p['color']))
+      annotations << pa
+    end
+
+    puts "Annotations: #{annotations}".focus
+    annotations
+  end
 end
-# rubocop:enable Metrics/ClassLength

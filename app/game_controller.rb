@@ -18,6 +18,7 @@ class GameController < MachineViewController
 
   DEBUGGING = true
   PYLON_VIEW_IDENTIFIER = 'PylonViewIdentifier'.freeze
+  KAITAKARO_VIEW_IDENTIFIER = 'KaitakaroViewIdentifier'.freeze
 
   def setup_mapview
     map_view.showsUserLocation = true
@@ -42,7 +43,7 @@ class GameController < MachineViewController
   def setup_timers
     puts 'SETUP_TIMERS'.yellow
     @timer_count = Machine.instance.takaro_fbo.duration * 60
-    mp @timer_count
+    # mp @timer_count
     timer_label.text = format_seconds(@timer_count)
     @timer = NSTimer.timerWithTimeInterval(
       1,
@@ -83,7 +84,7 @@ class GameController < MachineViewController
     areas_hash = {}
 
     @voronoi_map.voronoi_cells.each do |vc|
-      mp vc.pylon['kapa_key']
+      # mp vc.pylon['kapa_key']
       verts = vc.vertices
 
       area = 0.0
@@ -107,7 +108,6 @@ class GameController < MachineViewController
       else
         areas_hash[vc.pylon['kapa_key']] = area
       end
-      # puts "area: #{area}".focus
     end
 
     total_areas_hash = areas_hash.values.inject(0, :+)
@@ -115,7 +115,7 @@ class GameController < MachineViewController
     delta_hash = {}
     areas_hash.each do |key, v|
       s = ((v / total_areas_hash) * 100).round - 50
-      s = s.negative? ? 0 : s
+      s = s < 0 ? 0 : s
       delta_hash[key] = (s / 10).round
     end
 
@@ -200,6 +200,11 @@ class GameController < MachineViewController
     @placement_observer = App.notification_center.observe 'CrossedPlacementLimit' do |_notification|
       @button_cancel_audio.play
       @button_fsm.event(:button_cancel)
+    end
+
+    @pouwhenua_label_observer = App.notification_center.observe 'UpdatePouwhenuaLabel' do |_notification|
+      puts 'GameController: pouwhenua_label_observer'.focus
+      update_pouwhenua_label
     end
   end
   # rubocop:enable Metrics/AbcSize
@@ -292,34 +297,62 @@ class GameController < MachineViewController
 
   ### Makes an annotation image for the map ###
   def mapView(map_view, viewForAnnotation: annotation)
-    # puts 'GAME_CONTROLLER: MAPVIEW.VIEWFORANNOTATION'.blue if DEBUGGING
     return nil if annotation == map_view.userLocation
 
-    # puts "viewForAnnotation: #{annotation.class}"
-    # check to see if it exists and has been queued
-    if annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PYLON_VIEW_IDENTIFIER)
-     else
-      annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: PYLON_VIEW_IDENTIFIER)
-
-      ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
-
-      annotation_view.image = ui_renderer.imageWithActions(
-        lambda do |_context|
-          path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
-          # UIColor.blueColor.setFill
-          # puts "Annotation color for #{annotation.coordinate.to_hash}"
-          # mp annotation.color.CIColor.stringRepresentation
-          annotation.color.setStroke
-          path.lineWidth = 4.0
-          path.stroke
-        end
-      )
-
-      annotation_view.canShowCallout = false
-    end
-    annotation_view
+    return pouwhenua_annotation(annotation) if annotation.class.to_s.end_with?('PouAnnotation')
+    return kaitarako_annotation(annotation) if annotation.class.to_s.end_with?('KaitakaroAnnotation')
   end
   # rubocop:enable Metrics/AbcSize
+
+  def pouwhenua_annotation(annotation)
+    annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PYLON_VIEW_IDENTIFIER)
+    if annotation_view.nil?
+      annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: PYLON_VIEW_IDENTIFIER)
+    end
+
+    ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
+
+    annotation_view.image = ui_renderer.imageWithActions(
+      lambda do |_context|
+        path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
+
+        UIColor.whiteColor.setFill
+        # path.fill
+        annotation.color.setStroke
+        path.lineWidth = 2.0
+        path.stroke
+      end
+    )
+
+    annotation_view.canShowCallout = false
+
+    annotation_view
+  end
+
+  def kaitarako_annotation(annotation)
+    annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(KAITAKARO_VIEW_IDENTIFIER)
+    if annotation_view.nil?
+      annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: KAITAKARO_VIEW_IDENTIFIER)
+    end
+
+    ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
+
+    annotation_view.image = ui_renderer.imageWithActions(
+      lambda do |_context|
+        path = UIBezierPath.bezierPathWithOvalInRect(CGRectMake(1, 1, 14, 14))
+
+        UIColor.blackColor.setFill
+        path.fill
+        annotation.color.setStroke
+        path.lineWidth = 2.0
+        path.stroke
+      end
+    )
+
+    annotation_view.canShowCallout = true
+
+    annotation_view
+  end
 
   ### Called after annotations have been added ###
   # def mapView(map_view, didAddAnnotationViews: views)
@@ -360,8 +393,12 @@ class GameController < MachineViewController
     # return if Machine.instance.takaro.pouwhenua_array.length < 2
     return if Machine.instance.takaro_fbo.pouwhenua_array.length < 2
 
-    # puts "Adding annotations: #{@voronoi_map.annotations}".focus
-    map_view.addAnnotations(@voronoi_map.annotations)
+    # add the pouwhenua
+    # map_view.addAnnotations(@voronoi_map.annotations)
+    map_view.addAnnotations(Machine.instance.takaro_fbo.pouwhenua_annotations)
+
+    # add the players
+    map_view.addAnnotations(Machine.instance.takaro_fbo.kaitakaro_annotations)
 
     puts 'GAME_CONTROLLER getting the cells'
     @voronoi_map.voronoiCells.each do |cell|
