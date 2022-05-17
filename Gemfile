@@ -7,7 +7,7 @@ gem 'rake'
 gem 'motion-cocoapods', path:"/Users/lhaley/Documents/Projects/Personal/motion-cocoapods/"
 gem "motion-provisioning"
 
-gem "bubble-wrap", git: "https://github.com/rubymotion-community/BubbleWrap"
+# gem "bubble-wrap", git: "https://github.com/rubymotion-community/BubbleWrap"
 
 # https://code.tutsplus.com/tutorials/lets-write-a-rubymotion-app-part-1--cms-20612
 gem 'ib'
@@ -21,7 +21,7 @@ gem 'standard'
 # gem "geomotion"
 
 # For RubyMine IDE debugging
-gem 'debase'
+# gem 'debase'
 
 # https://github.com/OTGApps/motion_print
 gem 'motion_print'

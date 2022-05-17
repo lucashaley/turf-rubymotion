@@ -15,7 +15,7 @@ rescue LoadError
 end
 
 # https://github.com/rubymotion-community/BubbleWrap
-require 'bubble-wrap'
+# require 'bubble-wrap'
 # https://github.com/rubymotion-community/ib
 require 'ib'
 # https://github.com/clayallsopp/geomotion

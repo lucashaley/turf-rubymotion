@@ -1,9 +1,3 @@
-GIT
-  remote: https://github.com/rubymotion-community/BubbleWrap
-  revision: afdc89e7f49e0f34009ae1554727322f5f38917f
-  specs:
-    bubble-wrap (1.9.7)
-
 PATH
   remote: /Users/lhaley/Documents/Projects/Personal/motion-cocoapods
   specs:
@@ -89,9 +83,6 @@ GEM
     commander (4.6.0)
       highline (~> 2.0.0)
     concurrent-ruby (1.1.9)
-    debase (2.3.2)
-      debase-ruby_core_source (~> 0.10.11)
-    debase-ruby_core_source (0.10.14)
     declarative (0.0.20)
     digest-crc (0.6.4)
       rake (>= 12.0.0, < 14.0.0)
@@ -321,8 +312,6 @@ PLATFORMS
   x86_64-darwin-20
 
 DEPENDENCIES
-  bubble-wrap!
-  debase
   ib
   motion-cocoapods!
   motion-provisioning
@@ -332,4 +321,4 @@ DEPENDENCIES
   standard
 
 BUNDLED WITH
-   2.2.31
+   2.3.13
