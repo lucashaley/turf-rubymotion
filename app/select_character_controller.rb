@@ -81,7 +81,7 @@ class SelectCharacterController < MachineViewController
     # Machine.instance.takaro_fbo.local_kaitakaro.character = character
 
     # post notification for New Controller
-    App.notification_center.post('SelectCharacter', character)
+    Notification.center.post('SelectCharacter', character)
 
     # Machine.instance.segue('ToGame')
     # Machine.instance.segue('ToWaitingRoom')

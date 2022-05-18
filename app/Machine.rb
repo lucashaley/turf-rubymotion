@@ -188,7 +188,8 @@ class Machine
   def locationManager(_manager, didUpdateToLocation: new_location, fromLocation: old_location)
     puts 'MACHINE: DIDUPDATETOLOCATION'.blue if DEBUGGING
 
-    App.notification_center.post(
+    # Notification.center.post(
+    Notification.center.post(
       'UpdateLocation',
       { 'new_location' => new_location, 'old_location' => old_location }
     )
@@ -196,7 +197,7 @@ class Machine
 
   def locationManager(_manager, didFailWithError: error)
     puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
-    App.notification_center.post 'PlayerDisappear'
+    Notification.center.post 'PlayerDisappear'
   end
 
   def check_for_game(gamecode)

@@ -36,13 +36,13 @@ class Player < FirebaseObject
           on: :deactivate
         state.transition_to :out_bounds,
           on: :exit_bounds,
-          action: proc { App.notification_center.post "BoundaryExit" }
+          action: proc { Notification.center.post "BoundaryExit" }
       end
       p.machine.when :out_bounds do |state|
         state.on_entry { puts "Player out_bounds enter" }
         state.transition_to :active,
           on: :enter_bounds,
-          action: proc { App.notification_center.post "BoundaryEnter" }
+          action: proc { Notification.center.post "BoundaryEnter" }
       end
 
       p.machine.start!

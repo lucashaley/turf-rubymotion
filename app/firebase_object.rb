@@ -71,7 +71,8 @@ class FirebaseObject
       lambda do |data_snapshot|
         # puts "FBO:#{@class_name} CHILDCHANGED".red if DEBUGGING
         # mp data_snapshot.valueInExportFormat if DEBUGGING
-        App.notification_center.post("#{@class_name}_ChildChanged", data_snapshot.valueInExportFormat)
+        # Notification.center.post("#{@class_name}_ChildChanged", data_snapshot.valueInExportFormat)
+        Notification.center.post("#{@class_name}_ChildChanged", data_snapshot.valueInExportFormat)
         pull
       end
     )
@@ -81,7 +82,8 @@ class FirebaseObject
       lambda do |data_snapshot|
         puts "FBO:#{@class_name} CHILDADDED".red if DEBUGGING
         # mp data_snapshot.valueInExportFormat if DEBUGGING
-        App.notification_center.post("#{@class_name}_ChildAdded", data_snapshot.valueInExportFormat)
+        Notification.center.post("#{@class_name}_ChildAdded", data_snapshot.valueInExportFormat)
+        # Notification.center.post("#{@class_name}_ChildAdded", data_snapshot.valueInExportFormat)
         pull
       end
     )
@@ -90,7 +92,8 @@ class FirebaseObject
       FIRDataEventTypeChildRemoved, withBlock:
       lambda do |data_snapshot|
         # puts "FBO:#{@class_name} CHILDREMOVED".red if DEBUGGING
-        App.notification_center.post("#{@class_name}_ChildRemoved", data_snapshot.valueInExportFormat)
+        # Notification.center.post("#{@class_name}_ChildRemoved", data_snapshot.valueInExportFormat)
+        Notification.center.post("#{@class_name}_ChildRemoved", data_snapshot.valueInExportFormat)
         pull
       end
     )

@@ -38,11 +38,13 @@ class String
   end
 end
 
+# rubocop:disable Lint/UnifiedInteger
 class Fixnum
   def to_firebase
     self
   end
 end
+# rubocop:enable Lint/UnifiedInteger
 
 class CIColor
   def to_firebase
@@ -131,7 +133,6 @@ class Numeric
     self * 60
   end
 end
-
 
 module Debugging
   module_function

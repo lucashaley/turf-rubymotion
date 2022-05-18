@@ -45,7 +45,7 @@ class TakaroFbo < FirebaseObject
       FIRDataEventTypeChildAdded, withBlock:
       lambda do |_data_snapshot|
         puts "FBO:#{@class_name} POUWHENUA ADDED".red if DEBUGGING
-        pull_with_block { App.notification_center.post 'PouwhenuaFbo_New' }
+        pull_with_block { Notification.center.post 'PouwhenuaFbo_New' }
       end
     )
   end
@@ -59,7 +59,7 @@ class TakaroFbo < FirebaseObject
         puts "FBO:#{@class_name} KAPA ADDED".red if DEBUGGING
         # mp data_snapshot.valueInExportFormat
 
-        App.notification_center.post 'KapaNew'
+        Notification.center.post 'KapaNew'
         pull
       end
     )
@@ -68,12 +68,12 @@ class TakaroFbo < FirebaseObject
       FIRDataEventTypeChildRemoved, withBlock:
       lambda do |_data_snapshot|
         puts "FBO:#{@class_name} KAPA REMOVED".red if DEBUGGING
-        # App.notification_center.post("#{@class_name}Changed", data_snapshot.valueInExportFormat)
+        # Notification.center.post("#{@class_name}Changed", data_snapshot.valueInExportFormat)
 
         # puts "Removed snapshot: #{data_snapshot.valueInExportFormat}".focus
         # puts "Local kapa array: #{@local_kapa_array}".focus
         # # puts @kapa_array.delete_if { |k| k['id'] }
-        App.notification_center.post 'KapaDelete'
+        Notification.center.post 'KapaDelete'
         pull
       end
     )
@@ -144,7 +144,7 @@ class TakaroFbo < FirebaseObject
 
     # send update to UI
     # This should ultimately be in the Kapa
-    App.notification_center.post('PlayerNew', @kaitakaro_hash)
+    Notification.center.post('PlayerNew', @kaitakaro_hash)
   end
 
   # This need to delete from both array and Hash

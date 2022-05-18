@@ -13,7 +13,7 @@ class JoinExistingController < MachineViewController
     Machine.instance.initialize_location_manager
 
     # This checks for input in the gamecode input field
-    @text_change_observer = App.notification_center.observe UITextFieldTextDidChangeNotification do |_notification|
+    @text_change_observer = Notification.center.observe UITextFieldTextDidChangeNotification do |_notification|
       puts 'Text did change'.blue if DEBUGGING
       check_input_text
     end

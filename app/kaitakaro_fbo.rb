@@ -38,7 +38,7 @@ class KaitakaroFbo < FirebaseObject
       @in_boundary = true
       k.init_observers unless @is_bot
       # k.update({ 'display_name' => "mung #{rand(1..10)}" })
-      App.notification_center.post 'PlayerNew'
+      Notification.center.post 'PlayerNew'
 
       # STATE MACHINE
       k.machine = StateMachine::Base.new start_state: :in_bounds, verbose: DEBUGGING
@@ -65,7 +65,7 @@ class KaitakaroFbo < FirebaseObject
   def init_observers
     puts "FBO:#{@class_name}:#{__LINE__} init_observers".green if DEBUGGING
 
-    @location_update_observer = App.notification_center.observe 'UpdateLocation' do |data|
+    @location_update_observer = Notification.center.observe 'UpdateLocation' do |data|
       puts 'TAKARO UPDATELOCALPLAYERPOSITION LOCATION'.yellow if DEBUGGING
 
       new_location = data.object['new_location']
@@ -138,7 +138,7 @@ class KaitakaroFbo < FirebaseObject
     return if distance < PLACEMENT_LIMIT
 
     puts 'MOVED TOO FAR!!'.focus
-    App.notification_center.post 'CrossedPlacementLimit'
+    Notification.center.post 'CrossedPlacementLimit'
   end
 
   # TODO: Couldn't this all be in the .kapa method?
@@ -179,13 +179,13 @@ class KaitakaroFbo < FirebaseObject
   def exit_bounds
     puts 'Kaitakaro exit_bounds'.pink
     @in_boundary = false
-    App.notification_center.post 'BoundaryExit'
+    Notification.center.post 'BoundaryExit'
   end
 
   def enter_bounds
     puts 'Kaitakaro enter_bounds'.pink
     @in_boundary = true
-    App.notification_center.post 'BoundaryEnter'
+    Notification.center.post 'BoundaryEnter'
   end
 
   def eject
@@ -262,12 +262,12 @@ class KaitakaroFbo < FirebaseObject
   end
 
   def pouwhenua_decrement
-    notification = -> { App.notification_center.post 'UpdatePouwhenuaLabel' }
+    notification = -> { Notification.center.post 'UpdatePouwhenuaLabel' }
     update_with_block({ 'pouwhenua_current' => pouwhenua_current - 1 }, &notification)
   end
 
   def pouwhenua_increment
-    notification = -> { App.notification_center.post 'UpdatePouwhenuaLabel' }
+    notification = -> { Notification.center.post 'UpdatePouwhenuaLabel' }
     update_with_block({ 'pouwhenua_current' => pouwhenua_current + 1 }, &notification)
   end
 end

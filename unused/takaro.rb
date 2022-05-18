@@ -124,7 +124,7 @@ class Takaro
     # new_gamecode = generate_new_id
     # @ref.updateChildValues({"gamecode" => new_gamecode}, withCompletionBlock:
     #   lambda do | error, game_ref |
-    #     App.notification_center.post("GamecodeNew", new_gamecode)
+    #     Notification.center.post("GamecodeNew", new_gamecode)
     #   end
     # ) unless in_key
 
@@ -316,7 +316,7 @@ class Takaro
 
         # Let's take a look at who the player is
         puts "new player: #{player_snapshot.value}" if DEBUGGING
-        App.notification_center.post "PlayerNew"
+        Notification.center.post "PlayerNew"
       end # player lambda
     )
 
@@ -360,7 +360,7 @@ class Takaro
           puts "Updated Kapa: #{@kapa_array}"
 
           # puts "takaro kapa_array: #{@kapa_array}".red
-          App.notification_center.post 'PlayerChanged'
+          Notification.center.post 'PlayerChanged'
         end
       end
     )
@@ -369,7 +369,7 @@ class Takaro
     #
     # LOCAL PLAYER LOCATION UPDATED
     #
-    @takaro_update_location_observer_coord = App.notification_center.observe "UpdateLocation" do |data|
+    @takaro_update_location_observer_coord = Notification.center.observe "UpdateLocation" do |data|
       puts "TAKARO UPDATELOCALPLAYERPOSITION LOCATION".yellow if DEBUGGING
 
       new_location = data.object["new_location"]
@@ -378,7 +378,7 @@ class Takaro
       # puts "new_location: #{new_location.coordinate.latitude}" if DEBUGGING
       # puts "old_location: #{old_location.coordinate.latitude}" if DEBUGGING
 
-      App.notification_center.post("UpdateLocalPlayerPositionAsLocation",
+      Notification.center.post("UpdateLocalPlayerPositionAsLocation",
         {"new_location" => new_location, "old_location" => old_location}
       )
 
@@ -389,7 +389,7 @@ class Takaro
     #
     # ADD NEW POUWHENUA
     #
-    @takaro_add_new_pouwhenua = App.notification_center.observe "PouwhenuaNew" do |data|
+    @takaro_add_new_pouwhenua = Notification.center.observe "PouwhenuaNew" do |data|
       puts "TAKARO ADD NEW POUWHENUA".focus
       puts "data object: #{data.object}"
     end
@@ -582,7 +582,7 @@ class Takaro
         puts "#{pouwhenua_array}".focus
 
         # Should we turn it into a better-formed hash here?
-        App.notification_center.post('PouwhenuaNew', data)
+        Notification.center.post('PouwhenuaNew', data)
     end)
   end
 

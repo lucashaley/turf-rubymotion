@@ -30,7 +30,7 @@ class Kaitarako
 
     @takaro = args["takaro"] ? args["takaro"] : nil
 
-    @local_player_location_observer_coord = App.notification_center.observe "UpdateLocalPlayerPositionAsLocation" do |data|
+    @local_player_location_observer_coord = Notification.center.observe "UpdateLocalPlayerPositionAsLocation" do |data|
       # puts "DATA: #{data.object}" if DEBUGGING
       if @is_local && (@location_coords.nil? || data.object["new_location"].distanceFromLocation(data.object["old_location"]) > MOVE_THRESHOLD)
         self.coordinate = data.object["new_location"].coordinate

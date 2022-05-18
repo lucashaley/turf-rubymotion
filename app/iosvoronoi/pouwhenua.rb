@@ -63,20 +63,20 @@ class Pouwhenua < Site
         state.transition_to :dying,
           after: @lifespan * 0.5,
           if: proc { @lifespan > 0 },
-          action: proc { App.notification_center.post "PylonChange" }
+          action: proc { Notification.center.post "PylonChange" }
       end
       @machine.when :dying do |state|
         state.on_entry { p.lifespan_multiplier = 0.15 }
         state.transition_to :inactive,
           after: @lifespan * 0.5,
-          action: proc { App.notification_center.post "PylonChange" }
+          action: proc { Notification.center.post "PylonChange" }
       end
       @machine.when :inactive do |state|
         # state.on_entry { p.lifespan_multiplier = 0.01 }
         state.on_entry do
           p.lifespan_multiplier = 0.01
           puts "\nPylon Death: #{self}\n"
-          App.notification_center.post("PylonDeath", object: self)
+          Notification.center.post("PylonDeath", object: self)
         end
       end
     end

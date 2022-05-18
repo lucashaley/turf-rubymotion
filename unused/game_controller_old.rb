@@ -32,24 +32,24 @@ class GameController < MachineViewController
     
     add_overlays_and_annotations
     
-    @pouwhenua_new_observer = App.notification_center.observe 'PouwhenuaNew' do |notification|
+    @pouwhenua_new_observer = Notification.center.observe 'PouwhenuaNew' do |notification|
       observe_new_pouwhenua
     end
-    @pylon_new_observer = App.notification_center.observe 'PylonNew' do |notification|
+    @pylon_new_observer = Notification.center.observe 'PylonNew' do |notification|
       observe_new_pylon(notification.object)
     end
-    @pylon_observer = App.notification_center.observe 'PylonChange' do |notification|
+    @pylon_observer = Notification.center.observe 'PylonChange' do |notification|
       observe_change_pylon
     end
-    @pylon_death_observer = App.notification_center.observe 'PylonDeath' do |notification|
+    @pylon_death_observer = Notification.center.observe 'PylonDeath' do |notification|
       observe_death_pylon(notification.object)
     end
     
-    @player_new_observer = App.notification_center.observe 'PlayerNew' do |notification|
+    @player_new_observer = Notification.center.observe 'PlayerNew' do |notification|
       puts 'NEW PLAYER'
     end
     # BOUNDARY EXIT
-    @exit_observer = App.notification_center.observe 'BoundaryExit' do |notification|
+    @exit_observer = Notification.center.observe 'BoundaryExit' do |notification|
       puts 'BOUNDARY EXIT'.yellow
 
       # trying sounds
@@ -65,7 +65,7 @@ class GameController < MachineViewController
       # mark the player's last location
     end
     # BOUNDARY ENTER
-    @enter_observer = App.notification_center.observe 'BoundaryEnter' do |notification|
+    @enter_observer = Notification.center.observe 'BoundaryEnter' do |notification|
       puts 'BOUNDARY ENTER'.yellow
 
       # set the player state
@@ -76,7 +76,7 @@ class GameController < MachineViewController
       # remove the players last location
     end
     # PLAYER DISAPPEAR
-    @disappear_observer = App.notification_center.observe 'PlayerDisappear' do |notification|
+    @disappear_observer = Notification.center.observe 'PlayerDisappear' do |notification|
       puts 'PLAYER DISAPPEAR'.yellow
 
       # set the player state
@@ -87,7 +87,7 @@ class GameController < MachineViewController
       # mark the player's last location
     end
     # PLAYER APPEAR
-    @appear_observer = App.notification_center.observe 'PlayerAppear' do |notification|
+    @appear_observer = Notification.center.observe 'PlayerAppear' do |notification|
       puts 'PLAYER APPEAR'.yellow
 
       # set the player state

@@ -58,20 +58,20 @@ class Pylon < Site # move away from the Site superclass?
       state.transition_to :dying,
         after: p.lifespan * 0.5,
         if: proc { p.lifespan > 0 },
-        action: proc { App.notification_center.post "PylonChange" }
+        action: proc { Notification.center.post "PylonChange" }
     end
     p.machine.when :dying do |state|
       state.on_entry { p.lifespan_multiplier = 0.15 }
       state.transition_to :inactive,
         after: p.lifespan * 0.5,
-        action: proc { App.notification_center.post "PylonChange" }
+        action: proc { Notification.center.post "PylonChange" }
     end
     p.machine.when :inactive do |state|
       # state.on_entry { p.lifespan_multiplier = 0.01 }
       state.on_entry do
         p.lifespan_multiplier = 0.01
         puts "\nPylon Death: #{p}\n"
-        App.notification_center.post("PylonDeath", object: p)
+        Notification.center.post("PylonDeath", object: p)
       end
     end
     p.machine.start!

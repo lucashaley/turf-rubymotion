@@ -126,7 +126,7 @@ class Game < FirebaseObject
     @ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
       withBlock: proc do |data|
         # Should we turn it into a better-formed hash here?
-        App.notification_center.post("PylonNew", data)
+        Notification.center.post("PylonNew", data)
     end)
   end
 
@@ -136,7 +136,7 @@ class Game < FirebaseObject
     @ref.child("pouwhenua").observeEventType(FIRDataEventTypeChildAdded,
       withBlock: proc do |data|
         # Should we turn it into a better-formed hash here?
-        App.notification_center.post("PouwhenuaNew", data)
+        Notification.center.post("PouwhenuaNew", data)
     end)
   end
 
@@ -168,7 +168,7 @@ class Game < FirebaseObject
         # first team is not empty, so we have to either put it in a team, or distance warning.
         puts data.childSnapshotForPath("location").value
         # post notification for UI
-        App.notification_center.post("PlayerNew", data)
+        Notification.center.post("PlayerNew", data)
     end)
   end
 

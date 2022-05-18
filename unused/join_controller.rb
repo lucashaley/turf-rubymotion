@@ -30,14 +30,14 @@ class JoinController < MachineViewController
     # @takaro = Takaro.new
 
     # Listen for new players
-    @player_new_observer = App.notification_center.observe "PlayerNew" do |notification|
+    @player_new_observer = Notification.center.observe "PlayerNew" do |notification|
       puts "PLAYER NEW".yellow
 
       puts notification.object.value unless notification.object.nil?
 
       handle_new_player
     end
-    @kapa_new_observer = App.notification_center.observe "KapaNew" do |notification|
+    @kapa_new_observer = Notification.center.observe "KapaNew" do |notification|
       puts "KAPANEW".light_blue
       self.reload_data
     end
@@ -50,7 +50,7 @@ class JoinController < MachineViewController
   def viewWillAppear animated
     puts "JOINCONTROLLER VIEWWILLAPPEAR".blue if DEBUGGING
 
-    @text_change_observer = App.notification_center.observe UITextFieldTextDidChangeNotification do |notification|
+    @text_change_observer = Notification.center.observe UITextFieldTextDidChangeNotification do |notification|
       puts "Text did change".blue if DEBUGGING
       check_input_text
     end

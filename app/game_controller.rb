@@ -137,28 +137,28 @@ class GameController < MachineViewController
 
   # rubocop:disable Metrics/AbcSize
   def init_observers
-    @map_refresh = App.notification_center.observe 'MapRefresh' do |_notification|
+    @map_refresh = Notification.center.observe 'MapRefresh' do |_notification|
       puts 'map_refresh'.focus
       observe_new_pouwhenua
     end
-    @pouwhenua_new_observer = App.notification_center.observe 'PouwhenuaNew' do |_notification|
+    @pouwhenua_new_observer = Notification.center.observe 'PouwhenuaNew' do |_notification|
       puts 'pouwhenua_new_observer'.focus
       observe_new_pouwhenua
     end
-    @pouwhenuafbo_new_observer = App.notification_center.observe 'PouwhenuaFbo_New' do |_notification|
+    @pouwhenuafbo_new_observer = Notification.center.observe 'PouwhenuaFbo_New' do |_notification|
       puts 'pouwhenuafbo_new_observer'.focus
       observe_new_pouwhenua
     end
-    @pouwhenua_child_observer = App.notification_center.observe 'PouwhenuaFbo_ChildAdded' do |_notification|
+    @pouwhenua_child_observer = Notification.center.observe 'PouwhenuaFbo_ChildAdded' do |_notification|
       puts 'pouwhenua_child_observer'.focus
       observe_new_pouwhenua
     end
 
-    @player_new_observer = App.notification_center.observe 'PlayerNew' do |_notification|
+    @player_new_observer = Notification.center.observe 'PlayerNew' do |_notification|
       puts 'NEW PLAYER'
     end
     # BOUNDARY EXIT
-    @exit_observer = App.notification_center.observe 'BoundaryExit' do |_notification|
+    @exit_observer = Notification.center.observe 'BoundaryExit' do |_notification|
       @boundary_audio.play
 
       # disable the pylon button
@@ -167,7 +167,7 @@ class GameController < MachineViewController
       # mark the player's last location
     end
     # BOUNDARY ENTER
-    @enter_observer = App.notification_center.observe 'BoundaryEnter' do |_notification|
+    @enter_observer = Notification.center.observe 'BoundaryEnter' do |_notification|
       @boundary_audio.stop
       # enable the pylon button
       button_pylon.enabled = true
@@ -175,7 +175,7 @@ class GameController < MachineViewController
       # remove the players last location
     end
     # PLAYER DISAPPEAR
-    @disappear_observer = App.notification_center.observe 'PlayerDisappear' do |_notification|
+    @disappear_observer = Notification.center.observe 'PlayerDisappear' do |_notification|
       # puts 'PLAYER DISAPPEAR'.yellow
 
       # set the player state
@@ -186,7 +186,7 @@ class GameController < MachineViewController
       # mark the player's last location
     end
     # PLAYER APPEAR
-    @appear_observer = App.notification_center.observe 'PlayerAppear' do |_notification|
+    @appear_observer = Notification.center.observe 'PlayerAppear' do |_notification|
       # puts 'PLAYER APPEAR'.yellow
 
       # set the player state
@@ -197,12 +197,12 @@ class GameController < MachineViewController
       # remove the players last location
     end
 
-    @placement_observer = App.notification_center.observe 'CrossedPlacementLimit' do |_notification|
+    @placement_observer = Notification.center.observe 'CrossedPlacementLimit' do |_notification|
       @button_cancel_audio.play
       @button_fsm.event(:button_cancel)
     end
 
-    @pouwhenua_label_observer = App.notification_center.observe 'UpdatePouwhenuaLabel' do |_notification|
+    @pouwhenua_label_observer = Notification.center.observe 'UpdatePouwhenuaLabel' do |_notification|
       puts 'GameController: pouwhenua_label_observer'.focus
       update_pouwhenua_label
     end

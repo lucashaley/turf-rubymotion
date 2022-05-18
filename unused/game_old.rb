@@ -117,7 +117,7 @@ class GameOld
   #         # _game.firebase_ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
   #         #   withBlock: proc do |data|
   #         #     puts "New pylon data: #{data}"
-  #         #     App.notification_center.post("PylonNew", data)
+  #         #     Notification.center.post("PylonNew", data)
   #         #   end)
   #         #
   #         # _pylons = child.value[:pylons]
@@ -136,7 +136,7 @@ class GameOld
   #           puts "New pylon data: #{data}"
   #           puts "#{data.childrenCount}"
   #           puts "#{data.value}"
-  #           App.notification_center.post("PylonNew", data)
+  #           Notification.center.post("PylonNew", data)
   #         end)
   #     end
   #   )
@@ -210,7 +210,7 @@ class GameOld
     @firebase_ref.child("pylons").observeEventType(FIRDataEventTypeChildAdded,
       withBlock: proc do |data|
         # Should we turn it into a better-formed hash here?
-        App.notification_center.post("PylonNew", data)
+        Notification.center.post("PylonNew", data)
     end)
   end
 
@@ -220,7 +220,7 @@ class GameOld
     @firebase_ref.child("pouwhenua").observeEventType(FIRDataEventTypeChildAdded,
       withBlock: proc do |data|
         # Should we turn it into a better-formed hash here?
-        App.notification_center.post("PouwhenuaNew", data)
+        Notification.center.post("PouwhenuaNew", data)
     end)
   end
 
@@ -252,7 +252,7 @@ class GameOld
         # first team is not empty, so we have to either put it in a team, or distance warning.
         puts data.childSnapshotForPath("location").value
         # post notification for UI
-        App.notification_center.post("PlayerNew", data)
+        Notification.center.post("PlayerNew", data)
     end)
   end
 

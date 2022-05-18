@@ -23,7 +23,7 @@ class KapaFbo < FirebaseObject
     @kaitakaro_array = []
     # @kaitakaro_hash = {}
     super.tap do
-      App.notification_center.post 'Kapafbo_New'
+      Notification.center.post 'Kapafbo_New'
     end
     Utilities::puts_close
   end
@@ -37,7 +37,7 @@ class KapaFbo < FirebaseObject
 
     update({ 'kaitakaro' => kaitakaro_hash })
 
-    App.notification_center.post 'PlayerChanged'
+    Notification.center.post 'PlayerChanged'
     recalculate_coordinate
   end
 

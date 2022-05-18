@@ -73,7 +73,7 @@ class CharacterController < UIViewController
     Machine.instance.current_view.local_character = player_class
     
     # post notification for New Controller
-    App.notification_center.post("SelectCharacter", player_class)
+    Notification.center.post("SelectCharacter", player_class)
 
     dismiss_modal
   end
