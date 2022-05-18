@@ -12,6 +12,7 @@ class TakaroFbo < FirebaseObject
   MOVE_THRESHOLD = 2
   TEAM_COUNT = 2
   FIELD_SCALE = 1.5
+  BOT_DISTANCE = 0.005
 
   def initialize(in_ref, in_data_hash)
     @kaitakaro_array = []
@@ -129,8 +130,8 @@ class TakaroFbo < FirebaseObject
     coord = @local_kaitakaro.coordinate
 
     bot.coordinate = {
-      'latitude' => coord['latitude'] + rand(-0.01..0.01),
-      'longitude' => coord['longitude'] + rand(-0.01..0.01)
+      'latitude' => coord['latitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE),
+      'longitude' => coord['longitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE)
     }
 
     add_kaitakaro(bot)

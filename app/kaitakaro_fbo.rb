@@ -25,7 +25,7 @@ class KaitakaroFbo < FirebaseObject
   attr_reader :location_update_observer
 
   DEBUGGING = false
-  PLACEMENT_LIMIT = 2
+  PLACEMENT_DISTANCE_LIMIT = 4
 
   def initialize(in_ref, in_data_hash, in_bot = false)
     @location_update_observer = nil
@@ -135,7 +135,7 @@ class KaitakaroFbo < FirebaseObject
     distance = Utilities::get_distance(@button_down_location, coordinate)
     puts "Distance: #{distance}".focus
 
-    return if distance < PLACEMENT_LIMIT
+    return if distance < PLACEMENT_DISTANCE_LIMIT
 
     puts 'MOVED TOO FAR!!'.focus
     Notification.center.post 'CrossedPlacementLimit'
