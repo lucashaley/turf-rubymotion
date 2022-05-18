@@ -90,14 +90,16 @@ class GameController < MachineViewController
       area = 0.0
       verts.each_with_index do |point, index|
         if index + 1 < verts.length
-          point2 = verts[index +1]
+          point2 = verts[index + 1]
         end
         if point2
           # shoelace algorithm
-          area = area + ((point.x * point2.y) - (point2.x * point.y))
+          # area = area + ((point.x * point2.y) - (point2.x * point.y))
+          area += ((point.x * point2.y) - (point2.x * point.y))
         else
           # use the first point with the last point when all the other points have been done
-          area = area + ((point.x * verts[0].y) - (verts[0].x * point.y))
+          # area = area + ((point.x * verts[0].y) - (verts[0].x * point.y))
+          area += ((point.x * verts[0].y) - (verts[0].x * point.y))
         end
       end
       # divide by 2 and get the absolute. I  have converted the result to metres but that is optional. Leave it in square inches if you prefer.
