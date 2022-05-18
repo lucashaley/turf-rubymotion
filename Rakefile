@@ -25,6 +25,7 @@ require 'ib'
 # Uncomment the following line to add an icon generate capacity to your build
 # task 'build:icons' => 'resources/app-icon.icon_asset'
 
+# rubocop:disable Metrics/BlockLength
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   define_icon_defaults!(app)
@@ -173,6 +174,7 @@ Motion::Project::App.setup do |app|
     pod 'iosvoronoi'
   end
 end
+# rubocop:enable Metrics/BlockLength
 
 def define_icon_defaults!(app)
   # This is required as of iOS 11.0 (you must use asset catalogs to

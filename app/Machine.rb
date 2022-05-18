@@ -24,7 +24,7 @@ class Machine
 
   DEBUGGING = false
 
-  # rubocop:disable Metrics, Layout/LineLength
+  # rubocop:disable Metrics
   def initialize
     puts 'MACHINE: INITIALIZE'.green if DEBUGGING
 
@@ -135,7 +135,7 @@ class Machine
     # calling this from the application instead
     # @fsm.start!
   end
-  # rubocop:enable Metrics, Layout/LineLength
+  # rubocop:enable Metrics
 
   #####################
   # SINGLETON

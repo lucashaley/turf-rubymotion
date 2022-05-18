@@ -4,8 +4,8 @@ gem 'rake'
 # Add your dependencies here:
 
 # gem "motion-cocoapods"
-gem 'motion-cocoapods', path:"/Users/lhaley/Documents/Projects/Personal/motion-cocoapods/"
-gem "motion-provisioning"
+gem 'motion-cocoapods', path: '/Users/lhaley/Documents/Projects/Personal/motion-cocoapods/'
+gem 'motion-provisioning'
 
 # gem "bubble-wrap", git: "https://github.com/rubymotion-community/BubbleWrap"
 
