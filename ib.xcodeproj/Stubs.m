@@ -30,6 +30,9 @@
 @implementation GameOptionsController
 @end
 
+@implementation KaitakaroAnnotation
+@end
+
 @implementation MKPolygon
 @end
 
@@ -121,5 +124,8 @@
 @end
 
 @implementation Hash
+@end
+
+@implementation Numeric
 @end
 
