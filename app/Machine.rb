@@ -23,6 +23,7 @@ class Machine
                 :is_playing
 
   DEBUGGING = false
+  DESIRED_ACCURACY = 30
 
   # rubocop:disable Metrics
   def initialize
@@ -34,11 +35,6 @@ class Machine
     @tracking = false
     @is_playing = false
     @is_waiting = false
-    # @game = Game.new
-    # @bounding_box = UIScreen.mainScreen.bounds
-
-    # @player = Player.new
-    # @player
 
     ####################
     # FIREBASE
@@ -46,18 +42,6 @@ class Machine
     @db_app = FIRApp.defaultApp
     puts "Machine App:#{@db_app.name}"
     @db = FIRDatabase.databaseForApp(@db_app)
-    # @db.persistenceEnabled = true
-    # @db_ref = @db.reference
-    # @db_game_ref = @db.referenceWithPath("games/test-game-01")
-
-    # @handle_data_result = proc do |data|
-    #   # puts "\n----\nhandleDataResult\n----\n"
-    #   # puts "Data: #{data}"
-    #   # data.children.each do |c|
-    #   #   puts "\n#{c.value}"
-    #   # end
-    #   # _test_game = Game.init_from_firebase(data) # what is this doing here
-    # end
 
     #####################
     # AUTHENTICATION
@@ -156,17 +140,6 @@ class Machine
     @delegate.window.rootViewController.performSegueWithIdentifier(name, sender: self)
   end
 
-  # def generate_new_id
-  #   puts "MACHINE: GENERATE_NEW_ID".blue if DEBUGGING
-  #   # update the UI with the gamecode
-  #   # https://gist.github.com/mbajur/2aba832a6df3fc31fe7a82d3109cb626
-  #   new_id = rand(36**6).to_s(36)
-  #   # can also use NSUUID?
-  #
-  #   # check if it exists already
-  #   # puts @db_ref.child("games")
-  # end
-
   def authUI(authUI, didSignInWithAuthDataResult: result, error: _error)
     puts 'MACHINE DID_SIGN_IN'.blue if DEBUGGING
     puts 'insane'.red
@@ -178,7 +151,9 @@ class Machine
       lm.requestWhenInUseAuthorization
 
       # constant needs to be capitalized because Ruby
-      lm.desiredAccuracy = KCLLocationAccuracyBest
+      lm.desiredAccuracy = KCLLocationAccuracyBestForNavigation
+      # lm.desiredAccuracy = KCLLocationAccuracyBest
+      lm.distanceFilter = 2
       lm.startUpdatingLocation
       lm.delegate = self
     end
@@ -187,6 +162,11 @@ class Machine
   # https://github.com/HipByte/RubyMotionSamples/blob/a387842594fd0ac9d8560d2dc64eff4d87534093/ios/Locations/app/locations_controller.rb
   def locationManager(_manager, didUpdateToLocation: new_location, fromLocation: old_location)
     puts 'MACHINE: DIDUPDATETOLOCATION'.blue if DEBUGGING
+
+    # Check for reasonable accuracy
+    # https://stackoverflow.com/a/13502503
+    puts "horizontalAccuracy: #{new_location.horizontalAccuracy}".focus
+    return if new_location.horizontalAccuracy >= DESIRED_ACCURACY
 
     # Notification.center.post(
     Notification.center.post(

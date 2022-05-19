@@ -21,7 +21,7 @@ class GameController < MachineViewController
   KAITAKARO_VIEW_IDENTIFIER = 'KaitakaroViewIdentifier'.freeze
 
   def setup_mapview
-    map_view.showsUserLocation = true
+    map_view.showsUserLocation = false
     map_view.showsPitchControl = false
   end
 
@@ -299,6 +299,7 @@ class GameController < MachineViewController
 
   ### Makes an annotation image for the map ###
   def mapView(map_view, viewForAnnotation: annotation)
+    puts annotation.class.to_s
     return nil if annotation == map_view.userLocation
 
     return pouwhenua_annotation(annotation) if annotation.class.to_s.end_with?('PouAnnotation')
@@ -312,14 +313,16 @@ class GameController < MachineViewController
       annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: PYLON_VIEW_IDENTIFIER)
     end
 
-    ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
+    # ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
+    ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(24, 24))
 
     annotation_view.image = ui_renderer.imageWithActions(
       lambda do |_context|
-        path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
+        # path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
+        path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 22, 22), cornerRadius: 4)
 
         UIColor.whiteColor.setFill
-        # path.fill
+        path.fill
         annotation.color.setStroke
         path.lineWidth = 2.0
         path.stroke
@@ -442,8 +445,10 @@ class GameController < MachineViewController
   end
 
   def add_annotations
-    puts 'GAME_CONTROLLER: ADD_ANNOTATIIONS'.blue if DEBUGGING
-    map_view.addAnnotations(@voronoi_map.annotations)
+    puts 'GAME_CONTROLLER: ADD_ANNOTATIIONS'.blue
+    # map_view.addAnnotations(@voronoi_map.annotations)
+    map_view.addAnnotations(Machine.instance.takaro_fbo.pouwhenua_annotations)
+    map_view.addAnnotations(Machine.instance.takaro_fbo.kaitakaro_annotations)
   end
 
   def player_for_audio(filename)

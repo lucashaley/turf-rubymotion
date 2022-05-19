@@ -51,8 +51,8 @@ class KaitakaroFbo < FirebaseObject
         state.on_entry { exit_bounds }
         state.transition_to :in_bounds,
                             on: :enter_bounds
-        state.transition_to :ejected,
-                            after: 3
+        # state.transition_to :ejected,
+        #                     after: 3
       end
       k.machine.when :ejected do |state|
         state.on_entry { eject }
@@ -117,8 +117,11 @@ class KaitakaroFbo < FirebaseObject
     in_taiapa &= Math.cos((center.longitude - coord.longitude) * radian) > Math.cos(span.longitudeDelta / 2 * radian)
     # return result;
 
+    puts "in_taiapa: #{in_taiapa}"
+    puts "in_boundary: #{@in_boundary}"
+
     @machine.event(:exit_bounds) if !in_taiapa && @in_boundary
-    @machine.event(:enter_bounds) if in_taiapa && !@in_boundary
+    @machine.event(:enter_bounds) if !@in_boundary && in_taiapa
   end
 
   def placing(in_bool)

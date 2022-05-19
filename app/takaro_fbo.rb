@@ -385,6 +385,7 @@ class TakaroFbo < FirebaseObject
   end
 
   def kaitakaro_annotations
+    puts 'kaitakaro_annotations'
     annotations = []
 
     # this just gets the local kaitakaro's kapa
@@ -411,7 +412,7 @@ class TakaroFbo < FirebaseObject
 
     # this just gets the local kaitakaro's kapa
     pouwhenua_array_for_kapa.each do |p|
-      pa = KaitakaroAnnotation.alloc.initWithCoordinate(
+      pa = PouAnnotation.alloc.initWithCoordinate(
         Utilities::format_to_location_coord(p['coordinate'])
       )
       pa.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(p['color']))

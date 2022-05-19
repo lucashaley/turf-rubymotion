@@ -7,7 +7,7 @@ class SelectCharacterController < MachineViewController
       'scout' => {
         'deploy_time' => 4,
         # 'lifespan_ms' => 0.5.minutes * 1000,
-        'lifespan_ms' => 8 * 1000,
+        'lifespan_ms' => 1.minutes * 1000,
         'pouwhenua_start' => 4,
         'title' => 'Scout',
         'can_see_into_enemy_turf' => false,

@@ -2,9 +2,8 @@
 class VoronoiMap
   include Utilities
   include VoronoiUtilities
-  # @pylons is a dictionary, with key as the UUID and value as the pylon
-  # This will be translated into Firebase structure.
-  # attr_accessor :pylons
+
+  attr_accessor :voronoi_cells_cache
 
   DEBUGGING = false
 
@@ -61,7 +60,8 @@ class VoronoiMap
 
   def voronoi_cells
     puts 'VORONOI_MAP: VORONOI_CELLS'.blue if DEBUGGING
-    voronoi_cells_from_pylons(@pylons)
+    # voronoi_cells_from_pylons(@pylons)
+    voronoi_cells_from_pylons(nil)
   end
   alias voronoiCells voronoi_cells
 
