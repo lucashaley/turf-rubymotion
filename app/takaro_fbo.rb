@@ -4,6 +4,7 @@ class TakaroFbo < FirebaseObject
                 :local_kapa_array,
                 :local_kaitakaro,
                 :local_pouwhenua,
+                :pouwhenua_is_dirty,
                 :taiapa_region # TODO: this might be hash later?
 
   DEBUGGING = true
@@ -19,6 +20,7 @@ class TakaroFbo < FirebaseObject
     @kaitakaro_hash = {}
     @local_kapa_array = []
     @local_pouwhenua = []
+    @pouwhenua_is_dirty = true
 
     puts 'TakaroFbo initialize'.red
     super.tap do |t|
@@ -47,6 +49,7 @@ class TakaroFbo < FirebaseObject
       lambda do |_data_snapshot|
         puts "FBO:#{@class_name} POUWHENUA ADDED".red if DEBUGGING
         pull_with_block { Notification.center.post 'PouwhenuaFbo_New' }
+        @pouwhenua_is_dirty = true
       end
     )
   end
@@ -58,7 +61,6 @@ class TakaroFbo < FirebaseObject
       FIRDataEventTypeChildAdded, withBlock:
       lambda do |_data_snapshot|
         puts "FBO:#{@class_name} KAPA ADDED".red if DEBUGGING
-        # mp data_snapshot.valueInExportFormat
 
         Notification.center.post 'KapaNew'
         pull
@@ -69,11 +71,7 @@ class TakaroFbo < FirebaseObject
       FIRDataEventTypeChildRemoved, withBlock:
       lambda do |_data_snapshot|
         puts "FBO:#{@class_name} KAPA REMOVED".red if DEBUGGING
-        # Notification.center.post("#{@class_name}Changed", data_snapshot.valueInExportFormat)
 
-        # puts "Removed snapshot: #{data_snapshot.valueInExportFormat}".focus
-        # puts "Local kapa array: #{@local_kapa_array}".focus
-        # # puts @kapa_array.delete_if { |k| k['id'] }
         Notification.center.post 'KapaDelete'
         pull
       end
@@ -88,6 +86,7 @@ class TakaroFbo < FirebaseObject
       {
         'character' => in_character,
         'display_name' => Machine.instance.user.displayName
+        # 'displayName' => Machine.instance.user.profile.name
       }
     )
     @local_kaitakaro = k
@@ -152,18 +151,13 @@ class TakaroFbo < FirebaseObject
   # and then delete the kapa if empty
   def remove_kaitakaro_from_kapa(in_kaitakaro_id, in_kapa_id)
     puts 'remove_kaitakaro_from_kapa'.light_blue
-    # puts @local_kapa_array
-    # puts in_kapa_id
-    # puts in_kaitakaro_id
 
     # Find the kapa
     kapa = @local_kapa_array.select { |k| k.ref.key == in_kapa_id }.first
-    # puts "kapa: #{kapa}".focus
     kapa_empty = kapa.remove_kaitakaro(in_kaitakaro_id)
-    # puts "kapa_empty: #{kapa_empty}".focus
 
     kapa = nil if kapa_empty
-    # puts "remove_kaitakaro_from_kapa kapa_array after nil: #{@kapa_array.inspect}".focus
+
     @local_kapa_array.delete_if { |k| k.ref.key == in_kapa_id }.first
   end
 
@@ -385,7 +379,7 @@ class TakaroFbo < FirebaseObject
   end
 
   def kaitakaro_annotations
-    puts 'kaitakaro_annotations'
+    # puts 'kaitakaro_annotations'
     annotations = []
 
     # this just gets the local kaitakaro's kapa
@@ -403,7 +397,7 @@ class TakaroFbo < FirebaseObject
       annotations << ka
     end
 
-    puts "Annotations: #{annotations}".focus
+    # puts "Annotations: #{annotations}".focus
     annotations
   end
 
@@ -419,7 +413,7 @@ class TakaroFbo < FirebaseObject
       annotations << pa
     end
 
-    puts "Annotations: #{annotations}".focus
+    # puts "Annotations: #{annotations}".focus
     annotations
   end
 end

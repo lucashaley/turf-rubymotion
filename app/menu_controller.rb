@@ -2,6 +2,7 @@ class MenuController < MachineViewController
   DEBUGGING = true
 
   outlet :button_login, UIButton
+  outlet :button_logout, UIButton
   outlet :button_settings, UIButton
   outlet :button_characters, UIButton
   outlet :button_game_new, UIButton
@@ -11,7 +12,7 @@ class MenuController < MachineViewController
     super
     puts "MENUCONTROLLER VIEWDIDLOAD".blue if DEBUGGING
     if Machine.instance.user
-      puts Machine.instance.user.email
+      puts "Currently logged in: #{Machine.instance.user.email}".focus
       button_login.setTitle("Logout", forState: UIControlStateNormal)
     else
       button_login.setTitle("Login", forState: UIControlStateNormal)
@@ -24,7 +25,9 @@ class MenuController < MachineViewController
 
   def action_login(sender)
     puts "MENUCONTROLLER ACTION_LOGIN".blue if DEBUGGING
-    Machine.instance.state(:log_in)
+    
+    # this doesn't seem to work any more 4/6/22
+    # Machine.instance.state(:log_in)
 
     # # Stuff for FirebaseAuthUI
     # # Never got this to work
@@ -36,13 +39,15 @@ class MenuController < MachineViewController
 
     # This signs in anew every time.
     # It would be good to check if they're already logged in.
-    GIDSignIn.sharedInstance.signInWithConfiguration(config,
+    GIDSignIn.sharedInstance.signInWithConfiguration(
+      config,
       presentingViewController: self,
       callback: lambda do |user, error|
         puts "LOGINCONTROLLER GIDSIGNIN".blue if DEBUGGING
         unless error.nil?
           puts error.localizedDescription
           puts error.userInfo
+          return
         end
         puts "User: #{user.userID}".red if DEBUGGING
         authentication = user.authentication
@@ -58,6 +63,10 @@ class MenuController < MachineViewController
         end
       end
     )
+  end
+
+  def action_logout(sender)
+    puts "MENUCONTROLLER ACTION_LOGOUT".blue if DEBUGGING
   end
 
   # # Stuff for FirebaseAuthUI

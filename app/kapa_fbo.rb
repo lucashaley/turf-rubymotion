@@ -61,7 +61,9 @@ class KapaFbo < FirebaseObject
   end
 
   def self.remove_kaitakaro_with_key(in_kaitakaro, in_key)
-    puts 'remove_kaitakaro_with_key'.red
+    puts "FBO:#{@class_name}:#{__LINE__} remove_kaitakaro_with_key".red
+    mp in_kaitakaro
+    mp in_key
 
     # first, find the Kapa
     k = Machine.instance.takaro_fbo.kapa_with_key(in_key)

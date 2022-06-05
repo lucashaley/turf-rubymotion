@@ -151,7 +151,9 @@ class NewController < MachineViewController
 
   def cancel_new_game
     puts 'NewController: cancel_new_game'
-
+    @takaro = nil
+    Machine.instance.takaro_fbo = nil
+    Machine.instance.segue('ToMenu')
     # self.presentingViewController.dismissViewControllerAnimated(true, completion:nil)
   end
 
@@ -182,12 +184,14 @@ class NewController < MachineViewController
     puts 'Continuing to game'.focus
     # make the first two pouwhenua
     # set the machine takaro
-    Machine.instance.takaro = @takaro
+    Machine.instance.takaro_fbo = @takaro
 
     @takaro.set_initial_pouwhenua
   end
 
   def dismiss_new
+    @takaro = nil
+    Machine.instance.takaro_fbo = nil
     Machine.instance.segue('ToMenu')
   end
 

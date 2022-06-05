@@ -62,6 +62,15 @@ class GameController < MachineViewController
       repeats: true
     )
     NSRunLoop.currentRunLoop.addTimer(@score_timer, forMode: NSDefaultRunLoopMode)
+
+    @redraw_timer = NSTimer.timerWithTimeInterval(
+      0.1,
+      target: self,
+      selector: 'try_render_overlays',
+      userInfo: nil,
+      repeats: true
+    )
+    NSRunLoop.currentRunLoop.addTimer(@redraw_timer, forMode: NSDefaultRunLoopMode)
   end
 
   def timer_decrement
@@ -217,7 +226,7 @@ class GameController < MachineViewController
     # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
     setup_mapview
 
-    add_overlays_and_annotations
+    # add_overlays_and_annotations
 
     render_overlays
   end
@@ -276,7 +285,8 @@ class GameController < MachineViewController
     # puts 'Starting button state machine'
     @button_fsm.start!
 
-    add_overlays_and_annotations
+    # add_overlays_and_annotations
+    render_overlays
   end
 
   def button_down
@@ -299,7 +309,6 @@ class GameController < MachineViewController
 
   ### Makes an annotation image for the map ###
   def mapView(map_view, viewForAnnotation: annotation)
-    puts annotation.class.to_s
     return nil if annotation == map_view.userLocation
 
     return pouwhenua_annotation(annotation) if annotation.class.to_s.end_with?('PouAnnotation')
@@ -330,6 +339,7 @@ class GameController < MachineViewController
     )
 
     annotation_view.canShowCallout = false
+    annotation_view.layer.zPosition = 1
 
     annotation_view
   end
@@ -355,6 +365,7 @@ class GameController < MachineViewController
     )
 
     annotation_view.canShowCallout = true
+    annotation_view.layer.zPosition = 2
 
     annotation_view
   end
@@ -380,9 +391,18 @@ class GameController < MachineViewController
     rend
   end
 
-  # REFACTOR with method below?
+  def try_render_overlays
+    puts 'try_render_overlays'
+    return if @rendering
+
+    puts 'rendering'
+    render_overlays
+  end
+
   def render_overlays
-    puts 'GAME_CONTROLLER RENDEROVERLAYS'.blue if DEBUGGING
+    # puts 'game_controller render_overlays'.blue
+
+    @rendering = true
 
     if map_view.overlays
       overlays_to_remove = map_view.overlays.mutableCopy
@@ -405,11 +425,11 @@ class GameController < MachineViewController
     # add the players
     map_view.addAnnotations(Machine.instance.takaro_fbo.kaitakaro_annotations)
 
-    puts 'GAME_CONTROLLER getting the cells'
     @voronoi_map.voronoiCells.each do |cell|
-      # puts "cell: #{cell}".focus
       map_view.addOverlay(cell.overlay)
     end
+
+    @rendering = false
   end
 
   def touch_down
@@ -431,25 +451,25 @@ class GameController < MachineViewController
     button_pylon.tintColor = color
   end
 
-  def add_overlays_and_annotations
-    # puts 'add_overlays_and_annotations'
-    add_overlays
-    add_annotations
-  end
-
-  def add_overlays
-    puts 'GAME_CONTROLLER: ADD_OVERLAYS'.blue if DEBUGGING
-    @voronoi_map.voronoi_cells.each do |cell|
-      map_view.addOverlay(cell.overlay)
-    end
-  end
-
-  def add_annotations
-    puts 'GAME_CONTROLLER: ADD_ANNOTATIIONS'.blue
-    # map_view.addAnnotations(@voronoi_map.annotations)
-    map_view.addAnnotations(Machine.instance.takaro_fbo.pouwhenua_annotations)
-    map_view.addAnnotations(Machine.instance.takaro_fbo.kaitakaro_annotations)
-  end
+#   def add_overlays_and_annotations
+#     # puts 'add_overlays_and_annotations'
+#     add_overlays
+#     add_annotations
+#   end
+# 
+#   def add_overlays
+#     puts 'GAME_CONTROLLER: ADD_OVERLAYS'.blue if DEBUGGING
+#     @voronoi_map.voronoi_cells.each do |cell|
+#       map_view.addOverlay(cell.overlay)
+#     end
+#   end
+# 
+#   def add_annotations
+#     puts 'GAME_CONTROLLER: ADD_ANNOTATIIONS'.blue
+#     # map_view.addAnnotations(@voronoi_map.annotations)
+#     map_view.addAnnotations(Machine.instance.takaro_fbo.pouwhenua_annotations)
+#     map_view.addAnnotations(Machine.instance.takaro_fbo.kaitakaro_annotations)
+#   end
 
   def player_for_audio(filename)
     sound_path = NSBundle.mainBundle.pathForResource(filename, ofType: 'mp3')
@@ -458,6 +478,15 @@ class GameController < MachineViewController
     # player_audio = AVAudioPlayer.alloc.initWithContentsOfURL(sound_url, error: error_ptr)
     # puts "AVAudioPlayer error: #{error_ptr[0]}" if error_ptr[0]
     AVAudioPlayer.alloc.initWithContentsOfURL(sound_url, error: error_ptr)
+  end
+
+  # https://gist.github.com/amirrajan/706dafe5ce196f966ad04bf9bb06e764
+  def play_forward_sound_thread
+    NSThread.detachNewThreadSelector :play_forward_sound, toTarget: self, withObject: nil
+  end
+  
+  def play_forward_sound context = nil
+    #play sound code here
   end
 
   def handle_new_pouwhenua

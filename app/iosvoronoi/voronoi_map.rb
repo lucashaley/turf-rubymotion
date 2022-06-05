@@ -15,10 +15,10 @@ class VoronoiMap
   def voronoi_cells_from_pylons(_in_pylons)
     puts 'VORONOI_MAP: VORONOI_CELLS_FROM_PYLONS'.blue if DEBUGGING
 
-    # puts "in_pylons: #{in_pylons}".red if DEBUGGING
+    return @voronoi_cells_cache if !@voronoi_cells_cache.nil? && !Machine.instance.takaro_fbo.pouwhenua_is_dirty
 
     voronoi_cells = []
-    taiapa_region = Machine.instance.takaro.taiapa_region
+    taiapa_region = Machine.instance.takaro_fbo.taiapa_region
     bounding_box = mkmaprect_for_coord_region(taiapa_region).to_cgrect
 
     voronoi = Voronoi.new
@@ -27,10 +27,10 @@ class VoronoiMap
 
     # TODO: rename this with pouwhenua
     # pylons_array = Machine.instance.takaro.pouwhenua_array
-    pylons_array = Machine.instance.takaro.pouwhenua_array_enabled_only
+    pylons_array = Machine.instance.takaro_fbo.pouwhenua_array_enabled_only
 
     # site_array_map = Machine.instance.takaro.pouwhenua_array.map do |p|
-    site_array_map = Machine.instance.takaro.pouwhenua_array_enabled_only.map do |p|
+    site_array_map = Machine.instance.takaro_fbo.pouwhenua_array_enabled_only.map do |p|
       # puts "coordinate: #{p['coordinate']}".focus
       loc_coord = format_to_location_coord(p['coordinate'])
       color = CIColor.colorWithString(p['color'])
@@ -52,7 +52,8 @@ class VoronoiMap
     end
 
     puts 'FINISHNG VORONOI_CELLS_FROM_PYLONS'.blue if DEBUGGING
-    voronoi_cells
+    Machine.instance.takaro_fbo.pouwhenua_is_dirty = false
+    @voronoi_cells_cache = voronoi_cells
   end
   alias voronoiCellsFromPylons voronoi_cells_from_pylons
   alias voronoi_cells_from_pouwhenua voronoi_cells_from_pylons
@@ -70,7 +71,7 @@ class VoronoiMap
     annotations = []
 
     # Machine.instance.takaro.pouwhenua_array.each do |p|
-    Machine.instance.takaro.pouwhenua_array_enabled_only.each do |p|
+    Machine.instance.takaro_fbo.pouwhenua_array_enabled_only.each do |p|
       # puts "Adding p: #{p}".focus
       pa = PouAnnotation.alloc.initWithCoordinate(
         format_to_location_coord(p['coordinate'])

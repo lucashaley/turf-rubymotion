@@ -33,7 +33,11 @@ class PouwhenuaFbo < FirebaseObject
   def destroy
     puts "FBO:#{@class_name} destroy".red if DEBUGGING
     Machine.instance.takaro_fbo.local_kaitakaro.pouwhenua_increment
-    notification = -> { Notification.center.post 'MapRefresh' }
+    # notification = -> { Notification.center.post 'MapRefresh' }
+    notification = lambda do
+      Machine.instance.takaro_fbo.pouwhenua_is_dirty = true
+      Notification.center.post 'MapRefresh'
+    end
     update_with_block({ 'enabled' => 'false' }, &notification)
   end
 end

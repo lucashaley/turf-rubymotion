@@ -24,7 +24,7 @@ class KaitakaroFbo < FirebaseObject
                 :button_down_location
   attr_reader :location_update_observer
 
-  DEBUGGING = false
+  DEBUGGING = true
   PLACEMENT_DISTANCE_LIMIT = 4
 
   def initialize(in_ref, in_data_hash, in_bot = false)
@@ -150,13 +150,18 @@ class KaitakaroFbo < FirebaseObject
     new_kapa = Machine.instance.takaro_fbo.get_kapa_for_coordinate(in_coordinate)
 
     if new_kapa.nil?
+      # we did not find any nearby kapa.
       puts 'Too far!'.red
 
-      # remove from kapa, if it exists
+      # if the kaitakaro has a kapa already,
+      # it means they have moved away from their kapa
       KapaFbo.remove_kaitakaro_with_key(@ref.key, kapa['id']) unless kapa.nil?
 
+      # either way, remove the kapa from the player
       self.kapa = nil
     else
+      # we did find a kapa!
+      # it's the same kapa
       if @data_hash.key?('kapa') && @data_hash['kapa']['id'] == new_kapa.ref.key
         new_kapa.recalculate_coordinate
         return
@@ -165,9 +170,10 @@ class KaitakaroFbo < FirebaseObject
       # if there is already a kapa, we need to remove the kaitakaro
       # ahh yes, we must remove it from the _existing_ one, not the new one
       puts "recalculate_kapa - existing data_hash kapa: #{@data_hash['kapa']}"
-      unless @data_hash['kapa'].nil? or @data_hash['kapa'].count == 1
+      # unless @data_hash['kapa'].nil? or @data_hash['kapa'].count == 1
+      unless kapa.nil? or @data_hash['kapa'].count == 1
         # what if it's the last one? Surely we don't delete it
-        KapaFbo.remove_kaitakaro_with_key(@ref.key, kapa['id'])
+        KapaFbo.remove_kaitakaro_with_key(@ref.key, kapa['kapa_key'])
       end
 
       # We might be adding it to the new kapa before it leaves the old one

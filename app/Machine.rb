@@ -14,7 +14,7 @@ class Machine
                 :location_manager,
                 :tracking,
                 :auth_view_controller,
-                :takaro,
+                # :takaro,
                 :takaro_fbo,
                 :game_duration,
                 :local_character,
@@ -23,7 +23,7 @@ class Machine
                 :is_playing
 
   DEBUGGING = false
-  DESIRED_ACCURACY = 30
+  DESIRED_ACCURACY = 66
 
   # rubocop:disable Metrics
   def initialize
@@ -106,7 +106,7 @@ class Machine
       state.on_exit { puts 'Machine ending menu' }
 
       state.transition_to :logging_in,
-        on: :log_in
+                          on: :log_in
     end
 
     ####################
