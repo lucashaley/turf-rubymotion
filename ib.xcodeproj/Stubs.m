@@ -9,12 +9,6 @@
 @implementation CharacterController
 @end
 
-@implementation DbView
-@end
-
-@implementation DbViewController
-@end
-
 @implementation FirebaseObject
 @end
 
@@ -76,6 +70,12 @@
 @end
 
 @implementation NewController
+@end
+
+@implementation Notification
+@end
+
+@implementation NSNotificationCenter
 @end
 
 @implementation PlayerCell

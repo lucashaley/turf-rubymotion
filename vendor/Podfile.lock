@@ -41,8 +41,8 @@ PODS:
     - GoogleUtilities/AppDelegateSwizzler (~> 7.6)
     - GoogleUtilities/Environment (~> 7.6)
     - GTMSessionFetcher/Core (~> 1.5)
-  - FirebaseAuthUI (12.1.1):
-    - FirebaseAuth (~> 8.0)
+  - FirebaseAuthUI (12.2.0):
+    - FirebaseAuth (< 10.0, >= 8.0)
     - FirebaseCore
   - FirebaseCore (8.10.0):
     - FirebaseCoreDiagnostics (~> 8.0)
@@ -56,7 +56,7 @@ PODS:
   - FirebaseDatabase (8.10.0):
     - FirebaseCore (~> 8.0)
     - leveldb-library (~> 1.22)
-  - FirebaseGoogleAuthUI (12.1.1):
+  - FirebaseGoogleAuthUI (12.2.0):
     - FirebaseAuth
     - FirebaseAuthUI
     - FirebaseCore
@@ -66,14 +66,14 @@ PODS:
     - GoogleUtilities/Environment (~> 7.7)
     - GoogleUtilities/UserDefaults (~> 7.7)
     - PromisesObjC (< 3.0, >= 1.2)
-  - FirebaseOAuthUI (12.1.1):
-    - FirebaseAuth (~> 8.0)
+  - FirebaseOAuthUI (12.2.0):
+    - FirebaseAuth (< 10.0, >= 8.0)
     - FirebaseAuthUI (< 13.0, >= 12.0.2)
   - FirebaseUI/Auth (12.0.2):
     - FirebaseAuthUI (~> 12.0)
   - FirebaseUI/Google (12.0.2):
     - FirebaseGoogleAuthUI (~> 12.0)
-  - FirebaseUI/OAuth (12.0.2):
+  - FirebaseUI/OAuth (12.2.0):
     - FirebaseOAuthUI (~> 12.0)
   - GoogleAppMeasurement (8.10.0):
     - GoogleAppMeasurement/AdIdSupport (= 8.10.0)
@@ -175,14 +175,14 @@ SPEC CHECKSUMS:
   Firebase: 44213362f1dcc52555b935dc925ed35ac55f1b20
   FirebaseAnalytics: 319c9b3b1bdd400d60e2f415dff0c5f6959e6760
   FirebaseAuth: 59a2d2b933b5b79e18fb1e6ad230c6abdaa73d26
-  FirebaseAuthUI: 71ad7db60f0e3eb34b790868163dde99fde6d989
+  FirebaseAuthUI: 9381cd32c4efcaf3550f4a95dd176fc73da253ee
   FirebaseCore: 04186597c095da37d90ff9fd3e53bc61a1ff2440
   FirebaseCoreDiagnostics: 92e07a649aeb66352b319d43bdd2ee3942af84cb
   FirebaseDatabase: 5f3e83b0a0d8759378fbd5d05661244d14dfbbb0
-  FirebaseGoogleAuthUI: 00f4a3ff878bb96ba5a04cb7752b08235a3dbd9e
+  FirebaseGoogleAuthUI: 978ae1845a5c9111fdf4c2e05708edb0a224bed3
   FirebaseInstallations: 40bd9054049b2eae9a2c38ef1c3dd213df3605cd
-  FirebaseOAuthUI: 264bbf01beff69162c74f464512f16903a33bb38
-  FirebaseUI: b04b32ead3a6dcd5a50829e14b8f3f6d044d5d62
+  FirebaseOAuthUI: 4cb09dfdf3164e664e5381cc6beec9d600205790
+  FirebaseUI: 33ee19f70792fae68bee5cbbbf93733baa2cc7fa
   GoogleAppMeasurement: a3311dbcf3ea651e5a070fe8559b57c174ada081
   GoogleDataTransport: 629c20a4d363167143f30ea78320d5a7eb8bd940
   GoogleSignIn: c90b5bec45e780f54c6a8e1e3c182a86e3dda69d
@@ -194,6 +194,6 @@ SPEC CHECKSUMS:
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 99b6f43f9e1044bd87a95a60beff28c2c44ddb72
 
-PODFILE CHECKSUM: 3ad6cfddb4af477ed00a4cad63d5e98de5250513
+PODFILE CHECKSUM: c06314e03ea235003289c8fae862981dad877eab
 
 COCOAPODS: 1.11.2

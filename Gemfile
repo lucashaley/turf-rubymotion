@@ -5,7 +5,9 @@ gem 'rake'
 
 # gem "motion-cocoapods"
 gem 'motion-cocoapods', path: '/Users/lhaley/Documents/Projects/Personal/motion-cocoapods/'
-gem 'motion-provisioning'
+
+# Disabling as it doesn't seem to work 5/22
+# gem 'motion-provisioning'
 
 # gem "bubble-wrap", git: "https://github.com/rubymotion-community/BubbleWrap"
 

@@ -14,9 +14,9 @@
 #import <MapKit/MapKit.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <JavaScriptCore/JavaScriptCore.h>
-#import <FirebaseAnalytics/FirebaseAnalytics.h>
 #import <CoreTelephony/CoreTelephony.h>
 #import <CoreText/CoreText.h>
+#import <FirebaseAnalytics/FirebaseAnalytics.h>
 #import <GoogleAppMeasurement/GoogleAppMeasurement.h>
 #import <GoogleAppMeasurementIdentitySupport/GoogleAppMeasurementIdentitySupport.h>
 #import <LocalAuthentication/LocalAuthentication.h>
@@ -35,16 +35,6 @@
 -(IBAction) viewDidLoad;
 -(IBAction) select_player_class:(id) sender;
 -(IBAction) dismiss_modal;
-
-@end
-
-@interface DbView: UIView
--(IBAction) drawRect:(id) rect;
-
-@end
-
-@interface DbViewController: UIViewController
--(IBAction) loadView;
 
 @end
 
@@ -87,15 +77,15 @@
 -(IBAction) button_up;
 -(IBAction) pouwhenua_annotation:(id) annotation;
 -(IBAction) kaitarako_annotation:(id) annotation;
+-(IBAction) try_render_overlays;
 -(IBAction) render_overlays;
 -(IBAction) touch_down;
 -(IBAction) touch_up;
 -(IBAction) touch_out;
 -(IBAction) button_color:(id) color;
--(IBAction) add_overlays_and_annotations;
--(IBAction) add_overlays;
--(IBAction) add_annotations;
 -(IBAction) player_for_audio:(id) filename;
+-(IBAction) play_forward_sound_thread;
+-(IBAction) play_forward_sound:(id) context;
 -(IBAction) handle_new_pouwhenua;
 -(IBAction) observe_new_pouwhenua;
 
@@ -247,6 +237,7 @@
 @interface MenuController: MachineViewController
 
 @property IBOutlet UIButton * button_login;
+@property IBOutlet UIButton * button_logout;
 @property IBOutlet UIButton * button_settings;
 @property IBOutlet UIButton * button_characters;
 @property IBOutlet UIButton * button_game_new;
@@ -255,6 +246,7 @@
 -(IBAction) viewDidLoad;
 -(IBAction) controlTouched:(id) sender;
 -(IBAction) action_login:(id) sender;
+-(IBAction) action_logout:(id) sender;
 -(IBAction) action_settings:(id) sender;
 -(IBAction) action_characters:(id) sender;
 -(IBAction) action_game_new:(id) sender;
@@ -280,6 +272,15 @@
 -(IBAction) cancel_new_game;
 -(IBAction) compose_sms;
 -(IBAction) dismiss_new;
+
+@end
+
+@interface Notification: NSObject
+@end
+
+@interface NSNotificationCenter: NSObject
+-(IBAction) observers;
+-(IBAction) unobserve:(id) observer;
 
 @end
 
@@ -381,6 +382,7 @@
 -(IBAction) to_hash;
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
+-(IBAction) to_CLLocationCoordinate2D;
 
 @end
 
@@ -423,6 +425,7 @@
 -(IBAction) minutes;
 -(IBAction) recursive_symbolize_keys:(id) h;
 -(IBAction) format_to_location_coord:(id) input;
+-(IBAction) random_color;
 
 @end
 
