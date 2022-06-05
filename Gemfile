@@ -27,3 +27,6 @@ gem 'standard'
 
 # https://github.com/OTGApps/motion_print
 gem 'motion_print'
+
+# https://github.com/andrewhavens/moticons
+gem 'moticons'
