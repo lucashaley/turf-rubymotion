@@ -75,6 +75,27 @@ PODS:
     - FirebaseGoogleAuthUI (~> 12.0)
   - FirebaseUI/OAuth (12.2.0):
     - FirebaseOAuthUI (~> 12.0)
+  - FontAwesomeKit (2.2.1):
+    - FontAwesomeKit/Core (= 2.2.1)
+    - FontAwesomeKit/FontAwesome (= 2.2.1)
+    - FontAwesomeKit/FoundationIcons (= 2.2.1)
+    - FontAwesomeKit/IonIcons (= 2.2.1)
+    - FontAwesomeKit/Material (= 2.2.1)
+    - FontAwesomeKit/Octicons (= 2.2.1)
+    - FontAwesomeKit/Zocial (= 2.2.1)
+  - FontAwesomeKit/Core (2.2.1)
+  - FontAwesomeKit/FontAwesome (2.2.1):
+    - FontAwesomeKit/Core
+  - FontAwesomeKit/FoundationIcons (2.2.1):
+    - FontAwesomeKit/Core
+  - FontAwesomeKit/IonIcons (2.2.1):
+    - FontAwesomeKit/Core
+  - FontAwesomeKit/Material (2.2.1):
+    - FontAwesomeKit/Core
+  - FontAwesomeKit/Octicons (2.2.1):
+    - FontAwesomeKit/Core
+  - FontAwesomeKit/Zocial (2.2.1):
+    - FontAwesomeKit/Core
   - GoogleAppMeasurement (8.10.0):
     - GoogleAppMeasurement/AdIdSupport (= 8.10.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.6)
@@ -142,6 +163,7 @@ DEPENDENCIES:
   - FirebaseUI/Auth (~> 12.0.2)
   - FirebaseUI/Google
   - FirebaseUI/OAuth
+  - FontAwesomeKit (~> 2.2.1)
   - GoogleSignIn
   - iosvoronoi
 
@@ -159,6 +181,7 @@ SPEC REPOS:
     - FirebaseInstallations
     - FirebaseOAuthUI
     - FirebaseUI
+    - FontAwesomeKit
     - GoogleAppMeasurement
     - GoogleDataTransport
     - GoogleSignIn
@@ -183,6 +206,7 @@ SPEC CHECKSUMS:
   FirebaseInstallations: 40bd9054049b2eae9a2c38ef1c3dd213df3605cd
   FirebaseOAuthUI: 4cb09dfdf3164e664e5381cc6beec9d600205790
   FirebaseUI: 33ee19f70792fae68bee5cbbbf93733baa2cc7fa
+  FontAwesomeKit: 3614979b3dbb0ec3f7fac1bd760b91f66c31db67
   GoogleAppMeasurement: a3311dbcf3ea651e5a070fe8559b57c174ada081
   GoogleDataTransport: 629c20a4d363167143f30ea78320d5a7eb8bd940
   GoogleSignIn: c90b5bec45e780f54c6a8e1e3c182a86e3dda69d
@@ -194,6 +218,6 @@ SPEC CHECKSUMS:
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 99b6f43f9e1044bd87a95a60beff28c2c44ddb72
 
-PODFILE CHECKSUM: c06314e03ea235003289c8fae862981dad877eab
+PODFILE CHECKSUM: 45ae84f4bd4db52f9b4aa1abcd7603b63d8bb6e1
 
 COCOAPODS: 1.11.2

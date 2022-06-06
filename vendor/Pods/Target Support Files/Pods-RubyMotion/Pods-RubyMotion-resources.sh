@@ -100,12 +100,24 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseAuthUI/FirebaseAuthUI.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseGoogleAuthUI/FirebaseGoogleAuthUI.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseOAuthUI/FirebaseOAuthUI.bundle"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/FontAwesome.otf"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/foundation-icons.ttf"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/ionicons.ttf"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/Material-Design-Iconic-Font.ttf"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/octicons.ttf"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/zocial-regular-webfont.ttf"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/GoogleSignIn/GoogleSignIn.bundle"
 fi
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseAuthUI/FirebaseAuthUI.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseGoogleAuthUI/FirebaseGoogleAuthUI.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseOAuthUI/FirebaseOAuthUI.bundle"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/FontAwesome.otf"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/foundation-icons.ttf"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/ionicons.ttf"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/Material-Design-Iconic-Font.ttf"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/octicons.ttf"
+  install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/zocial-regular-webfont.ttf"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/GoogleSignIn/GoogleSignIn.bundle"
 fi
 
