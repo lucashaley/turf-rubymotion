@@ -81,6 +81,7 @@ GEM
     molinillo (0.8.0)
     moticons (1.1.0)
       motion-cocoapods
+    motion-lager (1.0.0)
     motion-state-machine (0.8.4)
     motion_print (1.2.0)
     nanaimo (0.3.0)
@@ -136,6 +137,7 @@ DEPENDENCIES
   ib
   moticons
   motion-cocoapods!
+  motion-lager
   motion-state-machine
   motion_print
   rake

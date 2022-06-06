@@ -17,6 +17,7 @@ class MenuController < MachineViewController
     else
       button_login.setTitle("Login", forState: UIControlStateNormal)
     end
+    $logger.debug 'My debug message'
   end
 
   def controlTouched(sender)

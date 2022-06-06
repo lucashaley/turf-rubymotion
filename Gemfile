@@ -30,3 +30,6 @@ gem 'motion_print'
 
 # https://github.com/andrewhavens/moticons
 gem 'moticons'
+
+# https://github.com/rubymotion-community/motion-lager
+gem 'motion-lager'

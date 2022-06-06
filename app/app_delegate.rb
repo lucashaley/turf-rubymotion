@@ -11,6 +11,9 @@ class AppDelegate
 
     @window.makeKeyAndVisible
 
+    # Trying Logger
+    $logger = Motion::Lager.new(level: 'debug') # default
+
     # Testing JavaScriptCore
     puts "Testing JavaScriptCore"
     js_context = JSContext.alloc.init
