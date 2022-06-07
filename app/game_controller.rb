@@ -223,7 +223,7 @@ class GameController < MachineViewController
   def viewWillAppear(_animated)
     puts 'GAME_CONTROLLER: VIEWWILLAPPEAR'.light_blue
 
-    button_pylon.setImage(icon_image(:awesome, :circle_plus, size: 80, color: UIColor.redColor), forState: UIControlStateNormal)
+    button_pylon.setImage(icon_image(:awesome, :plus_circle, size: 80, color: UIColor.redColor), forState: UIControlStateNormal)
 
     # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
     setup_mapview
