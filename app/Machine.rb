@@ -5,6 +5,7 @@ class Machine
                 :rootview,
                 :db_app,
                 :user,
+                :google_user,
                 # :player,
                 :bounding_box,
                 # :db_game_ref,

@@ -11,12 +11,20 @@ class MenuController < MachineViewController
   def viewDidLoad
     super
     puts "MENUCONTROLLER VIEWDIDLOAD".blue if DEBUGGING
-    if Machine.instance.user
-      puts "Currently logged in: #{Machine.instance.user.email}".focus
-      button_login.setTitle("Logout", forState: UIControlStateNormal)
+
+    # better way to check using GID?
+    if Machine.instance.google_user
+      button_login.hidden = true
+      button_logout.hidden = false
+      button_game_new.enabled = true
+      button_game_join.enabled = true
     else
-      button_login.setTitle("Login", forState: UIControlStateNormal)
+      button_login.hidden = false
+      button_logout.hidden = true
+      button_game_new.enabled = false
+      button_game_join.enabled = false
     end
+
     $logger.debug 'My debug message'
   end
 
@@ -26,7 +34,7 @@ class MenuController < MachineViewController
 
   def action_login(sender)
     puts "MENUCONTROLLER ACTION_LOGIN".blue if DEBUGGING
-    
+
     # this doesn't seem to work any more 4/6/22
     # Machine.instance.state(:log_in)
 
@@ -58,7 +66,11 @@ class MenuController < MachineViewController
         Dispatch::Queue.new("turf-test-db").async do
           FIRAuth.auth.signInWithCredential(credential, completion: lambda do |authResult, error|
             puts user.profile.name
-            Machine.instance.user = user
+            Machine.instance.google_user = user
+            button_login.hidden = true
+            button_logout.hidden = false
+            button_game_new.enabled = true
+            button_game_join.enabled = true
             # dismiss_modal
           end)
         end
@@ -68,6 +80,12 @@ class MenuController < MachineViewController
 
   def action_logout(sender)
     puts "MENUCONTROLLER ACTION_LOGOUT".blue if DEBUGGING
+    GIDSignIn.sharedInstance.signOut
+    Machine.instance.google_user = nil
+    button_login.hidden = false
+    button_logout.hidden = true
+    button_game_new.enabled = false
+    button_game_join.enabled = false
   end
 
   # # Stuff for FirebaseAuthUI
