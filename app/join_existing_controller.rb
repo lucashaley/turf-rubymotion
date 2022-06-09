@@ -56,23 +56,12 @@ class JoinExistingController < MachineViewController
             Machine.instance.takaro_fbo = TakaroFbo.new(game_snapshot.ref, {})
             mp Machine.instance.takaro_fbo
 
-            # Machine.instance.takaro = Takaro.new(snapshot.children.nextObject.key)
-            # Machine.instance.gamecode = gamecode.text
             continue_button.enabled = true
 
-            # # can we get all the players?
-            # if game_snapshot.hasChild('players')
-            #   player_hash = game_snapshot.childSnapshotForPath('players').valueInExportFormat
-            #   player_names = player_hash.values.map { |p| p['display_name'] }
-            #   puts "player_names: #{player_names}".red
-            #   # oh yeah this worked
-            # end
+            # hide the keyboard
+            gamecode.resignFirstResponder
           end
         )
-      #
-      # if Machine.instance.check_for_game(gamecode.text)
-      #   continue_button.enabled = true
-      # end
     else
       continue_button.enabled = false
     end
