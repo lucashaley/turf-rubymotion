@@ -36,42 +36,45 @@ class NewController < MachineViewController
   end
 
   def init_observers
-    # Listen for new players
-    @player_new_observer = Notification.center.observe 'PlayerNew' do |_notification|
-      puts 'new_controller: PLAYER NEW'.yellow
-      # handle_new_player
-    end
+    Notification.center.addObserver(self,
+                                    selector: 'handle_new_player',
+                                    name: 'PlayerNew',
+                                    object: nil)
 
-    @player_changed_observer = Notification.center.observe 'PlayerChanged' do |_notification|
-      puts 'new_controller: PLAYER CHANGED'.yellow
-      handle_changed_player
-    end
+    Notification.center.addObserver(self,
+                                    selector: 'handle_changed_player',
+                                    name: 'PlayerChanged',
+                                    object: nil)
 
-    @kapa_new_observer = Notification.center.observe 'KapaNew' do |_notification|
-      puts 'new_controller: NEWKAPA'.yellow
-      reload_table_data
-    end
-    @kapa_new_observer = Notification.center.observe 'KapaDelete' do |_notification|
-      puts 'new_controller: KAPADELETE'.yellow
-      reload_table_data
-    end
+    Notification.center.addObserver(self,
+                                    selector: 'reload_table_data',
+                                    name: 'KapaNew',
+                                    object: nil)
 
-    @kapa_new_observer = Notification.center.observe 'Kapafbo_New' do |_notification|
-      puts 'new_controller: Kapafbo_New'.yellow
-      reload_table_data
-    end
-    @kapafbo_new_observer = Notification.center.observe 'Kapafbo_ChildRemoved' do |_notification|
-      puts 'new_controller: Kapafbo_ChildRemoved'.yellow
-      reload_table_data
-    end
-    @kapafbo_new_observer = Notification.center.observe 'Kapafbo_ChildAdded' do |_notification|
-      puts 'new_controller: Kapafbo_ChildAdded'.yellow
-      reload_table_data
-    end
-    @kapafbo_changed_observer = Notification.center.observe 'Kapafbo_ChildChanged' do |_notification|
-      puts 'new_controller: Kapafbo_ChildChanged'.yellow
-      reload_table_data
-    end
+    Notification.center.addObserver(self,
+                                    selector: 'reload_table_data',
+                                    name: 'KapaDelete',
+                                    object: nil)
+
+    Notification.center.addObserver(self,
+                                    selector: 'reload_table_data',
+                                    name: 'Kapafbo_New',
+                                    object: nil)
+
+    Notification.center.addObserver(self,
+                                    selector: 'reload_table_data',
+                                    name: 'Kapafbo_ChildRemoved',
+                                    object: nil)
+
+    Notification.center.addObserver(self,
+                                    selector: 'reload_table_data',
+                                    name: 'Kapafbo_ChildAdded',
+                                    object: nil)
+
+    Notification.center.addObserver(self,
+                                    selector: 'reload_table_data',
+                                    name: 'Kapafbo_ChildChanged',
+                                    object: nil)
 
     # Listen for gamecode
     @gamecode_new_observer = Notification.center.observe 'GamecodeNew' do |notification|
