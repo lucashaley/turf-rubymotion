@@ -11,6 +11,7 @@ Lint/DuplicateMethods:
   Enabled: false
 
 Lint/UnusedMethodArgument:
+  Enabled: false
   AllowUnusedKeywordArguments: true
 
 Metrics/BlockLength:
