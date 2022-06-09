@@ -69,9 +69,9 @@ class Machine
     puts "User: #{@auth.currentUser}".red
     FIRAuth.auth.addAuthStateDidChangeListener(handle_auth_state_changed)
 
-    authUI = FUIAuth.defaultAuthUI
-    authUI.delegate = self
-    puts "Machine AuthUI: #{authUI}".red
+    @auth_ui = FUIAuth.defaultAuthUI
+    @auth_ui.delegate = self
+    puts "Machine AuthUI: #{@auth_ui}".red
     provider_apple = FUIOAuth.appleAuthProvider
     puts "Machine provider: #{provider_apple}".red
 
@@ -79,9 +79,10 @@ class Machine
     providers = []
     providers << FUIGoogleAuth.alloc.init
     providers << FUIOAuth.appleAuthProvider
-    authUI.providers = providers
+    providers << FUIEmailAuth.alloc.init
+    @auth_ui.providers = providers
 
-    @auth_view_controller = authUI.authViewController
+    @auth_view_controller = @auth_ui.authViewController
     puts "Machine auth_view_controller: #{auth_view_controller}"
 
     ####################
