@@ -76,7 +76,15 @@ class GameController < MachineViewController
   def timer_decrement
     # puts 'TIMER_DECREMENT'.yellow
     @timer_count -= 1
+
+    handle_game_over if @timer_count <= 0
+
     timer_label.text = format_seconds(@timer_count)
+  end
+
+  def handle_game_over
+    $logger.info 'handle_game_over'
+    performSegueWithIdentifier('GameOver', sender: self)
   end
 
   def format_seconds(in_seconds)

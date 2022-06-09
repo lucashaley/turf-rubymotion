@@ -6,7 +6,7 @@ class GameCountdownController < MachineViewController
     machine.when :waiting do |state|
       state.on_entry { puts 'Countdown state waiting'.pink }
       state.transition_to :starting,
-                          after: 5
+                          after: 4
     end
     machine.when :starting do |state|
       state.on_entry do
