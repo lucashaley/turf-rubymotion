@@ -81,11 +81,13 @@ class TakaroFbo < FirebaseObject
   def init_local_kaitakaro(in_character)
     puts "FBO:#{@class_name} init_local_kaitakaro".green if DEBUGGING
     kaitakaro_ref = @ref.child('kaitakaro').childByAutoId
+    $logger.info Machine.instance.firebase_user
+    $logger.info Machine.instance.firebase_user.providerData[0].displayName
     k = KaitakaroFbo.new(
       kaitakaro_ref,
       {
         'character' => in_character,
-        'display_name' => Machine.instance.user.displayName
+        'display_name' => Machine.instance.firebase_user.providerData[0].displayName
         # 'displayName' => Machine.instance.user.profile.name
       }
     )

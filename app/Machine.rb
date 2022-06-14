@@ -6,6 +6,9 @@ class Machine
                 :db_app,
                 :user,
                 :google_user,
+                :firebase_user,
+                :firebase_displayname,
+                :firebase_email,
                 # :player,
                 :bounding_box,
                 # :db_game_ref,
@@ -56,9 +59,12 @@ class Machine
       if auth.currentUser
         puts 'User already logged in'.pink
         @user = auth.currentUser
+        @firebase_user = auth.currentUser
+        Notification.center.post 'UserLogIn'
       else
         puts 'No user logged in'.pink
         @user = nil
+        Notification.center.post 'UserLogOut'
       end
     end
     ####################

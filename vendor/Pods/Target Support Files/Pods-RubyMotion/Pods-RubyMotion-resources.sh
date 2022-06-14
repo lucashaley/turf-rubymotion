@@ -98,6 +98,7 @@ EOM
 }
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseAuthUI/FirebaseAuthUI.bundle"
+  install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseEmailAuthUI/FirebaseEmailAuthUI.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseGoogleAuthUI/FirebaseGoogleAuthUI.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseOAuthUI/FirebaseOAuthUI.bundle"
   install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/FontAwesome.otf"
@@ -110,6 +111,7 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
 fi
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseAuthUI/FirebaseAuthUI.bundle"
+  install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseEmailAuthUI/FirebaseEmailAuthUI.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseGoogleAuthUI/FirebaseGoogleAuthUI.bundle"
   install_resource "${PODS_CONFIGURATION_BUILD_DIR}/FirebaseOAuthUI/FirebaseOAuthUI.bundle"
   install_resource "${PODS_ROOT}/FontAwesomeKit/FontAwesomeKit/FontAwesome.otf"

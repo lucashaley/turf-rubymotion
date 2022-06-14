@@ -36,7 +36,7 @@ Motion::Project::App.setup do |app|
   app.name = 'Turf'
 
   # version for your app
-  app.version = '0.1.4'
+  app.version = '0.1.8'
 
   # ===========================================================================================
   # 3. Set your deployment target (it's recommended that you at least target 10.0 and above).
@@ -77,16 +77,22 @@ Motion::Project::App.setup do |app|
   app.info_plist['UIRequiredDeviceCapabilities'] = ['arm64']
 
   # app.frameworks += ['CoreLocation', 'MessageUI', 'MapKit', 'AudioToolbox', 'JavaScriptCore', 'FirebaseAnalytics']
-  app.frameworks += ['CoreLocation', 'MessageUI', 'MapKit', 'AudioToolbox', 'JavaScriptCore']
+  app.frameworks += ['CoreLocation', 'MessageUI', 'MapKit', 'AudioToolbox', 'JavaScriptCore', 'AuthenticationServices']
 
   # This is a force, as for some reason the pods weren't including the resources
   app.resources_dirs += ['vendor/Pods/FirebaseAuthUI/FirebaseAuthUI/Sources/Resources/']
   app.resources_dirs += ['vendor/Pods/FirebaseOAuthUI/FirebaseOAuthUI/Sources/Resources/']
+  app.resources_dirs += ['vendor/Pods/FirebaseEmailAuthUI/FirebaseEmailAuthUI/Sources/Resrouces/']
+  app.resources_dirs += ['vendor/Pods/GoogleSignIn/GoogleSignIn/Sources/Resrouces/']
   # app.resources_dirs += ['vendor/Pods/FirebaseAnalytics/']
 
   # app.vendor_project('vendor/objcvoronoi-master', :xcode,
   #     :headers_dir => 'objcvoronoi')
   # app.frameworks << 'Cocoa'
+
+  # app.vendor_project('vendor/Pods/FirebaseUI', :static, ib: true)
+  # app.vendor_project('vendor/Pods/AppAuth', :static, :headers_dir => 'Source/', ib: true)
+  # app.vendor_project('vendor/Pods/GoogleSignIn', :static, ib: true)
 
   # ===========================================================================================
   # 7. To deploy to an actual device, you will need to create a developer certificate at:
@@ -95,39 +101,30 @@ Motion::Project::App.setup do |app|
   #    see there below.
   # ===========================================================================================
 
-  # app.codesign_certificate = MotionProvisioning.certificate(
-  #   platform: :ios,
-  #   type: :development,
-  #   free: false
-  # )
-
-#   app.development do
+#    app.development do
 #     app.codesign_certificate = MotionProvisioning.certificate(
 #       type: :development,
-#       platform: :ios
-#     )
+#       platform: :ios)
 # 
 #     app.provisioning_profile = MotionProvisioning.profile(
 #       bundle_identifier: app.identifier,
 #       app_name: app.name,
 #       platform: :ios,
-#       type: :development
-#     )
+#       type: :development)
 #   end
 # 
 #   app.release do
 #     app.codesign_certificate = MotionProvisioning.certificate(
 #       type: :distribution,
-#       platform: :ios
-#     )
+#       platform: :ios)
 # 
 #     app.provisioning_profile = MotionProvisioning.profile(
 #       bundle_identifier: app.identifier,
 #       app_name: app.name,
 #       platform: :ios,
-#       type: :distribution
-#     )
+#       type: :distribution)
 #   end
+
 
   # ===========================================================================================
   # 8. To deploy to an actual device, you will need to create a provisioning profile. First:
@@ -139,13 +136,6 @@ Motion::Project::App.setup do |app|
   #
   #    Download the profile and set the path to the download location below.
   # ===========================================================================================
-  # app.provisioning_profile = MotionProvisioning.profile(
-  #   bundle_identifier: 'com.animatology.turf',
-  #   app_name: app.name,
-  #   platform: :ios,
-  #   type: :development,
-  #   free: false
-  # )
 
   # ===========================================================================================
   # 9. Similar to Step 8. Production, create a production certificate at:
@@ -158,17 +148,22 @@ Motion::Project::App.setup do |app|
   #   app.codesign_certificate = 
   #   app.provisioning_profile = 
   # end
-  app.codesign_certificate = "Apple Distribution: Lucas Haley (3DZ7KWNU9A)"
-  app.provisioning_profile = 'provisioning/TurfDistribution.mobileprovision'
 
-  # app.codesign_certificate = 'provisioning/development.cer'
-  # app.provisioning_profile = 'provisioning/TurfDevelopment.mobileprovision'
+  # this works
+  app.release do
+    app.codesign_certificate = "Apple Distribution: Lucas Haley (3DZ7KWNU9A)"
+    app.provisioning_profile = 'provisioning/TurfDistribution.mobileprovision'
+  end
+  app.development do
+    app.codesign_certificate = "Apple Development: Lucas Haley (RU52PCAUBM)"
+    app.provisioning_profile = 'provisioning/TurfDevelopment.mobileprovision'
+  end
 
   # ===========================================================================================
   # 10. If you want to create a beta build. Uncomment the line below and set your profile to
   #     point to your production provisions (Step 9).
   # ===========================================================================================
-  app.entitlements['beta-reports-active'] = true
+  # app.entitlements['beta-reports-active'] = true
 
   # we need to set this for keychain shit
   # http://www.rubymotion.com/developers/guides/manuals/cocoa/project-management/
@@ -189,6 +184,9 @@ Motion::Project::App.setup do |app|
   app.info_plist['CFBundleURLTypes'] = [{
     # 'CFBundleURLName' => 'com.companyname.appname',
     'CFBundleURLSchemes' => ['com.googleusercontent.apps.858979761808-s8em2ueobqgnhi6905jcrifshedb4r61']
+  },{
+    # 'CFBundleURLName' => 'com.companyname.appname',
+    'CFBundleURLSchemes' => ['com.googleusercontent.apps.858979761808-1p3ni6tdgns4sge5tckefc583ud5o20m']
   }]
   # https://github.com/amirrajan/rubymotion-applied/issues/127
   app.info_plist['FirebaseAppDelegateProxyEnabled'] = false
@@ -206,6 +204,7 @@ Motion::Project::App.setup do |app|
     pod 'FirebaseUI/Google'
     # # pod 'FirebaseUI/Twitter'
     pod 'FirebaseUI/OAuth' # Used for Sign in with Apple, Twitter, etc
+    pod 'FirebaseUI/Email'
     # pod 'FirebaseUI/Database'
     # pod 'FirebaseUI/Phone'
 
@@ -214,6 +213,8 @@ Motion::Project::App.setup do |app|
 
     # https://github.com/mapbox/MapboxStatic.swift
     # pod 'MapboxStatic.swift', '~> 0.12'
+
+    pod 'NSHash'
   end
 end
 # rubocop:enable Metrics/BlockLength
@@ -237,6 +238,9 @@ def define_icon_defaults!(app)
     }
   }
 end
+
+# IB::RakeTask.new do |project|
+# end
 
 # https://github.com/archan937/motion-bundler
 # Track and specify files and their mutual dependencies within the :motion Bundler group

@@ -1,0 +1,1 @@
+../../../FirebaseEmailAuthUI/FirebaseEmailAuthUI/Sources/FUIEmailAuth_Internal.h

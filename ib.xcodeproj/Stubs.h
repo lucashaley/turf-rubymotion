@@ -24,6 +24,7 @@
 #import <MapKit/MapKit.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <JavaScriptCore/JavaScriptCore.h>
+#import <AuthenticationServices/AuthenticationServices.h>
 
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
 @end
@@ -69,6 +70,7 @@
 -(IBAction) update_pouwhenua_label;
 -(IBAction) setup_timers;
 -(IBAction) timer_decrement;
+-(IBAction) handle_game_over;
 -(IBAction) format_seconds:(id) in_seconds;
 -(IBAction) calculate_score;
 -(IBAction) init_observers;
@@ -99,6 +101,14 @@
 @interface GameOptionsController: MachineViewController
 -(IBAction) viewDidLoad;
 -(IBAction) select_duration:(id) sender;
+
+@end
+
+@interface InfoViewController: UIViewController
+
+@property IBOutlet UIButton * button_close;
+
+-(IBAction) close:(id) sender;
 
 @end
 
@@ -225,6 +235,21 @@
 
 @end
 
+@interface LoginController: MachineViewController
+
+@property IBOutlet UIButton * button_apple;
+@property IBOutlet UIButton * button_google;
+
+-(IBAction) unwind_to_main_menu:(UIStoryboardSegue*) sender;
+-(IBAction) viewDidLoad;
+-(IBAction) handle_apple_authorization:(id) sender;
+-(IBAction) presentationAnchorForAuthorizationController:(id) controller;
+-(IBAction) handle_google_authorization:(id) sender;
+-(IBAction) complete_authorization:(id) credential;
+-(IBAction) generate_nonce;
+
+@end
+
 @interface Machine: NSObject
 -(IBAction) initialize;
 -(IBAction) state;
@@ -247,10 +272,14 @@
 -(IBAction) controlTouched:(id) sender;
 -(IBAction) action_login:(id) sender;
 -(IBAction) action_logout:(id) sender;
+-(IBAction) action_test:(id) sender;
 -(IBAction) action_settings:(id) sender;
 -(IBAction) action_characters:(id) sender;
 -(IBAction) action_game_new:(id) sender;
 -(IBAction) action_game_join:(id) sender;
+-(IBAction) login;
+-(IBAction) logout;
+-(IBAction) action_dismiss_login:(id) segue;
 
 @end
 

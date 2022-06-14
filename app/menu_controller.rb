@@ -12,8 +12,39 @@ class MenuController < MachineViewController
     super
     puts "MENUCONTROLLER VIEWDIDLOAD".blue if DEBUGGING
 
-    # better way to check using GID?
-    if Machine.instance.google_user
+    # # better way to check using GID?
+    # if Machine.instance.google_user
+    #   button_login.hidden = true
+    #   button_logout.hidden = false
+    #   button_game_new.enabled = true
+    #   button_game_join.enabled = true
+    # else
+    #   button_login.hidden = false
+    #   button_logout.hidden = true
+    #   button_game_new.enabled = false
+    #   button_game_join.enabled = false
+    # end
+
+    Notification.center.observe 'UserLogIn' do |notification|
+      mp 'menu_controller UserLogIn'
+      button_login.hidden = true
+      button_logout.hidden = false
+      button_game_new.enabled = true
+      button_game_join.enabled = true
+    end
+    Notification.center.observe 'UserLogOut' do |notification|
+      mp 'menu_controller UserLogOut'
+      button_login.hidden = false
+      button_logout.hidden = true
+      button_game_new.enabled = false
+      button_game_join.enabled = false
+    end
+
+    $logger.debug 'My debug message'
+  end
+
+  def viewWillAppear(_animated)
+    if Machine.instance.firebase_user
       button_login.hidden = true
       button_logout.hidden = false
       button_game_new.enabled = true
@@ -24,8 +55,6 @@ class MenuController < MachineViewController
       button_game_new.enabled = false
       button_game_join.enabled = false
     end
-
-    $logger.debug 'My debug message'
   end
 
   def controlTouched(sender)
@@ -82,18 +111,16 @@ class MenuController < MachineViewController
     puts "MENUCONTROLLER ACTION_LOGOUT".blue if DEBUGGING
     GIDSignIn.sharedInstance.signOut
     Machine.instance.google_user = nil
+    Machine.instance.firebase_user = nil
     button_login.hidden = false
     button_logout.hidden = true
     button_game_new.enabled = false
     button_game_join.enabled = false
   end
 
-  # # Stuff for FirebaseAuthUI
-  # # Never got this to work
-  # def authUI(authUI, didSignInWithAuthDataResult: result, error: error)
-  #   puts "MENUCONTROLLER DID_SIGN_IN".blue if DEBUGGING
-  #   puts "insane".red
-  # end
+  def action_test(sender)
+    presentViewController(Machine.instance.auth_view_controller, animated: true, completion: nil)
+  end
 
   def action_settings(sender)
     # TODO
@@ -109,5 +136,25 @@ class MenuController < MachineViewController
 
   def action_game_join(sender)
     puts "MENUCONTROLLER ACTION_GAME_JOIN".blue if DEBUGGING
+  end
+
+  def login
+    mp 'menu_controller login'
+    button_login.hidden = true
+    button_logout.hidden = false
+    button_game_new.enabled = true
+    button_game_join.enabled = true
+  end
+
+  def logout
+    mp 'menu_controller logout'
+    button_login.hidden = false
+    button_logout.hidden = true
+    button_game_new.enabled = false
+    button_game_join.enabled = false
+  end
+
+  def action_dismiss_login(segue)
+    mp 'menu_controller action_dismiss_login'
   end
 end

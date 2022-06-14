@@ -49,6 +49,16 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>FirebaseEmailAuthUI-FirebaseEmailAuthUI.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>FirebaseEmailAuthUI.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>FirebaseGoogleAuthUI-FirebaseGoogleAuthUI.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -115,6 +125,11 @@
 			<false/>
 		</dict>
 		<key>GoogleUtilities.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>NSHash.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>

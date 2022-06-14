@@ -129,7 +129,7 @@
                                 <subviews>
                                     <segmentedControl opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" segmentControlStyle="plain" translatesAutoresizingMaskIntoConstraints="NO" id="6ft-eg-Joa">
                                         <rect key="frame" x="8" y="37" width="327" height="32"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                         <segments>
                                             <segment title="">
                                                 <imageReference key="image" image="5.square" catalog="system" symbolScale="large"/>
@@ -147,7 +147,7 @@
                                     </segmentedControl>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Duration" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5fR-sW-euv">
                                         <rect key="frame" x="138" y="8" width="66" height="21"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -404,13 +404,37 @@
             <objects>
                 <viewController storyboardIdentifier="LoginController" id="vYC-MB-KOT" customClass="LoginController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cWB-kz-Ny9">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Logging In…" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CFD-vA-xzY">
-                                <rect key="frame" x="16" y="270" width="343" height="72"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KKZ-r5-ifz" customClass="ASAuthorizationAppleIDButton">
+                                <rect key="frame" x="16" y="101" width="343" height="60"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Button"/>
+                                <connections>
+                                    <action selector="handle_apple_authorization:" destination="vYC-MB-KOT" eventType="touchUpInside" id="PUU-ki-Y4P"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" reversesTitleShadowWhenHighlighted="YES" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RaL-ce-rHO">
+                                <rect key="frame" x="16" y="169" width="343" height="60"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <accessibility key="accessibilityConfiguration">
+                                    <accessibilityTraits key="traits" button="YES" image="YES" staticText="YES"/>
+                                </accessibility>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="22"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="8" maxY="0.0"/>
+                                <state key="normal" title=" Sign in with Google" image="google.png">
+                                    <color key="titleColor" systemColor="labelColor"/>
+                                </state>
+                                <connections>
+                                    <action selector="handle_google_authorization:" destination="vYC-MB-KOT" eventType="touchUpInside" id="Zvk-Ov-PWH"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Log in?" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Oep-Fv-O3L">
+                                <rect key="frame" x="113" y="20" width="149" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="60"/>
+                                <fontDescription key="fontDescription" type="system" weight="black" pointSize="42"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -419,10 +443,16 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <navigationItem key="navigationItem" id="LtC-qf-vCP"/>
+                    <connections>
+                        <outlet property="button_apple" destination="KKZ-r5-ifz" id="MnQ-kA-zgb"/>
+                        <outlet property="button_google" destination="RaL-ce-rHO" id="Xkp-ea-Ilv"/>
+                        <segue destination="bx3-IO-2cL" kind="unwind" identifier="UnwindToMainMenu" unwindAction="unwind_to_main_menu:" id="INc-qM-HhX"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="f8c-k2-A3r" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <exit id="bx3-IO-2cL" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="2690" y="-962"/>
+            <point key="canvasLocation" x="2688.8000000000002" y="-962.06896551724151"/>
         </scene>
         <!--Menu Controller-->
         <scene sceneID="iKs-WB-UI8">
@@ -439,8 +469,8 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xey-4C-gU5">
-                                <rect key="frame" x="105" y="117" width="167" height="48"/>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xey-4C-gU5">
+                                <rect key="frame" x="208" y="0.0" width="167" height="48"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="30"/>
                                 <state key="normal" title="Login"/>
@@ -484,9 +514,7 @@
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="30"/>
                                 <state key="normal" title="Credits"/>
                                 <connections>
-                                    <segue destination="V95-ki-Mtz" kind="popoverPresentation" popoverAnchorView="yZe-pO-jvE" id="wLe-Y7-83p">
-                                        <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                    </segue>
+                                    <segue destination="V95-ki-Mtz" kind="presentation" identifier="Credits" id="wLe-Y7-83p"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rrg-Qe-RcH">
@@ -497,7 +525,7 @@
                                 <connections>
                                     <action selector="action_settings:" destination="8aw-7i-1GL" eventType="touchUpInside" id="drD-O7-5cu"/>
                                     <action selector="controlTouched:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="zvr-Tk-cMH"/>
-                                    <segue destination="lbW-wk-URB" kind="presentation" identifier="MenuToSettings" modalTransitionStyle="coverVertical" id="sNX-uv-R3c"/>
+                                    <segue destination="lbW-wk-URB" kind="presentation" identifier="Settings" modalTransitionStyle="coverVertical" id="sNX-uv-R3c"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CgZ-4X-Ile">
@@ -519,9 +547,16 @@
                                 <connections>
                                     <action selector="action_game_new:" destination="8aw-7i-1GL" eventType="touchUpInside" id="h7h-jz-DrQ"/>
                                     <action selector="controlTouched:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="IUl-tX-tKz"/>
-                                    <segue destination="J8r-WN-OqI" kind="popoverPresentation" popoverAnchorView="4WQ-qH-OPY" id="VnR-q6-uzz">
-                                        <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                    </segue>
+                                    <segue destination="J8r-WN-OqI" kind="presentation" identifier="HowToPlay" id="VnR-q6-uzz"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="cTN-nS-xGa">
+                                <rect key="frame" x="103" y="117" width="167" height="48"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="30"/>
+                                <state key="normal" title="Login"/>
+                                <connections>
+                                    <segue destination="vYC-MB-KOT" kind="presentation" identifier="Login" id="mPE-q2-s4G"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -533,7 +568,7 @@
                         <outlet property="button_characters" destination="zaA-2e-wRn" id="DVm-Qy-nE5"/>
                         <outlet property="button_game_join" destination="1qN-iL-YZT" id="LOK-4R-Ylg"/>
                         <outlet property="button_game_new" destination="CgZ-4X-Ile" id="jhH-7y-K7M"/>
-                        <outlet property="button_login" destination="xey-4C-gU5" id="mbo-O5-oZp"/>
+                        <outlet property="button_login" destination="cTN-nS-xGa" id="S52-Ho-NwD"/>
                         <outlet property="button_logout" destination="vnp-ag-rR7" id="GKv-Cu-Xk4"/>
                         <outlet property="button_settings" destination="rrg-Qe-RcH" id="3o2-Ne-Xxo"/>
                     </connections>
@@ -542,95 +577,90 @@
             </objects>
             <point key="canvasLocation" x="2135.1999999999998" y="-175.86206896551727"/>
         </scene>
-        <!--View Controller-->
+        <!--Credits-->
         <scene sceneID="Sgn-Hu-PiO">
             <objects>
-                <viewController id="V95-ki-Mtz" sceneMemberID="viewController">
+                <viewController id="V95-ki-Mtz" userLabel="Credits" customClass="InfoViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8GG-Cl-TLL">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Turf!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ucc-WJ-euR">
-                                <rect key="frame" x="137" y="60" width="104" height="51"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Credits!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ucc-WJ-euR">
+                                <rect key="frame" x="104" y="60" width="171" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" weight="black" pointSize="42"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" usesAttributedText="YES" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rMD-Zc-Qeg">
+                            <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" text="This game was made by Lucas Haley using the following tools: - RubyMotion - Google Firebase  Playtesters Harry Ford, Stu Dixon" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rMD-Zc-Qeg">
                                 <rect key="frame" x="16" y="138" width="343" height="484"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <attributedString key="attributedText">
-                                    <fragment content="This game was made by Lucas Haley using the following tools: - RubyMotion - Google Firebase  ">
-                                        <attributes>
-                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <font key="NSFont" metaFont="system" size="20"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" paragraphSpacing="4" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment content="Playtesters">
-                                        <attributes>
-                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <font key="NSFont" metaFont="systemBold" size="20"/>
-                                            <font key="NSOriginalFont" metaFont="systemBold" size="20"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" paragraphSpacing="4" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment content=" Harry Ford">
-                                        <attributes>
-                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <font key="NSFont" metaFont="system" size="20"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" paragraphSpacing="4" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                </attributedString>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="20"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DuJ-tp-l4c">
+                                <rect key="frame" x="19" y="20" width="163" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Close"/>
+                                <connections>
+                                    <action selector="close:" destination="V95-ki-Mtz" eventType="touchUpInside" id="WVN-K0-LHk"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="11q-gR-WZ1"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
+                    <connections>
+                        <outlet property="button_close" destination="DuJ-tp-l4c" id="qHu-4d-dNT"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bdv-j4-9bT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3353" y="-622"/>
+            <point key="canvasLocation" x="3352.8000000000002" y="-622.03898050974522"/>
         </scene>
-        <!--View Controller-->
+        <!--How To Play-->
         <scene sceneID="Xfa-LP-fsD">
             <objects>
-                <viewController id="J8r-WN-OqI" sceneMemberID="viewController">
+                <viewController id="J8r-WN-OqI" userLabel="How To Play" customClass="InfoViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Vos-tZ-lyl">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="How to Play" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gEE-kr-X96">
-                                <rect key="frame" x="66" y="76" width="246" height="51"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="How to Play:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gEE-kr-X96">
+                                <rect key="frame" x="60" y="76" width="258" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" weight="black" pointSize="42"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" usesAttributedText="YES" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I6g-Zo-6qu">
+                            <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I6g-Zo-6qu">
                                 <rect key="frame" x="16" y="154" width="343" height="473"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <attributedString key="attributedText">
-                                    <fragment>
-                                        <string key="content">Turf! is a real-time strategy game you play in real life.   Each player can place markers in their current location.   Each marker claims a certain amount of area.  Your score is based on how large your area is compared to the other team's area.  To start, cluster your teammates together in one location. The other team clusters in a different location. The playfield size is based on the distance between the two first positions.</string>
-                                        <attributes>
-                                            <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <font key="NSFont" metaFont="system" size="20"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" paragraphSpacing="4" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                </attributedString>
+                                <string key="text">Turf! is a real-time strategy game you play in real life.   Each player can place markers in their current location.   Each marker claims a certain amount of area.  Your score is based on how large your area is compared to the other team's area.  To start, cluster your teammates together in one location. The other team clusters in a different location. The playfield size is based on the distance between the two first positions.</string>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="20"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="s6x-zk-57o">
+                                <rect key="frame" x="16" y="20" width="163" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Close"/>
+                                <connections>
+                                    <action selector="close:" destination="J8r-WN-OqI" eventType="touchUpInside" id="2n8-4H-oQg"/>
+                                    <action selector="close:" destination="V95-ki-Mtz" eventType="touchUpInside" id="RSL-ge-iU5"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="AIv-uL-ARJ"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
+                    <connections>
+                        <outlet property="button_close" destination="s6x-zk-57o" id="CzB-nV-FGa"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pgy-1R-t1B" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -736,15 +766,13 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="o8Q-15-KZa">
-                                <rect key="frame" x="117" y="496" width="140" height="137"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="o8Q-15-KZa">
+                                <rect key="frame" x="117" y="505" width="141" height="138"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="28"/>
+                                <color key="tintColor" systemColor="labelColor"/>
                                 <size key="titleShadowOffset" width="3" height="3"/>
-                                <state key="normal">
-                                    <imageReference key="image" image="plus" catalog="system" symbolScale="large"/>
-                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64" weight="black"/>
-                                </state>
+                                <state key="normal" backgroundImage="plus.square.fill" catalog="system"/>
                                 <connections>
                                     <action selector="touch_down" destination="Ba5-Em-l6K" eventType="touchDown" id="neA-hA-SLD"/>
                                     <action selector="touch_out" destination="Ba5-Em-l6K" eventType="touchDragExit" id="rTf-ll-Mqt"/>
@@ -763,23 +791,53 @@
                         <outlet property="pouwhenua_label" destination="Jam-GE-hkW" id="Sao-Z6-NBx"/>
                         <outlet property="right_score_label" destination="0ai-Br-HTN" id="xNb-r0-QCZ"/>
                         <outlet property="timer_label" destination="yK6-Fr-IwJ" id="HAM-Cy-pSl"/>
+                        <segue destination="QAX-Yg-aGW" kind="showDetail" identifier="GameOver" id="FbP-rI-VQN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mg8-gS-fEk" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4788.7850467289718" y="2377.3218142548599"/>
+            <point key="canvasLocation" x="4788" y="2377.0614692653676"/>
+        </scene>
+        <!--GameOver-->
+        <scene sceneID="syp-D4-26m">
+            <objects>
+                <viewController id="QAX-Yg-aGW" userLabel="GameOver" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="eK7-1n-UgD">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Game O'er" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bWj-6U-z6w">
+                                <rect key="frame" x="78" y="79" width="219" height="51"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="black" pointSize="42"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="JhJ-JU-x4k"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="f5u-bR-WL2"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="uox-Lz-lmT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5530" y="2377"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
         <segue reference="gPf-Yu-zFj"/>
         <segue reference="Gh1-WF-AJg"/>
-        <segue reference="zAq-bV-BBM"/>
+        <segue reference="7CE-HL-6xe"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="10.square" catalog="system" width="128" height="114"/>
         <image name="20.square" catalog="system" width="128" height="114"/>
         <image name="5.square" catalog="system" width="128" height="114"/>
-        <image name="plus" catalog="system" width="128" height="113"/>
+        <image name="google.png" width="18" height="18"/>
+        <image name="plus.square.fill" catalog="system" width="128" height="114"/>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
         <systemColor name="secondarySystemFillColor">
             <color red="0.47058823529411764" green="0.47058823529411764" blue="0.50196078431372548" alpha="0.16" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>

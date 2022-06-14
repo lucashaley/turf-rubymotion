@@ -1,0 +1,1 @@
+../../../FirebaseEmailAuthUI/FirebaseEmailAuthUI/Sources/Public/FirebaseEmailAuthUI/FUIPasswordRecoveryViewController.h

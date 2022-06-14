@@ -56,6 +56,11 @@ PODS:
   - FirebaseDatabase (8.10.0):
     - FirebaseCore (~> 8.0)
     - leveldb-library (~> 1.22)
+  - FirebaseEmailAuthUI (12.2.0):
+    - FirebaseAuth
+    - FirebaseAuthUI
+    - FirebaseCore
+    - GoogleUtilities/UserDefaults
   - FirebaseGoogleAuthUI (12.2.0):
     - FirebaseAuth
     - FirebaseAuthUI
@@ -71,6 +76,8 @@ PODS:
     - FirebaseAuthUI (< 13.0, >= 12.0.2)
   - FirebaseUI/Auth (12.0.2):
     - FirebaseAuthUI (~> 12.0)
+  - FirebaseUI/Email (12.0.2):
+    - FirebaseEmailAuthUI (~> 12.0)
   - FirebaseUI/Google (12.0.2):
     - FirebaseGoogleAuthUI (~> 12.0)
   - FirebaseUI/OAuth (12.2.0):
@@ -154,6 +161,7 @@ PODS:
     - nanopb/encode (= 2.30908.0)
   - nanopb/decode (2.30908.0)
   - nanopb/encode (2.30908.0)
+  - NSHash (1.2.0)
   - PromisesObjC (2.1.0)
 
 DEPENDENCIES:
@@ -161,11 +169,13 @@ DEPENDENCIES:
   - Firebase/Auth (~> 8.10.0)
   - Firebase/Database
   - FirebaseUI/Auth (~> 12.0.2)
+  - FirebaseUI/Email
   - FirebaseUI/Google
   - FirebaseUI/OAuth
   - FontAwesomeKit (~> 2.2.1)
   - GoogleSignIn
   - iosvoronoi
+  - NSHash
 
 SPEC REPOS:
   trunk:
@@ -177,6 +187,7 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseCoreDiagnostics
     - FirebaseDatabase
+    - FirebaseEmailAuthUI
     - FirebaseGoogleAuthUI
     - FirebaseInstallations
     - FirebaseOAuthUI
@@ -191,6 +202,7 @@ SPEC REPOS:
     - iosvoronoi
     - leveldb-library
     - nanopb
+    - NSHash
     - PromisesObjC
 
 SPEC CHECKSUMS:
@@ -202,6 +214,7 @@ SPEC CHECKSUMS:
   FirebaseCore: 04186597c095da37d90ff9fd3e53bc61a1ff2440
   FirebaseCoreDiagnostics: 92e07a649aeb66352b319d43bdd2ee3942af84cb
   FirebaseDatabase: 5f3e83b0a0d8759378fbd5d05661244d14dfbbb0
+  FirebaseEmailAuthUI: 9d6de47961cd1fa9be0003ad3cc4763fdd20560f
   FirebaseGoogleAuthUI: 978ae1845a5c9111fdf4c2e05708edb0a224bed3
   FirebaseInstallations: 40bd9054049b2eae9a2c38ef1c3dd213df3605cd
   FirebaseOAuthUI: 4cb09dfdf3164e664e5381cc6beec9d600205790
@@ -216,8 +229,9 @@ SPEC CHECKSUMS:
   iosvoronoi: 14bd5591d3e9443aca947a66d2e5e7b8f73516f4
   leveldb-library: 50c7b45cbd7bf543c81a468fe557a16ae3db8729
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
+  NSHash: 036c03781d372c288d332b512b203e7bb832e46e
   PromisesObjC: 99b6f43f9e1044bd87a95a60beff28c2c44ddb72
 
-PODFILE CHECKSUM: 45ae84f4bd4db52f9b4aa1abcd7603b63d8bb6e1
+PODFILE CHECKSUM: 84fd341c71e67f0c6ef7a23cba6795d0b40f8d85
 
 COCOAPODS: 1.11.2

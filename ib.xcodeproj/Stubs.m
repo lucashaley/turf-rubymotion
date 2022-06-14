@@ -24,6 +24,9 @@
 @implementation GameOptionsController
 @end
 
+@implementation InfoViewController
+@end
+
 @implementation KaitakaroAnnotation
 @end
 
@@ -61,6 +64,9 @@
 @end
 
 @implementation KapaFbo
+@end
+
+@implementation LoginController
 @end
 
 @implementation Machine
