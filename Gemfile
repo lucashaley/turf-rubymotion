@@ -33,3 +33,6 @@ gem 'moticons'
 
 # https://github.com/rubymotion-community/motion-lager
 gem 'motion-lager'
+
+# https://github.com/tmeinlschmidt/rm-digest
+# gem 'rm-digest'
