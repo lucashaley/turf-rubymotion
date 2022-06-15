@@ -56,7 +56,7 @@ class LoginController < MachineViewController
 #     $logger.info authorization
 #     $logger.info authorization.credential
 
-    @result.text = @nonce
+    # @result.text = @nonce
     # @result.text = authorization.credential.authorizationCode.to_s
     # id_token = NSString.alloc.initWithData(authorization.credential, encoding: NSUTF8StringEncoding)
 
@@ -123,7 +123,7 @@ class LoginController < MachineViewController
     Dispatch::Queue.new("turf-test-db").async do
       FIRAuth.auth.signInWithCredential(credential, completion: lambda do |auth_result, error|
         unless error.nil?
-          @result.text = error.localizedDescription
+          # @result.text = error.localizedDescription
           return
         end
         # @result.text = auth_result.user.providerData[0].displayName if error.nil?

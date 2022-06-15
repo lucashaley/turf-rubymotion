@@ -36,7 +36,7 @@ Motion::Project::App.setup do |app|
   app.name = 'Turf'
 
   # version for your app
-  app.version = '0.1.8'
+  app.version = '0.1.9'
 
   # ===========================================================================================
   # 3. Set your deployment target (it's recommended that you at least target 10.0 and above).
