@@ -231,7 +231,8 @@ class GameController < MachineViewController
   def viewWillAppear(_animated)
     puts 'GAME_CONTROLLER: VIEWWILLAPPEAR'.light_blue
 
-    button_pylon.setImage(icon_image(:awesome, :plus_circle, size: 100, color: UIColor.redColor), forState: UIControlStateNormal)
+    # we now use a background image?
+    # button_pylon.setImage(icon_image(:awesome, :plus_circle, size: 100, color: UIColor.redColor), forState: UIControlStateNormal)
 
     # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
     setup_mapview
@@ -312,7 +313,7 @@ class GameController < MachineViewController
     puts 'GameController button_up'.red
 
     # change the button color
-    button_color(UIColor.systemBlueColor)
+    button_color(UIColor.labelColor)
 
     Machine.instance.takaro_fbo.local_kaitakaro.placing(true)
   end
@@ -458,7 +459,7 @@ class GameController < MachineViewController
   end
 
   def button_color(color)
-    button_pylon.tintColor = color
+    @button_pylon.tintColor = color
   end
 
 #   def add_overlays_and_annotations
@@ -494,7 +495,7 @@ class GameController < MachineViewController
   def play_forward_sound_thread
     NSThread.detachNewThreadSelector :play_forward_sound, toTarget: self, withObject: nil
   end
-  
+
   def play_forward_sound context = nil
     #play sound code here
   end
