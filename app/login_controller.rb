@@ -16,6 +16,12 @@ class LoginController < MachineViewController
     end
   end
 
+  # this is an action attached to a button in IB
+  # the UIButton class is replaced with ASAuthorizationAppleIDButton
+  # make sure your Rake file has:
+  # app.frameworks += ['AuthenticationServices']
+  # and
+  #   app.entitlements['com.apple.developer.applesignin'] = ['Default']
   def handle_apple_authorization(sender)
     $logger.info 'handle_apple_authorization'
 
@@ -77,6 +83,7 @@ class LoginController < MachineViewController
     view.window
   end
 
+  # this is an action attached to a button in IB
   def handle_google_authorization(sender)
     $logger.info 'handle_google_authorization'
 
