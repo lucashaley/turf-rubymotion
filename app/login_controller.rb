@@ -3,7 +3,7 @@ class LoginController < MachineViewController
   outlet :button_apple, UIButton
   outlet :button_google, UIButton
 
-  # ib_action :unwind_to_main_menu
+  # this gives ib an action in the Exit
   ib_action :unwind_to_main_menu, UIStoryboardSegue
 
   DEBUGGING = true
@@ -18,13 +18,15 @@ class LoginController < MachineViewController
 
   def handle_apple_authorization(sender)
     $logger.info 'handle_apple_authorization'
-    # @result.text = 'handle_apple_authorization'
+
+    # the 'nonce' is a random string that is used to confirm the authentication
+    # for Firebase logins using Apple
     @nonce = generate_nonce
-    # @result.text = @nonce
 
     appleID_provider = ASAuthorizationAppleIDProvider.alloc.init
     $logger.info appleID_provider
 
+    # Create the request, and encode the nonce
     request = appleID_provider.createRequest
     request.nonce = @nonce.SHA256
 
@@ -38,7 +40,7 @@ class LoginController < MachineViewController
     auth_controller.presentationContextProvider = self
     $logger.info auth_controller
 
-    # @result.text = 'perform'
+    # start the process
     auth_controller.performRequests
   end
 
@@ -46,29 +48,18 @@ class LoginController < MachineViewController
   # - (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithAuthorization:(ASAuthorization *)authorization;
   def authorizationController(auth_controller, didCompleteWithAuthorization: authorization)
     if authorization.nil?
-      # @result.text = 'NO AUTHORIZATION'
+      # probably more graceful things should happen here
       return
     end
 
     $logger.info 'didCompleteWithAuthorization'
-    # @result.text = 'didCompleteWithAuthorization'
 
-#     $logger.info authorization
-#     $logger.info authorization.credential
-
-    # @result.text = @nonce
-    # @result.text = authorization.credential.authorizationCode.to_s
-    # id_token = NSString.alloc.initWithData(authorization.credential, encoding: NSUTF8StringEncoding)
-
+    # create a firebase credential for the apple auth
     credential = FIROAuthProvider.credentialWithProviderID(
       'apple.com',
       IDToken: authorization.credential.identityToken.to_s,
       rawNonce: @nonce
     )
-
-    # @result.text = credential.to_s
-
-    # @result.text = 'Finished authorization'
 
     complete_authorization(credential)
   end
@@ -76,7 +67,7 @@ class LoginController < MachineViewController
   # - (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithError:(NSError *)error;
   def authorizationController(auth_controller, didCompleteWithError: error)
     $logger.info 'didCompleteWithError'
-    # @result.text = 'didCompleteWithError'
+    # again, something useful should happen here
   end
 
   # ASAuthorizationControllerPresentationContextProviding
@@ -89,8 +80,10 @@ class LoginController < MachineViewController
   def handle_google_authorization(sender)
     $logger.info 'handle_google_authorization'
 
+    # get the config from the current Firebase app
     gid_config = GIDConfiguration.alloc.initWithClientID(FIRApp.defaultApp.options.clientID)
 
+    # show the sign in
     GIDSignIn.sharedInstance.signInWithConfiguration(
       gid_config,
       presentingViewController: self,
@@ -107,6 +100,8 @@ class LoginController < MachineViewController
       return
     end
 
+    # create a firebase credential
+    # this is more straightforward, because Firebase is Google
     authentication = user.authentication
     credential = FIRGoogleAuthProvider.credentialWithIDToken(
       authentication.idToken,
@@ -117,32 +112,34 @@ class LoginController < MachineViewController
   end
 
   def complete_authorization(credential)
+    # from either Apple or Google, we get a firebase credential
     $logger.info 'complete_authorization'
-    # @result.text = credential.provider
 
+    # async call to sign into Firebase using the credential
     Dispatch::Queue.new("turf-test-db").async do
       FIRAuth.auth.signInWithCredential(credential, completion: lambda do |auth_result, error|
         unless error.nil?
-          # @result.text = error.localizedDescription
-          return
-        end
-        # @result.text = auth_result.user.providerData[0].displayName if error.nil?
-        if auth_result.nil?
-          # @result.text = 'no result!'
-          return
-        end
-        if auth_result.credential.nil?
-          # @result.text = 'no credential!'
+          $logger.error error.localizedDescription
           return
         end
 
+        if auth_result.nil?
+          $logger.error 'no auth_result!'
+          return
+        end
+        if auth_result.credential.nil?
+          $logger.error 'no auth_result.credentail!'
+          return
+        end
+
+        # here I'm setting the internal info particular for my app
+        # note that the providerData is an array, even if it's just 1 long
         Machine.instance.firebase_user = auth_result.user
         Machine.instance.firebase_displayname = auth_result.user.providerData[0].displayName
         Machine.instance.firebase_email = auth_result.user.providerData[0].email
 
-        mp 'ready to unwind'
+        # and return to the main menu, with the new login in place
         Machine.instance.current_view.login
-        # self.performSegueWithIdentifier('UnwindToMainMenu', sender: self)
         presentingViewController.dismissViewControllerAnimated(true, completion: nil)
       end)
     end
@@ -152,6 +149,7 @@ class LoginController < MachineViewController
     rand(10**30).to_s.rjust(30, '0')
   end
 
+  # unused, never got it to work
   def unwind_to_main_menu(sender)
     mp 'login_controller unwind_to_main_menu'
     source_view_controller = sender.sourceViewController
