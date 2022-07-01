@@ -63,7 +63,7 @@ class TakaroFbo < FirebaseObject
         puts "FBO:#{@class_name} KAPA ADDED".red if DEBUGGING
 
         Notification.center.post 'KapaNew'
-        pull
+        # pull
       end
     )
 
@@ -73,7 +73,7 @@ class TakaroFbo < FirebaseObject
         puts "FBO:#{@class_name} KAPA REMOVED".red if DEBUGGING
 
         Notification.center.post 'KapaDelete'
-        pull
+        # pull
       end
     )
   end
@@ -88,7 +88,6 @@ class TakaroFbo < FirebaseObject
       {
         'character' => in_character,
         'display_name' => Machine.instance.firebase_user.providerData[0].displayName
-        # 'displayName' => Machine.instance.user.profile.name
       }
     )
     @local_kaitakaro = k
