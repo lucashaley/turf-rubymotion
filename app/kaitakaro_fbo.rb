@@ -93,7 +93,7 @@ class KaitakaroFbo < FirebaseObject
     end
 
     # check if we are outside the kapa starting zone
-    recalculate_kapa(in_coordinate) if Machine.instance.is_waiting
+    # recalculate_kapa(in_coordinate) if Machine.instance.is_waiting
   end
 
   # https://stackoverflow.com/a/23546284
