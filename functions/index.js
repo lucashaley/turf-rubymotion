@@ -9,103 +9,123 @@ const admin = require("firebase-admin");
 admin.initializeApp();
     
 exports.kaitakaroCoordinate = functions.database.ref('/games/{gameId}/kaitakaro/{kaitakaroId}/coordinate')
-    .onWrite(async(coordinateSnapshot, context) => {
-        const coordinateSnapshotAfter = coordinateSnapshot.after
-        const kaitakaroCoordinate = coordinateSnapshotAfter.val();
-        const kaitakaroRef = coordinateSnapshotAfter.ref.parent;
-        const kapaPath = 'games/' + context.params.gameId + '/kapa';
-        
+.onWrite(async(coordinateSnapshot, context) => {
+    const coordinateSnapshotAfter = coordinateSnapshot.after
+    const kaitakaroCoordinate = coordinateSnapshotAfter.val();
+    const kaitakaroRef = coordinateSnapshotAfter.ref.parent;
+    // const kaitakaroSnapshot = kaitakaroRef.get();
+    var kaitakaroSnapshot;
+    const kapaPath = 'games/' + context.params.gameId + '/kapa';
+
+    kaitakaroRef.once('value').then(function(kSnapshot) {
+        kaitakaroSnapshot = kSnapshot;
+        functions.logger.log('kaitakaroSnapshot: ' + kaitakaroSnapshot.exportVal());
+        functions.logger.log('name: ' + kaitakaroSnapshot.child('display_name').val());
+        functions.logger.log('title: ' + kaitakaroSnapshot.child('character/title').val());
+    
         // get all the kapa for this game
-        const ngaKapa = await admin.database().ref(kapaPath).once('value')
-            .then(function(ngaKapaSnapshot) {
-                functions.logger.log('ngaKapaSnapshot');
-                functions.logger.log(ngaKapaSnapshot.exportVal());
-                var foundKapaRef = null;
+        const ngaKapa = admin.database().ref(kapaPath).once('value').then(function(ngaKapaSnapshot) {
+            functions.logger.log('ngaKapaSnapshot');
+            functions.logger.log(ngaKapaSnapshot.exportVal());
+            var foundKapaRef = null;
 
-                // check how many kapa there are
+            // check how many kapa there are
+            
+            // Iterate through all kapa, checking for proximity
+            ngaKapaSnapshot.forEach(function(kapaSnapshot) {
+                var kapaCoordinate = kapaSnapshot.child('coordinate').val();
                 
-                // Iterate through all kapa, checking for proximity
-                ngaKapaSnapshot.forEach(function(kapaSnapshot) {
-                    var kapaCoordinate = kapaSnapshot.child('coordinate').val();
+                var dist = calcCrow(kaitakaroCoordinate.latitude, kaitakaroCoordinate.longitude, kapaCoordinate.latitude, kapaCoordinate.longitude);
+                functions.logger.log(dist);
+
+                if (dist < distance_threshold) {
+                    functions.logger.log("2 CLOSE ENOUGH!!!");
                     
-                    var dist = calcCrow(kaitakaroCoordinate.latitude, kaitakaroCoordinate.longitude, kapaCoordinate.latitude, kapaCoordinate.longitude);
-                    functions.logger.log(dist);
+                    foundKapaRef = kapaSnapshot.ref;
 
-                    if (dist < distance_threshold) {
-                        functions.logger.log("2 CLOSE ENOUGH!!!");
-                        
-                        foundKapaRef = kapaSnapshot.ref;
-                        
-                        kapaSnapshot.ref.child('kaitakaro/' + kaitakaroRef.key + '/coordinate').set(kaitakaroCoordinate).then(function() {
-                            functions.logger.log('Synchronization succeeded');
-                            
-                            // set the kapa of the kaitakaro
-                            kaitakaroRef.child('kapa').set(
-                                {
-                                    kapa_key: kapaSnapshot.key
-                                }
-                            );
-                        })
-                        .catch(function(error) {
-                            functions.logger.log('Synchronization failed');
-                        });
-                    } else {
-                        functions.logger.log('Too far');
-                    }
-                });
-                
-                functions.logger.log('foundKapaRef: ' + foundKapaRef);
-                functions.logger.log('numChildren: ' + ngaKapaSnapshot.numChildren());
-
-                // check how many kapa there are
-                if (foundKapaRef == null && ngaKapaSnapshot.numChildren()<2)
-                {
-                    functions.logger.log('Creating new kapa');
-                    var newKapaRef = ngaKapaSnapshot.ref.push();
-                    newKapaRef.ref.child('kaitakaro/' + kaitakaroRef.key + '/coordinate').set(kaitakaroCoordinate).then(function() {
-                        functions.logger.log('New Kapa synchronization succeeded');
+                    kapaSnapshot.ref.child('kaitakaro/' + kaitakaroRef.key).set(
+                        {
+                            coordinate: kaitakaroCoordinate,
+                            display_name: kaitakaroSnapshot.child('display_name').val(),
+                            character: kaitakaroSnapshot.child('character/title').val()
+                        }
+                    ).then(function() {
+                    // kapaSnapshot.ref.child('kaitakaro/' + kaitakaroRef.key + '/coordinate').set(kaitakaroCoordinate).then(function() {
+                        functions.logger.log('Synchronization succeeded');
                         
                         // set the kapa of the kaitakaro
                         kaitakaroRef.child('kapa').set(
                             {
-                                kapa_key: newKapaRef.key
+                                kapa_key: kapaSnapshot.key
                             }
                         );
                     })
                     .catch(function(error) {
-                        functions.logger.log('New kapa synchronization failed');
+                        functions.logger.log('Synchronization failed');
                     });
+                } else {
+                    functions.logger.log('Too far');
                 }
-
-                // check if we've left a kapa
-                kaitakaroRef.once('value')
-                    .then(function(kaitakaroSnapshot) {
-                        const hasChild = kaitakaroSnapshot.hasChild('kapa');
-                        functions.logger.log('hasChild: ' + hasChild);
-                        if (foundKapaRef == null && hasChild == true)
-                        {
-                            functions.logger.log('NO KAPA FOUND AND HAS KAPA');
-                            // we now need to remove the kaitakaro from the kapa
-                            admin.database().ref(kapaPath).child(kaitakaroSnapshot.child('kapa/kapa_key').val()).child('kaitakaro').child(kaitakaroSnapshot.key).remove()
-                                .then(function(kapaSnapshot) {
-                                    functions.logger.log("Kapa remove succeeded.");
-                                })
-                                .catch(function(error) {
-                                    functions.logger.log("Kapa remove failed: " + error.message);
-                                });
-
-                            // and remove the kapa from the kaitakaro
-                            kaitakaroRef.child('kapa').remove()
-                                .then(function() {
-                                    functions.logger.log("Remove succeeded.");
-                                })
-                                .catch(function(error) {
-                                    functions.logger.log("Remove failed: " + error.message);
-                                });
-                        }
-                    });
             });
+            
+            functions.logger.log('foundKapaRef: ' + foundKapaRef);
+            functions.logger.log('numChildren: ' + ngaKapaSnapshot.numChildren());
+
+            // check how many kapa there are
+            if (foundKapaRef == null && ngaKapaSnapshot.numChildren()<2)
+            {
+                functions.logger.log('Creating new kapa');
+                var newKapaRef = ngaKapaSnapshot.ref.push();
+                newKapaRef.ref.child('kaitakaro/' + kaitakaroRef.key).set(
+                    {
+                        coordinate: kaitakaroCoordinate,
+                        display_name: kaitakaroSnapshot.child('display_name').val(),
+                        character: kaitakaroSnapshot.child('character/title').val()
+                    }
+                ).then(function() {
+                    functions.logger.log('New Kapa synchronization succeeded');
+                    
+                    // set the kapa of the kaitakaro
+                    kaitakaroRef.child('kapa').set(
+                        {
+                            kapa_key: newKapaRef.key
+                        }
+                    );
+                })
+                .catch(function(error) {
+                    functions.logger.log('New kapa synchronization failed');
+                });
+            }
+
+            // check if we've left a kapa
+            kaitakaroRef.once('value').then(function(kaitakaroSnapshot) {
+                const hasChild = kaitakaroSnapshot.hasChild('kapa');
+                functions.logger.log('hasChild: ' + hasChild);
+                if (foundKapaRef == null && hasChild == true)
+                {
+                    functions.logger.log('NO KAPA FOUND AND HAS KAPA');
+                    // we now need to remove the kaitakaro from the kapa
+                    admin.database().ref(kapaPath).child(kaitakaroSnapshot.child('kapa/kapa_key').val()).child('kaitakaro').child(kaitakaroSnapshot.key).remove()
+                        .then(function(kapaSnapshot) {
+                            functions.logger.log("Kapa remove succeeded.");
+                        })
+                        .catch(function(error) {
+                            functions.logger.log("Kapa remove failed: " + error.message);
+                        });
+
+                    // and remove the kapa from the kaitakaro
+                    kaitakaroRef.child('kapa').remove()
+                        .then(function() {
+                            functions.logger.log("Remove succeeded.");
+                        })
+                        .catch(function(error) {
+                            functions.logger.log("Remove failed: " + error.message);
+                        });
+                }
+            });
+        });
     });
+});
     
 exports.kapaCoordinate = functions.database.ref('/games/{gameId}/kapa/{kapaId}/kaitakaro/{kaitakaroId}/coordinate')
     .onWrite(async(coordinateSnapshot, context) => {

@@ -24,6 +24,8 @@ class KaitakaroFbo < FirebaseObject
                 :button_down_location
   attr_reader :location_update_observer
 
+  @dirty = false
+
   DEBUGGING = true
   PLACEMENT_DISTANCE_LIMIT = 4
 
@@ -65,6 +67,15 @@ class KaitakaroFbo < FirebaseObject
   def init_observers
     puts "FBO:#{@class_name}:#{__LINE__} init_observers".green if DEBUGGING
 
+    @ref.child('kapa').observeEventType(
+      FIRDataEventTypeChildAdded, withBlock:
+      lambda do |_data_snapshot|
+        puts "FBO:#{@class_name} KAPA CHANGED".red if DEBUGGING
+        mp 'Setting dirty to false'
+        @dirty = false
+      end
+    )
+
     @location_update_observer = Notification.center.observe 'UpdateLocation' do |data|
       puts 'TAKARO UPDATELOCALPLAYERPOSITION LOCATION'.yellow if DEBUGGING
 
@@ -78,8 +89,15 @@ class KaitakaroFbo < FirebaseObject
   def coordinate=(in_coordinate)
     puts "FBO:#{@class_name}:#{__LINE__} update_coordinate for #{display_name}".green if DEBUGGING
 
+    # if we're still updating, return
+    return if @dirty
+
     # We haven't changed, so move on
     return if in_coordinate == coordinate
+
+    # mark as dirty, so we can't do more updates until this cleans
+    mp 'Setting dirty to true'
+    @dirty = true
 
     # update the database if we've moved
     update({ 'coordinate' => in_coordinate })
