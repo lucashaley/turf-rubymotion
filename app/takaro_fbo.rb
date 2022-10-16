@@ -14,6 +14,8 @@ class TakaroFbo < FirebaseObject
   TEAM_COUNT = 2
   FIELD_SCALE = 1.5
   BOT_DISTANCE = 0.005
+  
+  # This is just a test update from the USA
 
   def initialize(in_ref, in_data_hash)
     @kaitakaro_array = []
