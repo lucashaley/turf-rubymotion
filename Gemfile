@@ -4,7 +4,8 @@ gem 'rake'
 # Add your dependencies here:
 
 # gem "motion-cocoapods"
-gem 'motion-cocoapods', path: '/Users/lhaley/Documents/Projects/Personal/motion-cocoapods/'
+# gem 'motion-cocoapods', path: '/Users/lhaley/Documents/Projects/Personal/motion-cocoapods/'
+gem 'motion-cocoapods', path: '/Users/lucashaley/Documents/GitHub/motion-cocoapods/'
 
 # Disabling as it doesn't seem to work 5/22
 # gem 'motion-provisioning'
