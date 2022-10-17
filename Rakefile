@@ -190,6 +190,10 @@ Motion::Project::App.setup do |app|
   }]
   # https://github.com/amirrajan/rubymotion-applied/issues/127
   app.info_plist['FirebaseAppDelegateProxyEnabled'] = false
+  
+  app.info_plist['bugsnag'] = [{
+    'apiKey' => ['3cab9a5e6b16897ab5e965083c5b4fd7']
+  }]
 
   app.pods do
     # use_frameworks!
@@ -215,6 +219,9 @@ Motion::Project::App.setup do |app|
     # pod 'MapboxStatic.swift', '~> 0.12'
 
     pod 'NSHash'
+    
+    # https://app.bugsnag.com
+    pod 'Bugsnag'
   end
 end
 # rubocop:enable Metrics/BlockLength
