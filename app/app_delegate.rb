@@ -13,6 +13,10 @@ class AppDelegate
 
     # Trying Logger
     $logger = Motion::Lager.new(level: 'debug') # default
+    
+    # Trying BugSnag
+    Bugsnag.start
+    Bugsnag.notifyError(NSError.errorWithDomain('com.example'), code:408, userInfo:nil)
 
     # Testing JavaScriptCore
     puts "Testing JavaScriptCore"
