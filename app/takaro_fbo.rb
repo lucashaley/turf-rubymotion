@@ -129,7 +129,7 @@ class TakaroFbo < FirebaseObject
     }
 
     bot_ref = @ref.child('kaitakaro').childByAutoId
-    bot = KaitakaroFbo.new(bot_ref, bot_data, true)
+    bot = Player.new(bot_ref, bot_data, true)
 
     coord = @local_kaitakaro.coordinate
 
