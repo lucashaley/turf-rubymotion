@@ -1,5 +1,6 @@
 class TakaroFbo < FirebaseObject
-  attr_accessor :kaitakaro_array,
+  attr_accessor :team_manager,
+                :kaitakaro_array,
                 :kaitakaro_hash,
                 :local_kapa_array,
                 :local_kaitakaro,
@@ -18,6 +19,7 @@ class TakaroFbo < FirebaseObject
   # This is just a test update from the USA
 
   def initialize(in_ref, in_data_hash)
+    @team_manager = TeamManager.new
     @kaitakaro_array = []
     @kaitakaro_hash = {}
     @local_kapa_array = []
