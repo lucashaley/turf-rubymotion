@@ -1,0 +1,8 @@
+{
+  "actions" : {
+    "run" : {
+      "enabled" : true,
+      "script" : "rake simulator device_name=\"iPhone SE 2020: iOS 14.5\""
+    }
+  }
+}
