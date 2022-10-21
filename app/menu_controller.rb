@@ -39,8 +39,6 @@ class MenuController < MachineViewController
       button_game_new.enabled = false
       button_game_join.enabled = false
     end
-
-    $logger.debug 'My debug message'
   end
 
   def viewWillAppear(_animated)
