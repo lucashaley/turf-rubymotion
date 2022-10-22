@@ -1,3 +1,4 @@
+# This is the main brain for the app
 class Machine
   attr_accessor :fsm,
                 :delegate,
@@ -121,6 +122,20 @@ class Machine
     @fsm.when :logging_in do |state|
       state.on_entry { puts 'Machine starting logging_in!' }
       state.on_exit { puts 'Machine ending logging_in!' }
+    end
+    
+    ####################
+    # WAITING ROOM
+    @fsm.when :waiting_room do |state|
+      state.on_entry { mp 'Machine entering waiting_room!' }
+      state.on_exit { mp 'Machine exiting waiting_room!' }
+    end
+    
+    ####################
+    # GAME PLAYING
+    @fsm.when :game_playing do |state|
+      state.on_entry { mp 'Machine entering game_playing!' }
+      state.on_exit { mp 'Machine exiting game_playing!' }
     end
 
     # calling this from the application instead
