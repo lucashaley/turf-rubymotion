@@ -22,7 +22,7 @@ class Player < FirebaseObject
       @is_bot = in_bot
       @in_boundary = true
       k.init_observers unless @is_bot
-      # k.update({ 'display_name' => "mung #{rand(1..10)}" })
+      
       Notification.center.post 'PlayerNew'
       
       k.coordinate_state = StateMachine::Base.new start_state: :waiting, verbose: DEBUGGING
@@ -32,6 +32,10 @@ class Player < FirebaseObject
       end
       k.coordinate_state.when :updating do |state|
         state.on_entry { puts 'coordinate_state enter updating'.pink }
+        state.transition_to :recalculating_team, on: :updated
+      end
+      k.coordinate_state.when :recalculating_team do |state|
+        state.on_entry { puts 'coordinate_state enter recalculating_team'.pink }
         state.transition_to :waiting, on: :updated
       end
       k.coordinate_state.start!
@@ -229,7 +233,7 @@ class Player < FirebaseObject
     }
   end
 
-  def data_for_kapa
+  def data_for_team
     {
       'id' => @ref.key,
       'display_name' => display_name,
