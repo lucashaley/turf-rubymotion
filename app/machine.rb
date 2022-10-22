@@ -1,4 +1,3 @@
-# This is the main brain for the app
 class Machine
   attr_accessor :fsm,
                 :delegate,
