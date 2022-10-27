@@ -6,7 +6,7 @@ class FirebaseObject
                 :data_hash,
                 :class_name
 
-  DEBUGGING = false
+  DEBUGGING = true
 
   # rubocop:disable Lint/Void
   def initialize(in_ref, in_data_hash = {})
@@ -23,10 +23,13 @@ class FirebaseObject
     Utilities::puts_open
     puts "FBO:#{@class_name} INITIALIZE".green if DEBUGGING
 
+    start_observing
+    
     push unless in_data_hash.empty?
     pull if in_data_hash.empty?
 
-    start_observing
+    # tyring this earlier
+    # start_observing
 
     # we have to do this
     self
