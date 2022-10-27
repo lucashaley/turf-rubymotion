@@ -39,10 +39,13 @@ class TakaroFbo < FirebaseObject
 
   def init_states
     # should this be part of the Machine?
-    update({ 'is_waiting' => 'false' })
-    update({ 'is_playing' => 'false' })
+    # turning off to test if the helper methods work
+    # update({ 'is_waiting' => 'false' })
+    # update({ 'is_playing' => 'false' })
+    # update({ 'game_state' => 'prepping' })
     self.waiting = false
     self.playing = false
+    self.game_state = 'prepping'
   end
 
   def init_pouwhenua
@@ -375,6 +378,14 @@ class TakaroFbo < FirebaseObject
 
   def playing=(in_playing)
     update({ 'playing' => in_playing })
+  end
+  
+  def game_state
+    @data_hash['game_state']
+  end
+  
+  def game_state=(in_state)
+    update({ 'game_state' => in_state })
   end
 
   def score(kapa_key, score)
