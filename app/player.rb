@@ -25,22 +25,27 @@ class Player < FirebaseObject
       
       Notification.center.post 'PlayerNew'
       
+      # STATE MACHINE: COORDINATE
       k.coordinate_state = StateMachine::Base.new start_state: :waiting, verbose: DEBUGGING
       k.coordinate_state.when :waiting do |state|
         state.on_entry { puts 'coordinate_state enter waiting'.pink }
+        state.on_exit { puts 'coordinate_state exit waiting'.pink }
         state.transition_to :updating, on: :update
       end
       k.coordinate_state.when :updating do |state|
         state.on_entry { puts 'coordinate_state enter updating'.pink }
-        state.transition_to :recalculating_team, on: :updated
+        state.on_exit { puts 'coordinate_state exit updating'.pink }
+        state.transition_to :waiting, 
+          on_notification: 'Player_ChildChanged',
+          action: proc { recalculate_team }
       end
-      k.coordinate_state.when :recalculating_team do |state|
-        state.on_entry { puts 'coordinate_state enter recalculating_team'.pink }
-        state.transition_to :waiting, on: :updated
-      end
+      # k.coordinate_state.when :recalculating_team do |state|
+      #   state.on_entry { puts 'coordinate_state enter recalculating_team'.pink }
+      #   state.transition_to :waiting, on: :finished
+      # end
       k.coordinate_state.start!
 
-      # STATE MACHINE
+      # STATE MACHINE: PLAYING
       k.machine = StateMachine::Base.new start_state: :in_bounds, verbose: DEBUGGING
       k.machine.when :in_bounds do |state|
         state.on_entry { enter_bounds }
@@ -65,10 +70,10 @@ class Player < FirebaseObject
   def init_observers
     puts "FBO:#{@class_name}:#{__LINE__} init_observers".green if DEBUGGING
 
-    @ref.child('kapa').observeEventType(
+    @ref.child('team').observeEventType(
       FIRDataEventTypeChildAdded, withBlock:
       lambda do |_data_snapshot|
-        puts "FBO:#{@class_name} KAPA CHANGED".red if DEBUGGING
+        puts "FBO:#{@class_name} TEAM CHANGED".red if DEBUGGING
         mp 'Setting dirty to false'
         @location_dirty = false
       end
@@ -89,9 +94,15 @@ class Player < FirebaseObject
 
     # if we're still updating, return
     return if @location_dirty
+    
+    # check if we're still in the update state
+    return if @coordinate_state.current_state.to_s == 'update'
 
     # We haven't changed, so move on
     return if in_coordinate == coordinate
+
+    # Looks like we're updating, so set state
+    @coordinate_state.event(:update)
 
     # mark as dirty, so we can't do more updates until this cleans
     mp 'New coordinate: Setting location_dirty to true'
@@ -161,43 +172,43 @@ class Player < FirebaseObject
   end
 
   # TODO: Couldn't this all be in the .kapa method?
-  def recalculate_kapa(in_coordinate = coordinate)
-    puts "FBO:#{@class_name}:#{__LINE__} recalculate_kapa for #{display_name}".green if DEBUGGING
-    new_kapa = Machine.instance.takaro_fbo.get_kapa_for_coordinate(in_coordinate)
+  def recalculate_team(in_coordinate = coordinate)
+    puts "FBO:#{@class_name}:#{__LINE__} recalculate_team for #{display_name}".green if DEBUGGING
+    new_team = Machine.instance.takaro_fbo.get_team_for_coordinate(in_coordinate)
 
-    if new_kapa.nil?
+    if new_team.nil?
       # we did not find any nearby kapa.
       puts 'Too far!'.red
 
       # if the kaitakaro has a kapa already,
       # it means they have moved away from their kapa
-      KapaFbo.remove_kaitakaro_with_key(@ref.key, kapa['id']) unless kapa.nil?
+      Team.remove_player_with_key(@ref.key, team['id']) unless team.nil?
 
-      # either way, remove the kapa from the player
-      self.kapa = nil
+      # either way, remove the team from the player
+      self.team = nil
     else
       # we did find a kapa!
       # it's the same kapa
-      if @data_hash.key?('kapa') && @data_hash['kapa']['id'] == new_kapa.ref.key
-        new_kapa.recalculate_coordinate
+      if @data_hash.key?('team') && @data_hash['team']['id'] == new_team.ref.key
+        new_team.recalculate_coordinate
         return
       end
 
       # if there is already a kapa, we need to remove the kaitakaro
       # ahh yes, we must remove it from the _existing_ one, not the new one
-      puts "recalculate_kapa - existing data_hash kapa: #{@data_hash['kapa']}"
+      puts "recalculate_team - existing data_hash team: #{@data_hash['team']}"
       # unless @data_hash['kapa'].nil? or @data_hash['kapa'].count == 1
-      unless kapa.nil? or @data_hash['kapa'].count == 1
+      unless team.nil? or @data_hash['team'].count == 1
         # what if it's the last one? Surely we don't delete it
-        KapaFbo.remove_kaitakaro_with_key(@ref.key, kapa['kapa_key'])
+        Team.remove_player_with_key(@ref.key, team['team_key'])
       end
 
       # We might be adding it to the new kapa before it leaves the old one
       # perhaps we need to pass a block?
 
-      puts "Adding #{display_name} to kapa #{new_kapa}".green
+      puts "Adding #{display_name} to team #{new_team}".green
 
-      new_kapa.add_kaitakaro(self)
+      new_team.add_player(self)
     end
   end
 
@@ -224,6 +235,14 @@ class Player < FirebaseObject
 
   def display_name=(in_name)
     update({ 'display_name' => in_name })
+  end
+  
+  def updating?
+    @data_hash['updating']
+  end
+  
+  def updating=(in_updating)
+    update({ 'updating' => 'true' })
   end
 
   def name_and_character
@@ -268,6 +287,15 @@ class Player < FirebaseObject
   def kapa=(in_kapa)
     result = in_kapa.nil? ? '' : in_kapa.data_for_kaitakaro
     update({ 'kapa' => result })
+  end
+  
+  def team
+    @data_hash['team']
+  end
+  
+  def team=(in_team)
+    result = in_team.nil? ? '' : in_team.data_for_player
+    update({ 'team' => result })
   end
 
   def coordinate
