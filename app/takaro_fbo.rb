@@ -110,7 +110,9 @@ class TakaroFbo < FirebaseObject
     # puts "kapa_ref: #{kapa_ref.URL}".yellow
     # TODO: This uses random colors, which is an issue
     k = KapaFbo.new(kapa_ref, { 'color' => Utilities::random_color, 'coordinate' => coordinate })
-    # mp k
+    team = Team.new(kapa_ref, { 'color' => Utilities::random_color, 'coordinate' => coordinate })
+    mp 'New team: ' & team
+    
     @local_kapa_array << k
     k
   end
@@ -128,12 +130,12 @@ class TakaroFbo < FirebaseObject
       'character' => {
         'deploy_time' => 4,
         'lifespan_ms' => 280_000,
-        'pouwhenua_start' => 3,
+        'pylon_start' => 3,
         'title' => 'Bot Character'
       }
     }
 
-    bot_ref = @ref.child('kaitakaro').childByAutoId
+    bot_ref = @ref.child('players').childByAutoId
     bot = Player.new(bot_ref, bot_data, true)
 
     coord = @local_kaitakaro.coordinate
@@ -151,6 +153,9 @@ class TakaroFbo < FirebaseObject
 
     @kaitakaro_array << in_kaitakaro
     @kaitakaro_hash[in_kaitakaro.data_hash['display_name']] = in_kaitakaro
+    
+    # Testing
+    @team_manager.add_player_to_team(in_kaitakaro)
 
     # send update to UI
     # This should ultimately be in the Kapa

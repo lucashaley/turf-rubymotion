@@ -134,7 +134,9 @@ class NewController < MachineViewController
             when @table_team_b then TABLEVIEW_TEAM_B
             else 'poop'
             end
-    @takaro.player_count_for_index(table)
+    count = @takaro.player_count_for_index(table)
+    mp count
+    count
   end
 
   def reload_table_data
