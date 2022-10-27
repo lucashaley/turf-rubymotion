@@ -102,6 +102,8 @@ class TakaroFbo < FirebaseObject
     add_kaitakaro(k)
   end
 
+  # This is never called?
+  # TODO: figure this out
   def create_kapa(coordinate)
     puts 'Creating new kapa'
     kapa_ref = @ref.child('kapa').childByAutoId
@@ -176,6 +178,7 @@ class TakaroFbo < FirebaseObject
 
   # TODO: When a player moves too much, they can make a new kapa. Check for this?
   # TODO: if it's the only member, it can't move too far away?
+  # This is never called?
   def get_kapa_for_coordinate(coordinate)
     puts "FBO:#{@class_name}:#{__LINE__} get_kapa_for_coordinate".green if DEBUGGING
 
