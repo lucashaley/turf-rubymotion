@@ -4,6 +4,7 @@ class TakaroFbo < FirebaseObject
                 :kaitakaro_hash,
                 :local_kapa_array,
                 :local_kaitakaro,
+                :local_player,
                 :local_pouwhenua,
                 :pouwhenua_is_dirty,
                 :taiapa_region # TODO: this might be hash later?
@@ -15,7 +16,7 @@ class TakaroFbo < FirebaseObject
   TEAM_COUNT = 2
   FIELD_SCALE = 1.5
   BOT_DISTANCE = 0.005
-  
+
   # This is just a test update from the USA
 
   def initialize(in_ref, in_data_hash)
@@ -30,11 +31,24 @@ class TakaroFbo < FirebaseObject
     super.tap do |t|
       unless in_data_hash.nil?
         t.init_states
-        t.init_kapa
+        # t.init_kapa
         t.init_pouwhenua
       end
     end
     Utilities::puts_close
+  end
+
+  def initialize_firebase_observers
+    # Teams
+    @ref.child('teams').observeEventType(
+      FIRDataEventTypeChildChanged, withBlock:
+      lambda do |teams_snapshot|
+        # puts "FBO:#{@class_name} CHILDCHANGED".red if DEBUGGING
+        mp "Teams Changed"
+        mp teams_snapshot.valueInExportFormat if DEBUGGING
+        Notification.center.post("teams_changed", teams_snapshot.valueInExportFormat)
+      end
+    )
   end
 
   def init_states
@@ -61,29 +75,29 @@ class TakaroFbo < FirebaseObject
     )
   end
 
-  def init_kapa
-    puts "FBO:#{@class_name} INIT_KAPA".green if DEBUGGING
-
-    @ref.child('kapa').observeEventType(
-      FIRDataEventTypeChildAdded, withBlock:
-      lambda do |_data_snapshot|
-        puts "FBO:#{@class_name} KAPA ADDED".red if DEBUGGING
-
-        Notification.center.post 'KapaNew'
-        # pull
-      end
-    )
-
-    @ref.child('kapa').observeEventType(
-      FIRDataEventTypeChildRemoved, withBlock:
-      lambda do |_data_snapshot|
-        puts "FBO:#{@class_name} KAPA REMOVED".red if DEBUGGING
-
-        Notification.center.post 'KapaDelete'
-        # pull
-      end
-    )
-  end
+#   def init_kapa
+#     puts "FBO:#{@class_name} INIT_KAPA".green if DEBUGGING
+#
+#     @ref.child('kapa').observeEventType(
+#       FIRDataEventTypeChildAdded, withBlock:
+#       lambda do |_data_snapshot|
+#         puts "FBO:#{@class_name} KAPA ADDED".red if DEBUGGING
+#
+#         Notification.center.post 'KapaNew'
+#         # pull
+#       end
+#     )
+#
+#     @ref.child('kapa').observeEventType(
+#       FIRDataEventTypeChildRemoved, withBlock:
+#       lambda do |_data_snapshot|
+#         puts "FBO:#{@class_name} KAPA REMOVED".red if DEBUGGING
+#
+#         Notification.center.post 'KapaDelete'
+#         # pull
+#       end
+#     )
+#   end
 
   def init_local_kaitakaro(in_character)
     puts "FBO:#{@class_name} init_local_kaitakaro".green if DEBUGGING
@@ -102,25 +116,40 @@ class TakaroFbo < FirebaseObject
     add_kaitakaro(k)
   end
 
-  # This is never called?
-  # TODO: figure this out
-  def create_kapa(coordinate)
-    puts 'Creating new kapa'
-    kapa_ref = @ref.child('kapa').childByAutoId
-    # puts "kapa_ref: #{kapa_ref.URL}".yellow
-    # TODO: This uses random colors, which is an issue
-    k = KapaFbo.new(kapa_ref, { 'color' => Utilities::random_color, 'coordinate' => coordinate })
-    team = Team.new(kapa_ref, { 'color' => Utilities::random_color, 'coordinate' => coordinate })
-    mp 'New team: ' & team
-    
-    @local_kapa_array << k
-    k
+  def initialize_local_player(in_character)
+    puts "FBO:#{@class_name} initialize_local_player".green if DEBUGGING
+    player_ref = @ref.child('players').childByAutoId
+    player = Player.new(
+      player_ref,
+      {
+        'character' => in_character,
+        'display_name' => Machine.instance.firebase_user.providerData[0].displayName
+      }
+    )
+    @local_player = player
+
+    add_player(player)
   end
 
-  def remove_kapa(_in_ref)
-    puts "FBO:#{@class_name} remove_kapa".green if DEBUGGING
-    # puts "in_ref: #{in_ref}".focus
-  end
+#   # This is never called?
+#   # TODO: figure this out
+#   def create_kapa(coordinate)
+#     puts 'Creating new kapa'
+#     kapa_ref = @ref.child('kapa').childByAutoId
+#     # puts "kapa_ref: #{kapa_ref.URL}".yellow
+#     # TODO: This uses random colors, which is an issue
+#     k = KapaFbo.new(kapa_ref, { 'color' => Utilities::random_color, 'coordinate' => coordinate })
+#     team = Team.new(kapa_ref, { 'color' => Utilities::random_color, 'coordinate' => coordinate })
+#     mp 'New team: ' & team
+#
+#     @local_kapa_array << k
+#     k
+#   end
+#
+#   def remove_kapa(_in_ref)
+#     puts "FBO:#{@class_name} remove_kapa".green if DEBUGGING
+#     # puts "in_ref: #{in_ref}".focus
+#   end
 
   def create_bot_player
     puts "FBO:#{@class_name} create_bot_player".green if DEBUGGING
@@ -139,13 +168,15 @@ class TakaroFbo < FirebaseObject
     bot = Player.new(bot_ref, bot_data, true)
 
     coord = @local_kaitakaro.coordinate
+    mp "coord: #{coord}"
 
     bot.coordinate = {
       'latitude' => coord['latitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE),
       'longitude' => coord['longitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE)
     }
 
-    add_kaitakaro(bot)
+    # add_kaitakaro(bot)
+    @team_manager.add_player_to_team(bot)
   end
 
   def add_kaitakaro(in_kaitakaro)
@@ -153,9 +184,9 @@ class TakaroFbo < FirebaseObject
 
     @kaitakaro_array << in_kaitakaro
     @kaitakaro_hash[in_kaitakaro.data_hash['display_name']] = in_kaitakaro
-    
+
     # Testing
-    @team_manager.add_player_to_team(in_kaitakaro)
+    # @team_manager.add_player_to_team(in_kaitakaro)
 
     # send update to UI
     # This should ultimately be in the Kapa
@@ -387,11 +418,11 @@ class TakaroFbo < FirebaseObject
   def playing=(in_playing)
     update({ 'playing' => in_playing })
   end
-  
+
   def game_state
     @data_hash['game_state']
   end
-  
+
   def game_state=(in_state)
     update({ 'game_state' => in_state })
   end
