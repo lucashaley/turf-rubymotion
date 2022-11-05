@@ -128,6 +128,7 @@ class TakaroFbo < FirebaseObject
     )
     @local_player = player
 
+    # not sure we need this
     add_player(player)
   end
 
@@ -167,7 +168,8 @@ class TakaroFbo < FirebaseObject
     bot_ref = @ref.child('players').childByAutoId
     bot = Player.new(bot_ref, bot_data, true)
 
-    coord = @local_kaitakaro.coordinate
+    # coord = @local_kaitakaro.coordinate
+    coord = @local_player.coordinate
     mp "coord: #{coord}"
 
     bot.coordinate = {
@@ -179,17 +181,27 @@ class TakaroFbo < FirebaseObject
     @team_manager.add_player_to_team(bot)
   end
 
-  def add_kaitakaro(in_kaitakaro)
-    puts "FBO:#{@class_name} add_kaitakaro".green if DEBUGGING
+#   def add_kaitakaro(in_kaitakaro)
+#     puts "FBO:#{@class_name} add_kaitakaro".green if DEBUGGING
+#
+#     @kaitakaro_array << in_kaitakaro
+#     @kaitakaro_hash[in_kaitakaro.data_hash['display_name']] = in_kaitakaro
+#
+#     # Testing
+#     # @team_manager.add_player_to_team(in_kaitakaro)
+#
+#     # send update to UI
+#     # This should ultimately be in the Kapa
+#     Notification.center.post('PlayerNew', @kaitakaro_hash)
+#   end
 
-    @kaitakaro_array << in_kaitakaro
-    @kaitakaro_hash[in_kaitakaro.data_hash['display_name']] = in_kaitakaro
+  def add_player(in_player)
+    puts "FBO:#{@class_name} add_player".green if DEBUGGING
 
-    # Testing
-    # @team_manager.add_player_to_team(in_kaitakaro)
+    # not sure we need this
+    @kaitakaro_array << in_player
+    @kaitakaro_hash[in_player.data_hash['display_name']] = in_player
 
-    # send update to UI
-    # This should ultimately be in the Kapa
     Notification.center.post('PlayerNew', @kaitakaro_hash)
   end
 
