@@ -2,11 +2,15 @@ class TakaroFbo < FirebaseObject
   attr_accessor :team_manager,
                 :kaitakaro_array,
                 :kaitakaro_hash,
+                :teams_hash,
                 :local_kapa_array,
                 :local_kaitakaro,
                 :local_player,
+                :bot_centroid,
                 :local_pouwhenua,
                 :pouwhenua_is_dirty,
+                :marker_hash,
+                :game_state,
                 :taiapa_region # TODO: this might be hash later?
 
   DEBUGGING = true
@@ -14,15 +18,19 @@ class TakaroFbo < FirebaseObject
   TEAM_DISTANCE = 3
   MOVE_THRESHOLD = 2
   TEAM_COUNT = 2
-  FIELD_SCALE = 1.5
+  FIELD_SCALE = 3
   BOT_DISTANCE = 0.005
-
-  # This is just a test update from the USA
+  # BOT_TEAM_DISPLACEMENT = 0.0000000005
+  BOT_TEAM_DISPLACEMENT = 5 * 10**-14
 
   def initialize(in_ref, in_data_hash)
+    mp __method__
+
     @team_manager = TeamManager.new
     @kaitakaro_array = []
     @kaitakaro_hash = {}
+    @teams_hash = {}
+    @marker_hash = {}
     @local_kapa_array = []
     @local_pouwhenua = []
     @pouwhenua_is_dirty = true
@@ -32,89 +40,117 @@ class TakaroFbo < FirebaseObject
       unless in_data_hash.nil?
         t.init_states
         # t.init_kapa
-        t.init_pouwhenua
+        t.initialize_firebase_observers
+        # t.init_pouwhenua
+        # t.initialize_markers
       end
     end
     Utilities::puts_close
   end
 
   def initialize_firebase_observers
+    mp __method__
     # Teams
     @ref.child('teams').observeEventType(
       FIRDataEventTypeChildChanged, withBlock:
       lambda do |teams_snapshot|
-        # puts "FBO:#{@class_name} CHILDCHANGED".red if DEBUGGING
-        mp "Teams Changed"
-        mp teams_snapshot.valueInExportFormat if DEBUGGING
-        Notification.center.post("teams_changed", teams_snapshot.valueInExportFormat)
+        teams_snapshot.ref.parent.getDataWithCompletionBlock(
+          lambda do |error, snapshot|
+            @teams_hash = snapshot.childSnapshotForPath('teams').valueInExportFormat
+            Notification.center.post("teams_changed", @teams_hash)
+          end
+        )
+      end
+    )
+    @ref.child('teams').observeEventType(FIRDataEventTypeValue, withBlock:
+      lambda do |teams_snapshot|
+        mp 'TEAMS VALUE CALLBACK'
+        mp teams_snapshot.value
+        # @teams_hash = teams_snapshot.value.values
+        # Notification.center.post("teams_changed", @teams_hash)
+      end
+    )
+    # Markers
+    @ref.child('markers').queryOrderedByChild('enabled').queryEqualToValue('true').observeEventType(FIRDataEventTypeValue, withBlock:
+      lambda do |markers_snapshot|
+        mp 'MARKERS ENABLED CALLBACK'
+        mp markers_snapshot.value
+        @marker_hash = markers_snapshot.value
+        Notification.center.post("markers_changed", @marker_hash)
+      end
+    )
+
+    # Game ready
+    @ref.child('game_state').observeEventType(
+      FIRDataEventTypeValue, withBlock:
+      lambda do |game_state_snapshot|
+        # if true
+        mp 'game_state_snapshot'
+        mp game_state_snapshot.value
+
+        self.game_state = game_state_snapshot.value
+
+        if game_state_snapshot.value == 'ready'
+          mp 'ready to start!'
+          Machine.instance.is_waiting = false
+          Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
+        end
       end
     )
   end
 
   def init_states
-    # should this be part of the Machine?
-    # turning off to test if the helper methods work
-    # update({ 'is_waiting' => 'false' })
-    # update({ 'is_playing' => 'false' })
-    # update({ 'game_state' => 'prepping' })
+    mp __method__
     self.waiting = false
     self.playing = false
     self.game_state = 'prepping'
+
+    @ref.child('game_state').setValue('prepping')
   end
 
-  def init_pouwhenua
-    puts "FBO:#{@class_name} INIT_POUWHENUA".green if DEBUGGING
-
-    @ref.child('pouwhenua').observeEventType(
-      FIRDataEventTypeChildAdded, withBlock:
-      lambda do |_data_snapshot|
-        puts "FBO:#{@class_name} POUWHENUA ADDED".red if DEBUGGING
-        pull_with_block { Notification.center.post 'PouwhenuaFbo_New' }
-        @pouwhenua_is_dirty = true
-      end
-    )
-  end
-
-#   def init_kapa
-#     puts "FBO:#{@class_name} INIT_KAPA".green if DEBUGGING
+#   def initialize_markers
+#     mp __method__
 #
-#     @ref.child('kapa').observeEventType(
+#     @ref.child('markers').observeEventType(
 #       FIRDataEventTypeChildAdded, withBlock:
-#       lambda do |_data_snapshot|
-#         puts "FBO:#{@class_name} KAPA ADDED".red if DEBUGGING
-#
-#         Notification.center.post 'KapaNew'
-#         # pull
-#       end
-#     )
-#
-#     @ref.child('kapa').observeEventType(
-#       FIRDataEventTypeChildRemoved, withBlock:
-#       lambda do |_data_snapshot|
-#         puts "FBO:#{@class_name} KAPA REMOVED".red if DEBUGGING
-#
-#         Notification.center.post 'KapaDelete'
-#         # pull
+#       lambda do |pylon_snapshot|
+#         puts "FBO:#{@class_name} MARKER ADDED".red if DEBUGGING
+#         pull_with_block { Notification.center.post 'markers_new' }
+#         @markers_are_dirty = true
 #       end
 #     )
 #   end
 
-  def init_local_kaitakaro(in_character)
-    puts "FBO:#{@class_name} init_local_kaitakaro".green if DEBUGGING
-    kaitakaro_ref = @ref.child('kaitakaro').childByAutoId
-    $logger.info Machine.instance.firebase_user
-    $logger.info Machine.instance.firebase_user.providerData[0].displayName
-    k = KaitakaroFbo.new(
-      kaitakaro_ref,
-      {
-        'character' => in_character,
-        'display_name' => Machine.instance.firebase_user.providerData[0].displayName
-      }
-    )
-    @local_kaitakaro = k
+#   def init_pouwhenua
+#     mp __method__
+#     puts "FBO:#{@class_name} INIT_POUWHENUA".green if DEBUGGING
+#
+#     @ref.child('pouwhenua').observeEventType(
+#       FIRDataEventTypeChildAdded, withBlock:
+#       lambda do |_data_snapshot|
+#         puts "FBO:#{@class_name} POUWHENUA ADDED".red if DEBUGGING
+#         pull_with_block { Notification.center.post 'PouwhenuaFbo_New' }
+#         @pouwhenua_is_dirty = true
+#       end
+#     )
+#   end
 
-    add_kaitakaro(k)
-  end
+#   def init_local_kaitakaro(in_character)
+#     puts "FBO:#{@class_name} init_local_kaitakaro".green if DEBUGGING
+#     kaitakaro_ref = @ref.child('kaitakaro').childByAutoId
+#     $logger.info Machine.instance.firebase_user
+#     $logger.info Machine.instance.firebase_user.providerData[0].displayName
+#     k = KaitakaroFbo.new(
+#       kaitakaro_ref,
+#       {
+#         'character' => in_character,
+#         'display_name' => Machine.instance.firebase_user.providerData[0].displayName
+#       }
+#     )
+#     @local_kaitakaro = k
+#
+#     add_kaitakaro(k)
+#   end
 
   def initialize_local_player(in_character)
     puts "FBO:#{@class_name} initialize_local_player".green if DEBUGGING
@@ -123,7 +159,8 @@ class TakaroFbo < FirebaseObject
       player_ref,
       {
         'character' => in_character,
-        'display_name' => Machine.instance.firebase_user.providerData[0].displayName
+        'display_name' => Machine.instance.firebase_user.providerData[0].displayName,
+        'marker_current' => in_character['pouwhenua_start']
       }
     )
     @local_player = player
@@ -155,6 +192,12 @@ class TakaroFbo < FirebaseObject
   def create_bot_player
     puts "FBO:#{@class_name} create_bot_player".green if DEBUGGING
 
+    # grab local player coordinate if not defined
+    @bot_centroid ||= {
+      'latitude' => @local_player.coordinate['latitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE),
+      'longitude' => @local_player.coordinate['longitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE)
+    }
+
     bot_data = {
       'display_name' => 'Jimmy Bot',
       'character' => {
@@ -169,12 +212,12 @@ class TakaroFbo < FirebaseObject
     bot = Player.new(bot_ref, bot_data, true)
 
     # coord = @local_kaitakaro.coordinate
-    coord = @local_player.coordinate
-    mp "coord: #{coord}"
+    # coord = @local_player.coordinate
+    # mp "coord: #{coord}"
 
     bot.coordinate = {
-      'latitude' => coord['latitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE),
-      'longitude' => coord['longitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE)
+      'latitude' => @bot_centroid['latitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT),
+      'longitude' => @bot_centroid['longitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT)
     }
 
     # add_kaitakaro(bot)
@@ -246,27 +289,99 @@ class TakaroFbo < FirebaseObject
     nil
   end
 
+#   # rubocop:disable Metrics/AbcSize
+#   # THIS IS NEXT!
+#   def set_initial_pouwhenua
+#     puts "FBO:#{@class_name}:#{__LINE__} set_initial_pouwhenua".green if DEBUGGING
+#     coord_array = []
+#
+#     # instead of a local array, we should pull from the DB?
+#     # Can't we just use @teams_hash?
+#     @local_kapa_array.each do |k|
+#       data = k.data_for_pouwhenua
+#       # mp data
+#
+#       # TODO: Should these initial pouwhenua ever die?
+#       # data.merge!('lifespan_ms' => 120_000)
+#       data.merge!('lifespan_ms' => duration * 60 * 1000)
+#
+#       create_new_pouwhenua_from_hash(data, true)
+#
+#       # add to local coords
+#       coord_array << k.coordinate
+#     end
+#
+#     # use coords to calculate play area
+#     lats = coord_array.map { |c| c['latitude'] }.minmax
+#     longs = coord_array.map { |c| c['longitude'] }.minmax
+#
+#     # This is a hack way to find the midpoint
+#     # A more accurate solution is here:
+#     # https://stackoverflow.com/questions/10559219/determining-midpoint-between-2-coordinates
+#     midpoint_array = [(lats[0] + lats[1]) * 0.5, (longs[0] + longs[1]) * 0.5]
+#     midpoint_location = CLLocation.alloc.initWithLatitude(midpoint_array[0], longitude: midpoint_array[1])
+#     top_location = CLLocation.alloc.initWithLatitude(lats[1], longitude: midpoint_array[1])
+#     right_location = CLLocation.alloc.initWithLatitude(midpoint_array[0], longitude: longs[1])
+#     latitude_delta = midpoint_location.distanceFromLocation(top_location)
+#     longitude_delta = midpoint_location.distanceFromLocation(right_location)
+#
+#     @taiapa_center = MKMapPointForCoordinate(CLLocationCoordinate2DMake(midpoint_array[0], midpoint_array[1]))
+#
+#     # Sometimes the resulting rectangle is super narrow
+#     # resize based on the longer side and golden ratio
+#     if latitude_delta < longitude_delta
+#       latitude_delta = longitude_delta * 0.618034
+#     else
+#       longitude_delta = latitude_delta * 0.618034
+#     end
+#
+#     @taiapa_region = MKCoordinateRegionMakeWithDistance(
+#       midpoint_location.coordinate, latitude_delta * 3, longitude_delta * 3
+#     )
+#     self.taiapa = {
+#       'midpoint' => midpoint_location.coordinate.to_hash,
+#       'latitude_delta' => latitude_delta * 3,
+#       'longitude_delta' => longitude_delta * 3
+#     }
+#
+#     # TODO: Should this be in the Machine?
+#     Machine.instance.is_waiting = false
+#     Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
+#   end
+#   # rubocop:enable Metrics/AbcSize
+
   # rubocop:disable Metrics/AbcSize
-  def set_initial_pouwhenua
-    puts "FBO:#{@class_name}:#{__LINE__} set_initial_pouwhenua".green if DEBUGGING
+  # THIS IS NEXT!
+  def set_initial_markers
+    mp __method__
+
+    # get the teams coordinates
     coord_array = []
-    @local_kapa_array.each do |k|
-      data = k.data_for_pouwhenua
-      # mp data
-
-      # TODO: Should these initial pouwhenua ever die?
-      # data.merge!('lifespan_ms' => 120_000)
-      data.merge!('lifespan_ms' => duration * 60 * 1000)
-
-      create_new_pouwhenua_from_hash(data, true)
-
-      # add to local coords
-      coord_array << k.coordinate
+    mp ['teams_hash', @teams_hash]
+    # coord_array = @teams_hash { |k,v| v['coordinate'] }
+    @teams_hash.each do |k, t|
+      # data = k.data_for_pouwhenua
+      new_marker_data = {
+        'kapa_key' => t['key'],
+        'color' => t['color'],
+        'coordinate' => t['coordinate'],
+        'enabled' => 'true'
+      }
+      mp new_marker_data
+      new_marker_data.merge!('lifespan_ms' => duration * 60 * 1000)
+      create_new_marker_from_hash(new_marker_data, true)
+      coord_array << t['coordinate']
     end
+    mp ['coord_array', coord_array]
+
+    # We should check if there are two team coordinates here
+    # If not prior to
 
     # use coords to calculate play area
     lats = coord_array.map { |c| c['latitude'] }.minmax
     longs = coord_array.map { |c| c['longitude'] }.minmax
+
+    mp ['corners', [lats, longs]]
 
     # This is a hack way to find the midpoint
     # A more accurate solution is here:
@@ -288,18 +403,27 @@ class TakaroFbo < FirebaseObject
       longitude_delta = latitude_delta * 0.618034
     end
 
+    # change this
+    # and also in voronoi_map.rb line 21
     @taiapa_region = MKCoordinateRegionMakeWithDistance(
       midpoint_location.coordinate, latitude_delta * 3, longitude_delta * 3
     )
-    self.taiapa = {
+    # self.taiapa = {
+    #   'midpoint' => midpoint_location.coordinate.to_hash,
+    #   'latitude_delta' => latitude_delta * 3,
+    #   'longitude_delta' => longitude_delta * 3
+    # }
+    self.playfield = {
       'midpoint' => midpoint_location.coordinate.to_hash,
-      'latitude_delta' => latitude_delta * 3,
-      'longitude_delta' => longitude_delta * 3
+      'latitude_delta' => latitude_delta * FIELD_SCALE,
+      'longitude_delta' => longitude_delta * FIELD_SCALE
     }
 
     # TODO: Should this be in the Machine?
-    Machine.instance.is_waiting = false
-    Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
+    # TODO: make the transition a reaction to setting the playfield
+    # Machine.instance.is_waiting = false
+    # Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
+    @ref.child('game_state').setValue('ready')
   end
   # rubocop:enable Metrics/AbcSize
 
@@ -334,23 +458,50 @@ class TakaroFbo < FirebaseObject
     pull
   end
 
+  def create_new_marker_from_hash(arg_hash = {}, is_initial = false)
+    mp __method__
+
+    # no availble markers
+    return if @local_player.marker_current <= 0 and !is_initial
+
+    # get player info
+    new_marker_hash = @local_player.data_for_marker.merge arg_hash
+
+    # this is clunky
+    new_marker_hash.delete('player_key') if is_initial
+
+    # new_marker = Marker.new(
+    #   @ref.child('markers').childByAutoId, new_marker_hash
+    # )
+
+    mp 'creating new marker'
+    new_marker = @ref.child('markers').childByAutoId
+    new_marker.setValue(
+      new_marker_hash
+    )
+
+    @local_player.marker_decrement unless is_initial
+  end
+
   # TableView methods
   def player_count_for_index(in_index)
-    puts "FBO:#{@class_name} player_count_for_index".green if DEBUGGING
+    mp __method__
 
-    return 0 if kapa_array.nil?
-    return 0 if kapa_array[in_index].nil?
+    return 0 if in_index >= @teams_hash.count
+    return 0 if @teams_hash.empty?
+    return 0 if @teams_hash.values[in_index].nil?
 
-    kapa_array[in_index]['kaitakaro']&.count
+    @teams_hash.values[in_index]['players'].count
   end
 
   def list_player_names_for_index(in_index)
+    mp __method__
     puts "FBO:#{@class_name} list_player_names_for_index".green if DEBUGGING
 
-    return nil if kapa_array.nil?
-
-    nga_kaitakaro = kapa_array[in_index]['kaitakaro'].values
-    nga_kaitakaro.flatten(1).map { |k| { 'display_name' => k['display_name'], 'character' => k['character'] } }
+    @teams_hash.values[in_index]['players'].values.map{ |p| {
+      'display_name' => p['display_name'],
+      'character' => p['character']
+    } }
   end
 
   def calculate_score
@@ -407,12 +558,30 @@ class TakaroFbo < FirebaseObject
     pouwhenua_array.select { |p| p['enabled'] == 'true' }
   end
 
+  def markers_array_enabled_only
+    mp __method__
+    @ref.child('markers').queryOrderedByChild('enabled').queryEqualToValue('true').observeSingleEventOfType(FIRDataEventTypeValue, withBlock:
+      lambda do |error, snapshot|
+        mp snapshot.value
+        return snapshot.value
+      end
+    )
+  end
+
   def taiapa=(in_region)
     update({ 'taiapa' => in_region })
   end
 
   def taiapa
     @data_hash['taiapa']
+  end
+
+  def playfield=(in_region)
+    update({ 'playfield' => in_region })
+  end
+
+  def playfield
+    @data_hash['playfield']
   end
 
   def waiting?
@@ -431,13 +600,13 @@ class TakaroFbo < FirebaseObject
     update({ 'playing' => in_playing })
   end
 
-  def game_state
-    @data_hash['game_state']
-  end
-
-  def game_state=(in_state)
-    update({ 'game_state' => in_state })
-  end
+#   def game_state
+#     @data_hash['game_state']
+#   end
+#
+#   def game_state=(in_state)
+#     update({ 'game_state' => in_state })
+#   end
 
   def score(kapa_key, score)
     puts "Score for #{kapa_key}: #{score}".focus
@@ -445,42 +614,74 @@ class TakaroFbo < FirebaseObject
     # mp local_kapa_array
   end
 
-  def kaitakaro_annotations
-    # puts 'kaitakaro_annotations'
+#   def kaitakaro_annotations
+#     # puts 'kaitakaro_annotations'
+#     annotations = []
+#
+#     # this just gets the local kaitakaro's kapa
+#     kaitakaro_for_kapa.each do |k|
+#       # TODO: this is a hack
+#       # perhaps we need to massage in the kaitakaro method
+#       k_hash = k[1]
+#
+#       ka = KaitakaroAnnotation.alloc.initWithCoordinate(
+#         Utilities::format_to_location_coord(k_hash['coordinate'])
+#       )
+#       ka.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(k_hash['kapa']['color']))
+#       ka.title = k_hash['display_name']
+#       ka.subtitle = k_hash['character']['title']
+#       annotations << ka
+#     end
+#
+#     # puts "Annotations: #{annotations}".focus
+#     annotations
+#   end
+
+  def player_annotations
+    mp __method__
+    mp @teams_hash.values
     annotations = []
-
-    # this just gets the local kaitakaro's kapa
-    kaitakaro_for_kapa.each do |k|
-      # TODO: this is a hack
-      # perhaps we need to massage in the kaitakaro method
-      k_hash = k[1]
-
-      ka = KaitakaroAnnotation.alloc.initWithCoordinate(
-        Utilities::format_to_location_coord(k_hash['coordinate'])
-      )
-      ka.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(k_hash['kapa']['color']))
-      ka.title = k_hash['display_name']
-      ka.subtitle = k_hash['character']['title']
-      annotations << ka
+    @teams_hash.values.each do |t|
+      t['players'].values.each do |p|
+        ka = KaitakaroAnnotation.alloc.initWithCoordinate(
+          Utilities::format_to_location_coord(p['coordinate'])
+        )
+        ka.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(t['color']))
+        ka.title = p['display_name']
+        ka.subtitle = p['character']
+        annotations << ka
+      end
     end
-
-    # puts "Annotations: #{annotations}".focus
     annotations
   end
 
-  def pouwhenua_annotations
+#   def pouwhenua_annotations
+#     annotations = []
+#
+#     # this just gets the local kaitakaro's kapa
+#     pouwhenua_array_for_kapa.each do |p|
+#       pa = PouAnnotation.alloc.initWithCoordinate(
+#         Utilities::format_to_location_coord(p['coordinate'])
+#       )
+#       pa.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(p['color']))
+#       annotations << pa
+#     end
+#
+#     # puts "Annotations: #{annotations}".focus
+#     annotations
+#   end
+
+  def marker_annotations
+    __method__
+    mp @marker_hash.values
     annotations = []
-
-    # this just gets the local kaitakaro's kapa
-    pouwhenua_array_for_kapa.each do |p|
-      pa = PouAnnotation.alloc.initWithCoordinate(
-        Utilities::format_to_location_coord(p['coordinate'])
-      )
-      pa.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(p['color']))
-      annotations << pa
-    end
-
-    # puts "Annotations: #{annotations}".focus
+      @marker_hash.values.each do |m|
+        pa = PouAnnotation.alloc.initWithCoordinate(
+          Utilities::format_to_location_coord(m['coordinate'])
+        )
+        pa.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(m['color']))
+        annotations << pa
+      end
     annotations
   end
 end

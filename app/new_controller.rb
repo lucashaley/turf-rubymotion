@@ -32,7 +32,8 @@ class NewController < MachineViewController
 
     gamecode.text = @takaro.gamecode
 
-    @takaro.init_local_kaitakaro(Machine.instance.local_character)
+    # @takaro.init_local_kaitakaro(Machine.instance.local_character)
+    @takaro.initialize_local_player(Machine.instance.local_character)
   end
 
   def init_observers
@@ -74,6 +75,11 @@ class NewController < MachineViewController
     Notification.center.addObserver(self,
                                     selector: 'reload_table_data',
                                     name: 'Kapafbo_ChildChanged',
+                                    object: nil)
+
+    Notification.center.addObserver(self,
+                                    selector: 'reload_table_data',
+                                    name: 'teams_changed',
                                     object: nil)
 
     # Listen for gamecode
@@ -135,7 +141,7 @@ class NewController < MachineViewController
             else 'poop'
             end
     count = @takaro.player_count_for_index(table)
-    mp count
+    mp "tableView count: #{count}"
     count
   end
 
@@ -191,7 +197,8 @@ class NewController < MachineViewController
     # set the machine takaro
     Machine.instance.takaro_fbo = @takaro
 
-    @takaro.set_initial_pouwhenua
+    # @takaro.set_initial_pouwhenua
+    @takaro.set_initial_markers
   end
 
   def dismiss_new

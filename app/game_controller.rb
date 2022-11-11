@@ -36,12 +36,13 @@ class GameController < MachineViewController
   end
 
   def update_pouwhenua_label
-    pouwhenua_label.text = '•' * Machine.instance.takaro_fbo.local_kaitakaro.pouwhenua_current
+    # pouwhenua_label.text = '•' * Machine.instance.takaro_fbo.local_kaitakaro.pouwhenua_current
   end
 
   # https://www.raywenderlich.com/2156-rubymotion-tutorial-for-beginners-part-2
   def setup_timers
-    puts 'SETUP_TIMERS'.yellow
+    mp __method__
+
     @timer_count = Machine.instance.takaro_fbo.duration * 60
     # mp @timer_count
     timer_label.text = format_seconds(@timer_count)
@@ -273,7 +274,8 @@ class GameController < MachineViewController
     @button_fsm.when :down do |state|
       state.on_entry { button_down }
       state.transition_to :primed,
-                          after: Machine.instance.takaro_fbo.local_kaitakaro.deploy_time
+                          # after: Machine.instance.takaro_fbo.local_kaitakaro.deploy_time
+                          after: Machine.instance.takaro_fbo.local_player.deploy_time
       state.transition_to :up,
                           on: :button_up
       state.transition_to :up,
@@ -287,7 +289,8 @@ class GameController < MachineViewController
                           on: :button_cancel
     end
     @button_fsm.when :placing do |state|
-      state.on_entry { handle_new_pouwhenua }
+      # state.on_entry { handle_new_pouwhenua }
+      state.on_entry { handle_new_marker }
       state.transition_to :up,
                           # this is a hack to get around thread timing
                           after: 0.2
@@ -306,7 +309,7 @@ class GameController < MachineViewController
     # change the button color
     button_color(UIColor.systemRedColor)
 
-    Machine.instance.takaro_fbo.local_kaitakaro.placing(true)
+    Machine.instance.takaro_fbo.local_player.placing(true)
   end
 
   def button_up
@@ -315,7 +318,8 @@ class GameController < MachineViewController
     # change the button color
     button_color(UIColor.labelColor)
 
-    Machine.instance.takaro_fbo.local_kaitakaro.placing(true)
+    # Machine.instance.takaro_fbo.local_kaitakaro.placing(true)
+    Machine.instance.takaro_fbo.local_player.placing(true)
   end
 
   ### Makes an annotation image for the map ###
@@ -427,14 +431,18 @@ class GameController < MachineViewController
     # This is a hack to get past having one pylon
     # return if @voronoi_map.pylons.length < 2
     # return if Machine.instance.takaro.pouwhenua_array.length < 2
-    return if Machine.instance.takaro_fbo.pouwhenua_array.length < 2
+    # return if Machine.instance.takaro_fbo.pouwhenua_array.length < 2
+    mp Machine.instance.takaro_fbo.marker_hash
+    return if Machine.instance.takaro_fbo.marker_hash.length < 2
 
     # add the pouwhenua
     # map_view.addAnnotations(@voronoi_map.annotations)
-    map_view.addAnnotations(Machine.instance.takaro_fbo.pouwhenua_annotations)
+    # map_view.addAnnotations(Machine.instance.takaro_fbo.pouwhenua_annotations)
+    map_view.addAnnotations(Machine.instance.takaro_fbo.marker_annotations)
 
     # add the players
-    map_view.addAnnotations(Machine.instance.takaro_fbo.kaitakaro_annotations)
+    # map_view.addAnnotations(Machine.instance.takaro_fbo.kaitakaro_annotations)
+    map_view.addAnnotations(Machine.instance.takaro_fbo.player_annotations)
 
     @voronoi_map.voronoiCells.each do |cell|
       map_view.addOverlay(cell.overlay)
@@ -467,14 +475,14 @@ class GameController < MachineViewController
 #     add_overlays
 #     add_annotations
 #   end
-# 
+#
 #   def add_overlays
 #     puts 'GAME_CONTROLLER: ADD_OVERLAYS'.blue if DEBUGGING
 #     @voronoi_map.voronoi_cells.each do |cell|
 #       map_view.addOverlay(cell.overlay)
 #     end
 #   end
-# 
+#
 #   def add_annotations
 #     puts 'GAME_CONTROLLER: ADD_ANNOTATIIONS'.blue
 #     # map_view.addAnnotations(@voronoi_map.annotations)
@@ -505,6 +513,12 @@ class GameController < MachineViewController
 
     # @button_fsm.event(:button_placed)
     Machine.instance.takaro_fbo.create_new_pouwhenua_from_hash
+  end
+
+  def handle_new_marker
+    mp __method__
+
+    Machine.instance.takaro_fbo.create_new_marker_from_hash
   end
 
   def observe_new_pouwhenua

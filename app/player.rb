@@ -4,14 +4,15 @@ class Player < FirebaseObject
                 :machine,
                 :button_down_location,
                 :state_waiting,
-                :coordinate_state
+                :coordinate_state,
+                :marker_current
   attr_reader :location_update_observer
-  
+
   @location_dirty = false
-  
+
   DEBUGGING = true
   PLACEMENT_DISTANCE_LIMIT = 4
-  
+
   def initialize(in_ref, in_data_hash, in_bot = false)
     @location_update_observer = nil
 
@@ -21,10 +22,11 @@ class Player < FirebaseObject
     super(in_ref, in_data_hash).tap do |k|
       @is_bot = in_bot
       @in_boundary = true
+      @marker_current = 0
       k.init_observers unless @is_bot
-      
+
       Notification.center.post 'PlayerNew'
-      
+
       # STATE MACHINE: COORDINATE
       k.coordinate_state = StateMachine::Base.new start_state: :waiting, verbose: DEBUGGING
       k.coordinate_state.when :waiting do |state|
@@ -35,9 +37,9 @@ class Player < FirebaseObject
       k.coordinate_state.when :updating do |state|
         state.on_entry { puts 'coordinate_state enter updating'.pink }
         state.on_exit { puts 'coordinate_state exit updating'.pink }
-        state.transition_to :waiting, 
-          on_notification: 'Player_ChildChanged',
-          action: proc { recalculate_team }
+        state.transition_to :waiting,
+          on_notification: 'Player_ChildChanged'
+          # action: proc { recalculate_team }
       end
       # k.coordinate_state.when :recalculating_team do |state|
       #   state.on_entry { puts 'coordinate_state enter recalculating_team'.pink }
@@ -79,6 +81,13 @@ class Player < FirebaseObject
       end
     )
 
+    @ref.child('marker_current').observeEventType(FIRDataEventTypeChildChanged, withBlock:
+      lambda do |marker_snapshot|
+        puts "FBO:#{@class_name} MARKER CURRENT CHANGED".red if DEBUGGING
+        @marker_current = marker_snapshot.value
+      end
+    )
+
     @location_update_observer = Notification.center.observe 'UpdateLocation' do |data|
       puts 'TAKARO UPDATELOCALPLAYERPOSITION LOCATION'.yellow if DEBUGGING
 
@@ -88,13 +97,13 @@ class Player < FirebaseObject
       self.coordinate = new_location.to_hash
     end
   end
-  
+
   def coordinate=(in_coordinate)
     puts "FBO:#{@class_name}:#{__LINE__} update_coordinate for #{display_name}".green if DEBUGGING
 
     # if we're still updating, return
     return if @location_dirty
-    
+
     # check if we're still in the update state
     return if @coordinate_state.current_state.to_s == 'update'
 
@@ -236,11 +245,11 @@ class Player < FirebaseObject
   def display_name=(in_name)
     update({ 'display_name' => in_name })
   end
-  
+
   def updating?
     @data_hash['updating']
   end
-  
+
   def updating=(in_updating)
     update({ 'updating' => 'true' })
   end
@@ -272,6 +281,17 @@ class Player < FirebaseObject
     }
   end
 
+  def data_for_marker
+    {
+      'key' => @ref.key,
+      'coordinate' => coordinate,
+      'lifespan_ms' => character['lifespan_ms'],
+      'color' => team['color'],
+      'team_key' => team['team_key'],
+      'player_key' => key
+    }
+  end
+
   def character
     @data_hash['character']
   end
@@ -288,11 +308,11 @@ class Player < FirebaseObject
     result = in_kapa.nil? ? '' : in_kapa.data_for_kaitakaro
     update({ 'kapa' => result })
   end
-  
+
   def team
     @data_hash['team']
   end
-  
+
   def team=(in_team)
     result = in_team.nil? ? '' : in_team.data_for_player
     update({ 'team' => result })
