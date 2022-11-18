@@ -34,6 +34,8 @@ class NewController < MachineViewController
 
     # @takaro.init_local_kaitakaro(Machine.instance.local_character)
     @takaro.initialize_local_player(Machine.instance.local_character)
+
+    Notification.center.post("game_state_waiting_room_notification", nil)
   end
 
   def init_observers

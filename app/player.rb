@@ -5,7 +5,8 @@ class Player < FirebaseObject
                 :button_down_location,
                 :state_waiting,
                 :coordinate_state,
-                :marker_current
+                :marker_current,
+                :coordinate_current
   attr_reader :location_update_observer
 
   @location_dirty = false
@@ -22,7 +23,8 @@ class Player < FirebaseObject
     super(in_ref, in_data_hash).tap do |k|
       @is_bot = in_bot
       @in_boundary = true
-      @marker_current = 0
+      @marker_current = in_data_hash['marker_current'] || 0
+      @coordinate_current = { 'latitude' => 0, 'longitude' => 0 }
       k.init_observers unless @is_bot
 
       Notification.center.post 'PlayerNew'
@@ -39,6 +41,8 @@ class Player < FirebaseObject
         state.on_exit { puts 'coordinate_state exit updating'.pink }
         state.transition_to :waiting,
           on_notification: 'Player_ChildChanged'
+        state.transition_to :waiting,
+          on: :finished_updating
           # action: proc { recalculate_team }
       end
       # k.coordinate_state.when :recalculating_team do |state|
@@ -98,35 +102,86 @@ class Player < FirebaseObject
     end
   end
 
+#   def coordinate=(in_coordinate)
+#     puts "FBO:#{@class_name}:#{__LINE__} update_coordinate for #{display_name}".green if DEBUGGING
+#
+#     # if we're still updating, return
+#     return if @location_dirty
+#
+#     # check if we're still in the update state
+#     return if @coordinate_state.current_state.to_s == 'update'
+#
+#     # We haven't changed, so move on
+#     return if in_coordinate == coordinate
+#
+#     # Looks like we're updating, so set state
+#     @coordinate_state.event(:update)
+#
+#     # mark as dirty, so we can't do more updates until this cleans
+#     mp 'New coordinate: Setting location_dirty to true'
+#     @location_dirty = true
+#
+#     # update the database if we've moved
+#     update({ 'coordinate' => in_coordinate })
+#
+#     # check if we are outside the game field
+#     # We could use MKMapRectContainsPoint, but we would need to MapView MKMapRect
+#     # or we can use this algorithm: https://stackoverflow.com/a/23546284
+#     if Machine.instance.is_playing
+#       check_taiapa
+#       check_placing
+#     end
+#
+#     # check if we are outside the kapa starting zone
+#     # recalculate_kapa(in_coordinate) if Machine.instance.is_waiting
+#   end
+
   def coordinate=(in_coordinate)
-    puts "FBO:#{@class_name}:#{__LINE__} update_coordinate for #{display_name}".green if DEBUGGING
+    mp __method__
 
     # if we're still updating, return
-    return if @location_dirty
+    # return if @location_dirty
 
     # check if we're still in the update state
-    return if @coordinate_state.current_state.to_s == 'update'
+    if @coordinate_state.current_state.to_s == 'update'
+      mp 'still updating'
+      return
+    end
 
     # We haven't changed, so move on
-    return if in_coordinate == coordinate
+    # return if in_coordinate == coordinate
+    if in_coordinate == coordinate
+      mp 'new coordinate is the same'
+    end
 
     # Looks like we're updating, so set state
     @coordinate_state.event(:update)
 
     # mark as dirty, so we can't do more updates until this cleans
-    mp 'New coordinate: Setting location_dirty to true'
-    @location_dirty = true
+    # mp 'New coordinate: Setting location_dirty to true'
+    # @location_dirty = true
 
     # update the database if we've moved
-    update({ 'coordinate' => in_coordinate })
+    # update({ 'coordinate' => in_coordinate })
+    @ref.updateChildValues(
+      {
+        'coordinate' => in_coordinate
+      }, withCompletionBlock: lambda do | error, coordinate_ref |
+        mp 'finished updating'
+        @coordinate_state.event :finished_updating
+      end
+    )
 
     # check if we are outside the game field
     # We could use MKMapRectContainsPoint, but we would need to MapView MKMapRect
     # or we can use this algorithm: https://stackoverflow.com/a/23546284
-    if Machine.instance.is_playing
-      check_taiapa
-      check_placing
-    end
+
+    # This should happen server side?
+
+    # if Machine.instance.is_playing
+    #   check_taiapa
+    #   check_placing
+    # end
 
     # check if we are outside the kapa starting zone
     # recalculate_kapa(in_coordinate) if Machine.instance.is_waiting
@@ -318,8 +373,12 @@ class Player < FirebaseObject
     update({ 'team' => result })
   end
 
+  # def coordinate
+  #   @data_hash['coordinate']
+  # end
+
   def coordinate
-    @data_hash['coordinate']
+    coordinate_current
   end
 
   def deploy_time
@@ -342,5 +401,15 @@ class Player < FirebaseObject
   def pouwhenua_increment
     notification = -> { Notification.center.post 'UpdatePouwhenuaLabel' }
     update_with_block({ 'pouwhenua_current' => pouwhenua_current + 1 }, &notification)
+  end
+
+  def marker_decrement
+    mp __method__
+    @marker_current -= 1
+  end
+
+  def marker_increment
+    mp __method__
+    @marker_current += 1
   end
 end

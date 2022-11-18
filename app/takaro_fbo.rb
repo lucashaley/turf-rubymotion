@@ -11,6 +11,7 @@ class TakaroFbo < FirebaseObject
                 :pouwhenua_is_dirty,
                 :marker_hash,
                 :game_state,
+                :game_state_machine,
                 :taiapa_region # TODO: this might be hash later?
 
   DEBUGGING = true
@@ -20,7 +21,6 @@ class TakaroFbo < FirebaseObject
   TEAM_COUNT = 2
   FIELD_SCALE = 3
   BOT_DISTANCE = 0.005
-  # BOT_TEAM_DISPLACEMENT = 0.0000000005
   BOT_TEAM_DISPLACEMENT = 5 * 10**-14
 
   def initialize(in_ref, in_data_hash)
@@ -43,6 +43,62 @@ class TakaroFbo < FirebaseObject
         t.initialize_firebase_observers
         # t.init_pouwhenua
         # t.initialize_markers
+
+        # set up game state state machine
+        t.game_state_machine = StateMachine::Base.new start_state: :initializing, verbose: DEBUGGING
+
+        ####################
+        # SPLASH SCREEN
+        t.game_state_machine.when :initializing do |state|
+          state.on_entry { mp 'game_state start initializing' }
+          state.on_exit { mp 'game_state end initializing' }
+          state.transition_to :options,
+                              on_notification: 'game_state_options_notification'
+        end
+        ####################
+        # OPTIONS
+        t.game_state_machine.when :options do |state|
+          state.on_entry { mp 'game_state start options' }
+          state.on_exit { mp 'game_state end options' }
+          state.transition_to :character_selection,
+                              on_notification: 'game_state_charcater_selection_notification'
+        end
+        ####################
+        # CHARACTER SELECTION
+        t.game_state_machine.when :character_selection do |state|
+          state.on_entry { mp 'game_state start character_selection' }
+          state.on_exit { mp 'game_state end character_selection' }
+          state.transition_to :waiting_room,
+                              on_notification: 'game_state_waiting_room_notification'
+        end
+        ####################
+        # WAITING ROOM
+        t.game_state_machine.when :waiting_room do |state|
+          state.on_entry { mp 'game_state start waiting_room' }
+          state.on_exit { mp 'game_state end waiting_room' }
+
+          state.transition_to :countdown,
+                              on_notification: 'game_state_countdown_notification'
+        end
+        ####################
+        # STARTING
+        t.game_state_machine.when :countdown do |state|
+          state.on_entry { mp 'game_state start countdown' }
+          state.on_exit { mp 'game_state end countdown' }
+
+          state.transition_to :playing,
+                              on_notification: 'game_state_playing_notification'
+        end
+        ####################
+        # PLAYING
+        t.game_state_machine.when :playing do |state|
+          state.on_entry { mp 'game_state start playing' }
+          state.on_exit { mp 'game_state end playing' }
+
+          # state.transition_to :options,
+          #                     on_notification: 'game_state_start_notification'
+        end
+        t.game_state_machine.start!
       end
     end
     Utilities::puts_close
@@ -427,48 +483,55 @@ class TakaroFbo < FirebaseObject
   end
   # rubocop:enable Metrics/AbcSize
 
-  def create_new_pouwhenua_from_hash(arg_hash = {}, is_initial = false)
-    puts "FBO:#{@class_name}:#{__LINE__} create_new_pouwhenua_from_hash".green if DEBUGGING
-
-    # Check if the player still has available pouwhenua
-    # puts @local_kaitakaro.pouwhenua_current.to_s.focus
-    return if @local_kaitakaro.pouwhenua_current <= 0
-
-    # the format we want to end up with:
-    # color,
-    # coordinate,
-    # title,
-    # kapa_key,
-    # lifespan
-
-    # get the player info
-    new_pouwhenua_hash = @local_kaitakaro.data_for_pouwhenua.merge arg_hash
-
-    # remove the kaitakaro for initial pouwhenua
-    # TODO: not sure we need this, it's also super clunky
-    new_pouwhenua_hash.delete('kaitakaro_key') if is_initial
-
-    p = PouwhenuaFbo.new(
-      @ref.child('pouwhenua').childByAutoId, new_pouwhenua_hash
-    )
-    @local_pouwhenua << p
-
-    @local_kaitakaro.pouwhenua_decrement unless is_initial
-
-    pull
-  end
+#   def create_new_pouwhenua_from_hash(arg_hash = {}, is_initial = false)
+#     puts "FBO:#{@class_name}:#{__LINE__} create_new_pouwhenua_from_hash".green if DEBUGGING
+#
+#     # Check if the player still has available pouwhenua
+#     # puts @local_kaitakaro.pouwhenua_current.to_s.focus
+#     return if @local_kaitakaro.pouwhenua_current <= 0
+#
+#     # the format we want to end up with:
+#     # color,
+#     # coordinate,
+#     # title,
+#     # kapa_key,
+#     # lifespan
+#
+#     # get the player info
+#     new_pouwhenua_hash = @local_kaitakaro.data_for_pouwhenua.merge arg_hash
+#
+#     # remove the kaitakaro for initial pouwhenua
+#     # TODO: not sure we need this, it's also super clunky
+#     new_pouwhenua_hash.delete('kaitakaro_key') if is_initial
+#
+#     p = PouwhenuaFbo.new(
+#       @ref.child('pouwhenua').childByAutoId, new_pouwhenua_hash
+#     )
+#     @local_pouwhenua << p
+#
+#     @local_kaitakaro.pouwhenua_decrement unless is_initial
+#
+#     pull
+#   end
 
   def create_new_marker_from_hash(arg_hash = {}, is_initial = false)
     mp __method__
+    mp arg_hash
+    mp @local_player
+    mp @local_player.marker_current
 
     # no availble markers
-    return if @local_player.marker_current <= 0 and !is_initial
+    if @local_player.marker_current <= 0 && !is_initial
+      mp 'no available markers!'
+      return
+    end
 
     # get player info
     new_marker_hash = @local_player.data_for_marker.merge arg_hash
 
     # this is clunky
     new_marker_hash.delete('player_key') if is_initial
+    new_marker_hash['enabled'] = 'true'
 
     # new_marker = Marker.new(
     #   @ref.child('markers').childByAutoId, new_marker_hash

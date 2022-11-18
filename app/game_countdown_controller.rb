@@ -15,5 +15,7 @@ class GameCountdownController < MachineViewController
       end
     end
     machine.start!
+
+    Notification.center.post("game_state_countdown_notification", nil)
   end
 end

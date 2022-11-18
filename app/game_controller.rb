@@ -226,6 +226,11 @@ class GameController < MachineViewController
       puts 'GameController: pouwhenua_label_observer'.focus
       update_pouwhenua_label
     end
+
+    @markers_change = Notification.center.observe 'markers_changed' do |_notification|
+      mp 'markers_changed received'
+      render_overlays
+    end
   end
   # rubocop:enable Metrics/AbcSize
 
@@ -298,6 +303,8 @@ class GameController < MachineViewController
 
     # puts 'Starting button state machine'
     @button_fsm.start!
+
+    Notification.center.post("game_state_playing_notification", nil)
 
     # add_overlays_and_annotations
     render_overlays
@@ -407,15 +414,15 @@ class GameController < MachineViewController
   end
 
   def try_render_overlays
-    puts 'try_render_overlays'
-    return if @rendering
-
-    puts 'rendering'
-    render_overlays
+#     puts 'try_render_overlays'
+#     return if @rendering
+#
+#     puts 'rendering'
+#     render_overlays
   end
 
   def render_overlays
-    # puts 'game_controller render_overlays'.blue
+    mp __method__
 
     @rendering = true
 

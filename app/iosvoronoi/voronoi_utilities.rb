@@ -26,8 +26,14 @@ module VoronoiUtilities
   alias :verticesFromCell :vertices_from_cell
 
   def overlay_from_vertices(vertices)
-    puts 'VORONOI_UTILITIES: OVERLAY_FROM_VERTICES'.blue if DEBUGGING
+    mp __method__
+    # puts 'VORONOI_UTILITIES: OVERLAY_FROM_VERTICES'.blue if DEBUGGING
     # puts "vertices: #{vertices.length}".red
+
+    if vertices.count <= 0
+      mp 'there are no vertices'
+      return
+    end
 
     points = []
 

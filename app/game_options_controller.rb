@@ -11,6 +11,7 @@ class GameOptionsController < MachineViewController
       { 'gamecode' => rand(36**6).to_s(36) }
     )
     @takaro_fbo = Machine.instance.takaro_fbo
+    Notification.center.post("game_state_options_notification", nil)
   end
 
   def select_duration(sender)
