@@ -10,7 +10,6 @@ class TakaroFbo < FirebaseObject
                 :local_pouwhenua,
                 :pouwhenua_is_dirty,
                 :markers_hash,
-                # :game_state,
                 :game_state_machine,
                 :players_hash,
                 :taiapa_region # TODO: this might be hash later?
@@ -53,7 +52,7 @@ class TakaroFbo < FirebaseObject
   # rubocop:disable Metrics/AbcSize
   def initialize_firebase_observers
     mp __method__
-    # Players
+    # All Players
 #     @ref.child('players').observeEventType(FIRDataEventTypeValue, withBlock:
 #       lambda do |players_snapshot|
 #         mp 'Takaro observe players'
@@ -66,14 +65,11 @@ class TakaroFbo < FirebaseObject
     @ref.child('players').observeEventType(FIRDataEventTypeChildChanged, withBlock:
       lambda do |player_snapshot|
         mp 'Takaro observe player changed'
-        # mp player_snapshot.valueInExportFormat
 
         # update the specific player
         @players_hash[player_snapshot.key] = player_snapshot.valueInExportFormat
-        # mp 'player updated'
-        # mp @players_hash
       end)
-    # Teams
+    # Specific Team
     @ref.child('teams').observeEventType(FIRDataEventTypeChildChanged, withBlock:
       lambda do |teams_snapshot|
         teams_snapshot.ref.parent.getDataWithCompletionBlock(
@@ -83,6 +79,7 @@ class TakaroFbo < FirebaseObject
           end
         )
       end)
+    # All Teams
     # @ref.child('teams').observeEventType(FIRDataEventTypeValue, withBlock:
     #   lambda do |teams_snapshot|
     #     mp 'TEAMS VALUE CALLBACK'
@@ -101,9 +98,9 @@ class TakaroFbo < FirebaseObject
       end
     )
 
-    @ref.child('game_state').observeEventType(FIRDataEventTypeValue, withBlock:
-      lambda do |game_state_snapshot|
-        mp "GAME_STATE SAVED"
+    @ref.child('game_state').observeEventType(
+      FIRDataEventTypeValue, withBlock: lambda do |game_state_snapshot|
+        mp 'GAME_STATE SAVED'
         mp game_state_snapshot.value
 
         if game_state_snapshot.value == 'ready'
@@ -121,7 +118,7 @@ class TakaroFbo < FirebaseObject
 
       unless @local_player.nil?
         mp 'updating location child'
-        @ref.child('location/' + @local_player.key).setValue(new_location.to_hash)
+        @ref.child("location/#{@local_player.key}").setValue(new_location.to_hash)
       end
     end
   end
@@ -245,10 +242,6 @@ class TakaroFbo < FirebaseObject
     bot_ref = @ref.child('players').childByAutoId
     bot = Player.new(bot_ref, bot_data, true)
 
-    # coord = @local_kaitakaro.coordinate
-    # coord = @local_player.coordinate
-    # mp "coord: #{coord}"
-
     bot.coordinate = {
       'latitude' => @bot_centroid['latitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT),
       'longitude' => @bot_centroid['longitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT)
@@ -258,20 +251,6 @@ class TakaroFbo < FirebaseObject
     # add_kaitakaro(bot)
     @team_manager.add_player_to_team(bot)
   end
-
-#   def add_kaitakaro(in_kaitakaro)
-#     puts "FBO:#{@class_name} add_kaitakaro".green if DEBUGGING
-#
-#     @kaitakaro_array << in_kaitakaro
-#     @kaitakaro_hash[in_kaitakaro.data_hash['display_name']] = in_kaitakaro
-#
-#     # Testing
-#     # @team_manager.add_player_to_team(in_kaitakaro)
-#
-#     # send update to UI
-#     # This should ultimately be in the Kapa
-#     Notification.center.post('PlayerNew', @kaitakaro_hash)
-#   end
 
   def add_player(in_player)
     puts "FBO:#{@class_name} add_player".green if DEBUGGING
@@ -323,67 +302,6 @@ class TakaroFbo < FirebaseObject
     # otherwise, we're too far
     nil
   end
-
-#   # rubocop:disable Metrics/AbcSize
-#   # THIS IS NEXT!
-#   def set_initial_pouwhenua
-#     puts "FBO:#{@class_name}:#{__LINE__} set_initial_pouwhenua".green if DEBUGGING
-#     coord_array = []
-#
-#     # instead of a local array, we should pull from the DB?
-#     # Can't we just use @teams_hash?
-#     @local_kapa_array.each do |k|
-#       data = k.data_for_pouwhenua
-#       # mp data
-#
-#       # TODO: Should these initial pouwhenua ever die?
-#       # data.merge!('lifespan_ms' => 120_000)
-#       data.merge!('lifespan_ms' => duration * 60 * 1000)
-#
-#       create_new_pouwhenua_from_hash(data, true)
-#
-#       # add to local coords
-#       coord_array << k.coordinate
-#     end
-#
-#     # use coords to calculate play area
-#     lats = coord_array.map { |c| c['latitude'] }.minmax
-#     longs = coord_array.map { |c| c['longitude'] }.minmax
-#
-#     # This is a hack way to find the midpoint
-#     # A more accurate solution is here:
-#     # https://stackoverflow.com/questions/10559219/determining-midpoint-between-2-coordinates
-#     midpoint_array = [(lats[0] + lats[1]) * 0.5, (longs[0] + longs[1]) * 0.5]
-#     midpoint_location = CLLocation.alloc.initWithLatitude(midpoint_array[0], longitude: midpoint_array[1])
-#     top_location = CLLocation.alloc.initWithLatitude(lats[1], longitude: midpoint_array[1])
-#     right_location = CLLocation.alloc.initWithLatitude(midpoint_array[0], longitude: longs[1])
-#     latitude_delta = midpoint_location.distanceFromLocation(top_location)
-#     longitude_delta = midpoint_location.distanceFromLocation(right_location)
-#
-#     @taiapa_center = MKMapPointForCoordinate(CLLocationCoordinate2DMake(midpoint_array[0], midpoint_array[1]))
-#
-#     # Sometimes the resulting rectangle is super narrow
-#     # resize based on the longer side and golden ratio
-#     if latitude_delta < longitude_delta
-#       latitude_delta = longitude_delta * 0.618034
-#     else
-#       longitude_delta = latitude_delta * 0.618034
-#     end
-#
-#     @taiapa_region = MKCoordinateRegionMakeWithDistance(
-#       midpoint_location.coordinate, latitude_delta * 3, longitude_delta * 3
-#     )
-#     self.taiapa = {
-#       'midpoint' => midpoint_location.coordinate.to_hash,
-#       'latitude_delta' => latitude_delta * 3,
-#       'longitude_delta' => longitude_delta * 3
-#     }
-#
-#     # TODO: Should this be in the Machine?
-#     Machine.instance.is_waiting = false
-#     Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
-#   end
-#   # rubocop:enable Metrics/AbcSize
 
   # rubocop:disable Metrics/AbcSize
   # THIS IS NEXT!
@@ -604,14 +522,6 @@ class TakaroFbo < FirebaseObject
     update({ 'playing' => in_playing })
   end
 
-#   def game_state
-#     @data_hash['game_state']
-#   end
-#
-#   def game_state=(in_state)
-#     update({ 'game_state' => in_state })
-#   end
-
   def game_state
     mp __method__
     @game_state_machine.current_state.name
@@ -627,29 +537,6 @@ class TakaroFbo < FirebaseObject
     # mp kapa_hash
     # mp local_kapa_array
   end
-
-#   def kaitakaro_annotations
-#     # puts 'kaitakaro_annotations'
-#     annotations = []
-#
-#     # this just gets the local kaitakaro's kapa
-#     kaitakaro_for_kapa.each do |k|
-#       # TODO: this is a hack
-#       # perhaps we need to massage in the kaitakaro method
-#       k_hash = k[1]
-#
-#       ka = KaitakaroAnnotation.alloc.initWithCoordinate(
-#         Utilities::format_to_location_coord(k_hash['coordinate'])
-#       )
-#       ka.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(k_hash['kapa']['color']))
-#       ka.title = k_hash['display_name']
-#       ka.subtitle = k_hash['character']['title']
-#       annotations << ka
-#     end
-#
-#     # puts "Annotations: #{annotations}".focus
-#     annotations
-#   end
 
   # This uses the teams
   # but we can also use the players, now that they each have a color
@@ -674,65 +561,7 @@ class TakaroFbo < FirebaseObject
     end
 
     annotations
-
-    # the new firebase player way
-    # @ref.child('players').observeEventType(FIRDataEventTypeValue, withBlock:
-    #   lambda do |players_snapshot|
-    #     mp 'Iterating through players'
-    #     mp players_snapshot.value
-    #     # players_snapshot.children.each do |player_snapshot|
-    #     #   player = player_snapshot.value
-    #     #   mp player
-    #     #   player_annotation = PlayerAnnotation.alloc.initWithCoordinate(
-    #     #     Utilities::format_to_location_coord(player_snapshot.childSnapshotForPath('coordinate').value)
-    #     #   )
-    #     #   # player_annotation.color = p['color']
-    #     #   # player_annotation.title = p['display_name']
-    #     #   # player_annotation.subtitle = p['character']
-    #     #   mp player_annotation
-    #     #   annotations << player_annotation
-    #     # end
-    #     mp annotations
-    #     annotations
-    #   end
-    # )
-
-    # # the old teams way
-    # mp @teams_hash.values
-    # annotations = []
-    # @teams_hash.values.each do |t|
-    #   t['players'].values.each do |p|
-    #     mp p['color']
-    #     player_annotation = PlayerAnnotation.alloc.initWithCoordinate(
-    #       Utilities::format_to_location_coord(p['coordinate'])
-    #     )
-    #     # ka.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(t['color']))
-    #     player_annotation.color = p['color']
-    #     player_annotation.title = p['display_name']
-    #     player_annotation.subtitle = p['character']
-    #     mp player_annotation
-    #     annotations << player_annotation
-    #   end
-    # end
-    # mp annotations
-    # annotations
   end
-
-#   def pouwhenua_annotations
-#     annotations = []
-#
-#     # this just gets the local kaitakaro's kapa
-#     pouwhenua_array_for_kapa.each do |p|
-#       pa = PouAnnotation.alloc.initWithCoordinate(
-#         Utilities::format_to_location_coord(p['coordinate'])
-#       )
-#       pa.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(p['color']))
-#       annotations << pa
-#     end
-#
-#     # puts "Annotations: #{annotations}".focus
-#     annotations
-#   end
 
   def marker_annotations
     __method__
