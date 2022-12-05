@@ -357,94 +357,40 @@ class GameController < MachineViewController
   end
   # rubocop:enable Metrics/AbcSize
 
-#   def pouwhenua_annotation(annotation)
-#     annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PYLON_VIEW_IDENTIFIER)
-#     if annotation_view.nil?
-#       annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: PYLON_VIEW_IDENTIFIER)
-#     end
-#
-#     # ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
-#     ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(24, 24))
-#
-#     annotation_view.image = ui_renderer.imageWithActions(
-#       lambda do |_context|
-#         # path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
-#         path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 22, 22), cornerRadius: 4)
-#
-#         UIColor.whiteColor.setFill
-#         path.fill
-#         annotation.color.setStroke
-#         path.lineWidth = 2.0
-#         path.stroke
-#       end
-#     )
-#
-#     annotation_view.canShowCallout = false
-#     annotation_view.layer.zPosition = 1
-#
-#     annotation_view
-#   end
-
   def marker_annotation(annotation)
-  annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PYLON_VIEW_IDENTIFIER)
-  if annotation_view.nil?
-    annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: PYLON_VIEW_IDENTIFIER)
-  end
-
-  # ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
-  ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(26, 26))
-
-  annotation_view.image = ui_renderer.imageWithActions(
-    lambda do |_context|
-      # path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
-      path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 24, 24), cornerRadius: 4)
-
-      UIColor.whiteColor.setFill
-      path.fill
-      annotation.color.setStroke
-      path.lineWidth = 2.0
-      path.stroke
+    annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(PYLON_VIEW_IDENTIFIER)
+    if annotation_view.nil?
+      annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: PYLON_VIEW_IDENTIFIER)
     end
-  )
 
-  annotation_view.canShowCallout = false
-  annotation_view.layer.zPosition = 1
+    # ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
+    ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(26, 26))
 
-  annotation_view
-end
+    annotation_view.image = ui_renderer.imageWithActions(
+      lambda do |_context|
+        # path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
+        path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 24, 24), cornerRadius: 4)
 
-#   def kaitarako_annotation(annotation)
-#     annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(KAITAKARO_VIEW_IDENTIFIER)
-#     if annotation_view.nil?
-#       annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: KAITAKARO_VIEW_IDENTIFIER)
-#     end
-#
-#     ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
-#
-#     annotation_view.image = ui_renderer.imageWithActions(
-#       lambda do |_context|
-#         path = UIBezierPath.bezierPathWithOvalInRect(CGRectMake(1, 1, 14, 14))
-#
-#         UIColor.blackColor.setFill
-#         path.fill
-#         annotation.color.setStroke
-#         path.lineWidth = 2.0
-#         path.stroke
-#       end
-#     )
-#
-#     annotation_view.canShowCallout = true
-#     annotation_view.layer.zPosition = 2
-#
-#     annotation_view.titleVisibility = MKFeatureVisibilityVisible
-#
-#     annotation_view
-#   end
+        UIColor.whiteColor.setFill
+        path.fill
+        annotation.color.setStroke
+        path.lineWidth = 2.0
+        path.stroke
+      end
+    )
+
+    annotation_view.canShowCallout = false
+    annotation_view.layer.zPosition = 1
+
+    annotation_view
+  end
 
   def player_annotation(annotation)
     annotation_view = map_view.dequeueReusableAnnotationViewWithIdentifier(KAITAKARO_VIEW_IDENTIFIER)
     if annotation_view.nil?
-      annotation_view = MKAnnotationView.alloc.initWithAnnotation(annotation, reuseIdentifier: KAITAKARO_VIEW_IDENTIFIER)
+      annotation_view = MKAnnotationView.alloc.initWithAnnotation(
+        annotation, reuseIdentifier: KAITAKARO_VIEW_IDENTIFIER
+      )
     end
 
     ui_renderer = UIGraphicsImageRenderer.alloc.initWithSize(CGSizeMake(16, 16))
@@ -453,9 +399,9 @@ end
       lambda do |_context|
         path = UIBezierPath.bezierPathWithOvalInRect(CGRectMake(1, 1, 14, 14))
 
-        UIColor.blackColor.setFill
+        annotation.color.setFill
         path.fill
-        annotation.color.setStroke
+        UIColor.blackColor.setStroke
         path.lineWidth = 2.0
         path.stroke
       end
