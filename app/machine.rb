@@ -27,11 +27,12 @@ class Machine
                 :is_playing
 
   DEBUGGING = false
-  DESIRED_ACCURACY = 66
+  DESIRED_ACCURACY = 10
 
   # rubocop:disable Metrics
   def initialize
-    puts 'MACHINE: INITIALIZE'.green if DEBUGGING
+    mp __method__
+    # puts 'MACHINE: INITIALIZE'.green if DEBUGGING
 
     @delegate = UIApplication.sharedApplication.delegate
     @rootview = UIApplication.sharedApplication.delegate.window.rootViewController
@@ -44,7 +45,7 @@ class Machine
     # FIREBASE
     FIRApp.configure
     @db_app = FIRApp.defaultApp
-    puts "Machine App:#{@db_app.name}"
+    # puts "Machine App:#{@db_app.name}"
     @db = FIRDatabase.databaseForApp(@db_app)
 
     #####################
@@ -123,14 +124,14 @@ class Machine
       state.on_entry { puts 'Machine starting logging_in!' }
       state.on_exit { puts 'Machine ending logging_in!' }
     end
-    
+
     ####################
     # WAITING ROOM
     @fsm.when :waiting_room do |state|
       state.on_entry { mp 'Machine entering waiting_room!' }
       state.on_exit { mp 'Machine exiting waiting_room!' }
     end
-    
+
     ####################
     # GAME PLAYING
     @fsm.when :game_playing do |state|
@@ -188,7 +189,7 @@ class Machine
     # Check for reasonable accuracy
     # https://stackoverflow.com/a/13502503
     puts "horizontalAccuracy: #{new_location.horizontalAccuracy}".focus
-    return if new_location.horizontalAccuracy >= DESIRED_ACCURACY
+    return if new_location.horizontalAccuracy > DESIRED_ACCURACY
 
     # Notification.center.post(
     Notification.center.post(

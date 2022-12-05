@@ -29,11 +29,11 @@ class VoronoiMap
     # TODO: rename this with pouwhenua
     # pylons_array = Machine.instance.takaro.pouwhenua_array
     # pylons_array = Machine.instance.takaro_fbo.pouwhenua_array_enabled_only
-    pylons_array = Machine.instance.takaro_fbo.marker_hash.values
+    pylons_array = Machine.instance.takaro_fbo.markers_hash.values
 
     # site_array_map = Machine.instance.takaro.pouwhenua_array.map do |p|
     # site_array_map = Machine.instance.takaro_fbo.pouwhenua_array_enabled_only.map do |p|
-    site_array_map = Machine.instance.takaro_fbo.marker_hash.values.map do |p|
+    site_array_map = Machine.instance.takaro_fbo.markers_hash.values.map do |p|
       # puts "coordinate: #{p['coordinate']}".focus
       loc_coord = format_to_location_coord(p['coordinate'])
       color = CIColor.colorWithString(p['color'])

@@ -591,7 +591,7 @@
             <objects>
                 <viewController id="V95-ki-Mtz" userLabel="Credits" customClass="InfoViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8GG-Cl-TLL">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Credits!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ucc-WJ-euR">
@@ -602,7 +602,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" text="This game was made by Lucas Haley using the following tools: - RubyMotion - Google Firebase  Playtesters Harry Ford, Stu Dixon" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rMD-Zc-Qeg">
-                                <rect key="frame" x="16" y="138" width="343" height="504"/>
+                                <rect key="frame" x="16" y="138" width="343" height="484"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <color key="textColor" systemColor="labelColor"/>
@@ -725,7 +725,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
             <objects>
                 <viewController id="J8r-WN-OqI" userLabel="How To Play" customClass="InfoViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Vos-tZ-lyl">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="How to Play:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gEE-kr-X96">
@@ -736,7 +736,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
                                 <nil key="highlightedColor"/>
                             </label>
                             <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I6g-Zo-6qu">
-                                <rect key="frame" x="16" y="154" width="343" height="473"/>
+                                <rect key="frame" x="16" y="154" width="343" height="493"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <string key="text">Turf! is a real-time strategy game you play in real life.   Each player can place markers in their current location.   Each marker claims a certain amount of area.  Your score is based on how large your area is compared to the other team's area.  To start, cluster your teammates together in one location. The other team clusters in a different location. The playfield size is based on the distance between the two first positions.</string>
                                 <color key="textColor" systemColor="labelColor"/>
@@ -843,7 +843,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" restorationIdentifier="distance_warning" text="•••" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Jam-GE-hkW">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" restorationIdentifier="distance_warning" text="••••••••••" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Jam-GE-hkW">
                                 <rect key="frame" x="16" y="459" width="343" height="37"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <accessibility key="accessibilityConfiguration" label="You are not close enough to other players."/>
@@ -946,11 +946,11 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
         <segue reference="zAq-bV-BBM"/>
     </inferredMetricsTieBreakers>
     <resources>
-        <image name="10.square" catalog="system" width="32" height="32"/>
-        <image name="20.square" catalog="system" width="32" height="32"/>
-        <image name="5.square" catalog="system" width="32" height="32"/>
+        <image name="10.square" catalog="system" width="128" height="114"/>
+        <image name="20.square" catalog="system" width="128" height="114"/>
+        <image name="5.square" catalog="system" width="128" height="114"/>
         <image name="google.png" width="18" height="18"/>
-        <image name="plus.square.fill" catalog="system" width="32" height="32"/>
+        <image name="plus.square.fill" catalog="system" width="128" height="114"/>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

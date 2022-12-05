@@ -72,6 +72,9 @@
 @implementation Machine
 @end
 
+@implementation Marker
+@end
+
 @implementation MenuController
 @end
 
@@ -82,6 +85,9 @@
 @end
 
 @implementation NSNotificationCenter
+@end
+
+@implementation Player
 @end
 
 @implementation PlayerCell
@@ -103,6 +109,12 @@
 @end
 
 @implementation TakaroFbo
+@end
+
+@implementation Team
+@end
+
+@implementation TeamManager
 @end
 
 @implementation String

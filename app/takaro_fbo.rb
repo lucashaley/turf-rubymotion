@@ -9,9 +9,10 @@ class TakaroFbo < FirebaseObject
                 :bot_centroid,
                 :local_pouwhenua,
                 :pouwhenua_is_dirty,
-                :marker_hash,
-                :game_state,
+                :markers_hash,
+                # :game_state,
                 :game_state_machine,
+                :players_hash,
                 :taiapa_region # TODO: this might be hash later?
 
   DEBUGGING = true
@@ -20,7 +21,7 @@ class TakaroFbo < FirebaseObject
   MOVE_THRESHOLD = 2
   TEAM_COUNT = 2
   FIELD_SCALE = 3
-  BOT_DISTANCE = 0.005
+  BOT_DISTANCE = 0.0005
   BOT_TEAM_DISPLACEMENT = 5 * 10**-14
 
   def initialize(in_ref, in_data_hash)
@@ -30,7 +31,8 @@ class TakaroFbo < FirebaseObject
     @kaitakaro_array = []
     @kaitakaro_hash = {}
     @teams_hash = {}
-    @marker_hash = {}
+    @markers_hash = {}
+    @players_hash = {}
     @local_kapa_array = []
     @local_pouwhenua = []
     @pouwhenua_is_dirty = true
@@ -38,175 +40,162 @@ class TakaroFbo < FirebaseObject
     puts 'TakaroFbo initialize'.red
     super.tap do |t|
       unless in_data_hash.nil?
-        t.init_states
-        # t.init_kapa
         t.initialize_firebase_observers
-        # t.init_pouwhenua
-        # t.initialize_markers
 
         # set up game state state machine
-        t.game_state_machine = StateMachine::Base.new start_state: :initializing, verbose: DEBUGGING
-
-        ####################
-        # SPLASH SCREEN
-        t.game_state_machine.when :initializing do |state|
-          state.on_entry { mp 'game_state start initializing' }
-          state.on_exit { mp 'game_state end initializing' }
-          state.transition_to :options,
-                              on_notification: 'game_state_options_notification'
-        end
-        ####################
-        # OPTIONS
-        t.game_state_machine.when :options do |state|
-          state.on_entry { mp 'game_state start options' }
-          state.on_exit { mp 'game_state end options' }
-          state.transition_to :character_selection,
-                              on_notification: 'game_state_charcater_selection_notification'
-        end
-        ####################
-        # CHARACTER SELECTION
-        t.game_state_machine.when :character_selection do |state|
-          state.on_entry { mp 'game_state start character_selection' }
-          state.on_exit { mp 'game_state end character_selection' }
-          state.transition_to :waiting_room,
-                              on_notification: 'game_state_waiting_room_notification'
-        end
-        ####################
-        # WAITING ROOM
-        t.game_state_machine.when :waiting_room do |state|
-          state.on_entry { mp 'game_state start waiting_room' }
-          state.on_exit { mp 'game_state end waiting_room' }
-
-          state.transition_to :countdown,
-                              on_notification: 'game_state_countdown_notification'
-        end
-        ####################
-        # STARTING
-        t.game_state_machine.when :countdown do |state|
-          state.on_entry { mp 'game_state start countdown' }
-          state.on_exit { mp 'game_state end countdown' }
-
-          state.transition_to :playing,
-                              on_notification: 'game_state_playing_notification'
-        end
-        ####################
-        # PLAYING
-        t.game_state_machine.when :playing do |state|
-          state.on_entry { mp 'game_state start playing' }
-          state.on_exit { mp 'game_state end playing' }
-
-          # state.transition_to :options,
-          #                     on_notification: 'game_state_start_notification'
-        end
+        t.initialize_state_machine
         t.game_state_machine.start!
       end
     end
     Utilities::puts_close
   end
 
+  # rubocop:disable Metrics/AbcSize
   def initialize_firebase_observers
     mp __method__
+    # Players
+#     @ref.child('players').observeEventType(FIRDataEventTypeValue, withBlock:
+#       lambda do |players_snapshot|
+#         mp 'Takaro observe players'
+#         mp players_snapshot.valueInExportFormat
+#
+#         # update the local hash
+#         @players_hash = players_snapshot.valueInExportFormat
+#       end)
+    # Specific Players
+    @ref.child('players').observeEventType(FIRDataEventTypeChildChanged, withBlock:
+      lambda do |player_snapshot|
+        mp 'Takaro observe player changed'
+        # mp player_snapshot.valueInExportFormat
+
+        # update the specific player
+        @players_hash[player_snapshot.key] = player_snapshot.valueInExportFormat
+        # mp 'player updated'
+        # mp @players_hash
+      end)
     # Teams
-    @ref.child('teams').observeEventType(
-      FIRDataEventTypeChildChanged, withBlock:
+    @ref.child('teams').observeEventType(FIRDataEventTypeChildChanged, withBlock:
       lambda do |teams_snapshot|
         teams_snapshot.ref.parent.getDataWithCompletionBlock(
           lambda do |error, snapshot|
             @teams_hash = snapshot.childSnapshotForPath('teams').valueInExportFormat
-            Notification.center.post("teams_changed", @teams_hash)
+            Notification.center.post('teams_changed', @teams_hash)
           end
         )
-      end
-    )
-    @ref.child('teams').observeEventType(FIRDataEventTypeValue, withBlock:
-      lambda do |teams_snapshot|
-        mp 'TEAMS VALUE CALLBACK'
-        mp teams_snapshot.value
-        # @teams_hash = teams_snapshot.value.values
-        # Notification.center.post("teams_changed", @teams_hash)
-      end
-    )
+      end)
+    # @ref.child('teams').observeEventType(FIRDataEventTypeValue, withBlock:
+    #   lambda do |teams_snapshot|
+    #     mp 'TEAMS VALUE CALLBACK'
+    #     mp teams_snapshot.value
+    #     # @teams_hash = teams_snapshot.value.values
+    #     # Notification.center.post("teams_changed", @teams_hash)
+    #   end
+    # )
     # Markers
     @ref.child('markers').queryOrderedByChild('enabled').queryEqualToValue('true').observeEventType(FIRDataEventTypeValue, withBlock:
       lambda do |markers_snapshot|
         mp 'MARKERS ENABLED CALLBACK'
         mp markers_snapshot.value
-        @marker_hash = markers_snapshot.value
-        Notification.center.post("markers_changed", @marker_hash)
+        @markers_hash = markers_snapshot.value
+        Notification.center.post("markers_changed", @markers_hash)
       end
     )
 
-    # Game ready
-    @ref.child('game_state').observeEventType(
-      FIRDataEventTypeValue, withBlock:
+    @ref.child('game_state').observeEventType(FIRDataEventTypeValue, withBlock:
       lambda do |game_state_snapshot|
-        # if true
-        mp 'game_state_snapshot'
+        mp "GAME_STATE SAVED"
         mp game_state_snapshot.value
 
-        self.game_state = game_state_snapshot.value
-
         if game_state_snapshot.value == 'ready'
-          mp 'ready to start!'
-          Machine.instance.is_waiting = false
           Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
         end
       end
     )
-  end
 
-  def init_states
+    # This updates the player location in the location child
+    @location_update_observer = Notification.center.observe 'UpdateLocation' do |data|
+      mp 'Takaro observe update location'
+
+      new_location = data.object['new_location']
+      _old_location = data.object['old_location']
+
+      unless @local_player.nil?
+        mp 'updating location child'
+        @ref.child('location/' + @local_player.key).setValue(new_location.to_hash)
+      end
+    end
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  # rubocop:disable Metrics/AbcSize
+  def initialize_state_machine
     mp __method__
-    self.waiting = false
-    self.playing = false
-    self.game_state = 'prepping'
 
-    @ref.child('game_state').setValue('prepping')
+    @game_state_machine = StateMachine::Base.new start_state: :initializing, verbose: DEBUGGING
+
+    ####################
+    # SPLASH SCREEN
+    @game_state_machine.when :initializing do |state|
+      state.on_entry { mp 'game_state start initializing' }
+      state.on_exit { mp 'game_state end initializing' }
+      state.transition_to :options,
+                          on_notification: 'game_state_options_notification',
+                          action: proc { self.game_state = 'options' }
+    end
+    ####################
+    # OPTIONS
+    @game_state_machine.when :options do |state|
+      state.on_entry { mp 'game_state start options' }
+      state.on_exit { mp 'game_state end options' }
+      state.transition_to :character_selection,
+                          on_notification: 'game_state_charcater_selection_notification',
+                          action: proc { self.game_state = 'character_selection' }
+    end
+    ####################
+    # CHARACTER SELECTION
+    @game_state_machine.when :character_selection do |state|
+      state.on_entry { mp 'game_state start character_selection' }
+      state.on_exit { mp 'game_state end character_selection' }
+      state.transition_to :waiting_room,
+                          on_notification: 'game_state_waiting_room_notification',
+                          action: proc { self.game_state = 'waiting_room' }
+    end
+    ####################
+    # WAITING ROOM
+    @game_state_machine.when :waiting_room do |state|
+      state.on_entry { mp 'game_state start waiting_room' }
+      state.on_exit { mp 'game_state end waiting_room' }
+
+      state.transition_to :countdown,
+                          on_notification: 'game_state_countdown_notification',
+                          action: proc {
+                            self.game_state = 'countdown'
+                            Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
+                          }
+    end
+    ####################
+    # STARTING
+    @game_state_machine.when :countdown do |state|
+      state.on_entry { mp 'game_state start countdown' }
+      state.on_exit { mp 'game_state end countdown' }
+
+      state.transition_to :playing,
+                          on_notification: 'game_state_playing_notification',
+                          action: proc {
+                            self.game_state = 'playing'
+                          }
+    end
+    ####################
+    # PLAYING
+    @game_state_machine.when :playing do |state|
+      state.on_entry { mp 'game_state start playing' }
+      state.on_exit { mp 'game_state end playing' }
+
+      # state.transition_to :options,
+      #                     on_notification: 'game_state_start_notification'
+    end
   end
-
-#   def initialize_markers
-#     mp __method__
-#
-#     @ref.child('markers').observeEventType(
-#       FIRDataEventTypeChildAdded, withBlock:
-#       lambda do |pylon_snapshot|
-#         puts "FBO:#{@class_name} MARKER ADDED".red if DEBUGGING
-#         pull_with_block { Notification.center.post 'markers_new' }
-#         @markers_are_dirty = true
-#       end
-#     )
-#   end
-
-#   def init_pouwhenua
-#     mp __method__
-#     puts "FBO:#{@class_name} INIT_POUWHENUA".green if DEBUGGING
-#
-#     @ref.child('pouwhenua').observeEventType(
-#       FIRDataEventTypeChildAdded, withBlock:
-#       lambda do |_data_snapshot|
-#         puts "FBO:#{@class_name} POUWHENUA ADDED".red if DEBUGGING
-#         pull_with_block { Notification.center.post 'PouwhenuaFbo_New' }
-#         @pouwhenua_is_dirty = true
-#       end
-#     )
-#   end
-
-#   def init_local_kaitakaro(in_character)
-#     puts "FBO:#{@class_name} init_local_kaitakaro".green if DEBUGGING
-#     kaitakaro_ref = @ref.child('kaitakaro').childByAutoId
-#     $logger.info Machine.instance.firebase_user
-#     $logger.info Machine.instance.firebase_user.providerData[0].displayName
-#     k = KaitakaroFbo.new(
-#       kaitakaro_ref,
-#       {
-#         'character' => in_character,
-#         'display_name' => Machine.instance.firebase_user.providerData[0].displayName
-#       }
-#     )
-#     @local_kaitakaro = k
-#
-#     add_kaitakaro(k)
-#   end
+  # rubocop:enable Metrics/AbcSize
 
   def initialize_local_player(in_character)
     puts "FBO:#{@class_name} initialize_local_player".green if DEBUGGING
@@ -220,39 +209,28 @@ class TakaroFbo < FirebaseObject
       }
     )
     @local_player = player
+    mp 'local_player:'
+    mp @local_player
 
     # not sure we need this
     add_player(player)
   end
 
-#   # This is never called?
-#   # TODO: figure this out
-#   def create_kapa(coordinate)
-#     puts 'Creating new kapa'
-#     kapa_ref = @ref.child('kapa').childByAutoId
-#     # puts "kapa_ref: #{kapa_ref.URL}".yellow
-#     # TODO: This uses random colors, which is an issue
-#     k = KapaFbo.new(kapa_ref, { 'color' => Utilities::random_color, 'coordinate' => coordinate })
-#     team = Team.new(kapa_ref, { 'color' => Utilities::random_color, 'coordinate' => coordinate })
-#     mp 'New team: ' & team
-#
-#     @local_kapa_array << k
-#     k
-#   end
-#
-#   def remove_kapa(_in_ref)
-#     puts "FBO:#{@class_name} remove_kapa".green if DEBUGGING
-#     # puts "in_ref: #{in_ref}".focus
-#   end
-
   def create_bot_player
-    puts "FBO:#{@class_name} create_bot_player".green if DEBUGGING
+    mp __method__
+
+    mp 'bot_centroid before:'
+    mp @bot_centroid
+    mp 'local coords:'
+    mp @local_player.coordinate
 
     # grab local player coordinate if not defined
     @bot_centroid ||= {
       'latitude' => @local_player.coordinate['latitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE),
       'longitude' => @local_player.coordinate['longitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE)
     }
+    mp 'bot_centroid after:'
+    mp @bot_centroid
 
     bot_data = {
       'display_name' => 'Jimmy Bot',
@@ -275,6 +253,7 @@ class TakaroFbo < FirebaseObject
       'latitude' => @bot_centroid['latitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT),
       'longitude' => @bot_centroid['longitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT)
     }
+    mp bot.coordinate
 
     # add_kaitakaro(bot)
     @team_manager.add_player_to_team(bot)
@@ -408,6 +387,7 @@ class TakaroFbo < FirebaseObject
 
   # rubocop:disable Metrics/AbcSize
   # THIS IS NEXT!
+  # This is doing a lot of heavy lifting
   def set_initial_markers
     mp __method__
 
@@ -415,18 +395,18 @@ class TakaroFbo < FirebaseObject
     coord_array = []
     mp ['teams_hash', @teams_hash]
     # coord_array = @teams_hash { |k,v| v['coordinate'] }
-    @teams_hash.each do |k, t|
+    @teams_hash.each do |k, team|
       # data = k.data_for_pouwhenua
       new_marker_data = {
-        'kapa_key' => t['key'],
-        'color' => t['color'],
-        'coordinate' => t['coordinate'],
+        'kapa_key' => team['key'],
+        'color' => team['color'],
+        'coordinate' => team['coordinate'],
         'enabled' => 'true'
       }
       mp new_marker_data
       new_marker_data.merge!('lifespan_ms' => duration * 60 * 1000)
       create_new_marker_from_hash(new_marker_data, true)
-      coord_array << t['coordinate']
+      coord_array << team['coordinate']
     end
     mp ['coord_array', coord_array]
 
@@ -464,55 +444,16 @@ class TakaroFbo < FirebaseObject
     @taiapa_region = MKCoordinateRegionMakeWithDistance(
       midpoint_location.coordinate, latitude_delta * 3, longitude_delta * 3
     )
-    # self.taiapa = {
-    #   'midpoint' => midpoint_location.coordinate.to_hash,
-    #   'latitude_delta' => latitude_delta * 3,
-    #   'longitude_delta' => longitude_delta * 3
-    # }
+
     self.playfield = {
       'midpoint' => midpoint_location.coordinate.to_hash,
       'latitude_delta' => latitude_delta * FIELD_SCALE,
       'longitude_delta' => longitude_delta * FIELD_SCALE
     }
 
-    # TODO: Should this be in the Machine?
-    # TODO: make the transition a reaction to setting the playfield
-    # Machine.instance.is_waiting = false
-    # Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
-    @ref.child('game_state').setValue('ready')
+    Notification.center.post('game_state_countdown_notification', nil)
   end
   # rubocop:enable Metrics/AbcSize
-
-#   def create_new_pouwhenua_from_hash(arg_hash = {}, is_initial = false)
-#     puts "FBO:#{@class_name}:#{__LINE__} create_new_pouwhenua_from_hash".green if DEBUGGING
-#
-#     # Check if the player still has available pouwhenua
-#     # puts @local_kaitakaro.pouwhenua_current.to_s.focus
-#     return if @local_kaitakaro.pouwhenua_current <= 0
-#
-#     # the format we want to end up with:
-#     # color,
-#     # coordinate,
-#     # title,
-#     # kapa_key,
-#     # lifespan
-#
-#     # get the player info
-#     new_pouwhenua_hash = @local_kaitakaro.data_for_pouwhenua.merge arg_hash
-#
-#     # remove the kaitakaro for initial pouwhenua
-#     # TODO: not sure we need this, it's also super clunky
-#     new_pouwhenua_hash.delete('kaitakaro_key') if is_initial
-#
-#     p = PouwhenuaFbo.new(
-#       @ref.child('pouwhenua').childByAutoId, new_pouwhenua_hash
-#     )
-#     @local_pouwhenua << p
-#
-#     @local_kaitakaro.pouwhenua_decrement unless is_initial
-#
-#     pull
-#   end
 
   def create_new_marker_from_hash(arg_hash = {}, is_initial = false)
     mp __method__
@@ -527,20 +468,20 @@ class TakaroFbo < FirebaseObject
     end
 
     # get player info
-    new_marker_hash = @local_player.data_for_marker.merge arg_hash
+    new_markers_hash = @local_player.data_for_marker.merge arg_hash
 
     # this is clunky
-    new_marker_hash.delete('player_key') if is_initial
-    new_marker_hash['enabled'] = 'true'
+    new_markers_hash.delete('player_key') if is_initial
+    new_markers_hash['enabled'] = 'true'
 
     # new_marker = Marker.new(
-    #   @ref.child('markers').childByAutoId, new_marker_hash
+    #   @ref.child('markers').childByAutoId, new_markers_hash
     # )
 
     mp 'creating new marker'
     new_marker = @ref.child('markers').childByAutoId
     new_marker.setValue(
-      new_marker_hash
+      new_markers_hash
     )
 
     @local_player.marker_decrement unless is_initial
@@ -671,6 +612,16 @@ class TakaroFbo < FirebaseObject
 #     update({ 'game_state' => in_state })
 #   end
 
+  def game_state
+    mp __method__
+    @game_state_machine.current_state.name
+  end
+
+  def game_state=(in_state)
+    mp __method__
+    @ref.child('game_state').setValue(in_state)
+  end
+
   def score(kapa_key, score)
     puts "Score for #{kapa_key}: #{score}".focus
     # mp kapa_hash
@@ -700,22 +651,71 @@ class TakaroFbo < FirebaseObject
 #     annotations
 #   end
 
+  # This uses the teams
+  # but we can also use the players, now that they each have a color
   def player_annotations
     mp __method__
-    mp @teams_hash.values
     annotations = []
-    @teams_hash.values.each do |t|
-      t['players'].values.each do |p|
-        ka = KaitakaroAnnotation.alloc.initWithCoordinate(
-          Utilities::format_to_location_coord(p['coordinate'])
-        )
-        ka.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(t['color']))
-        ka.title = p['display_name']
-        ka.subtitle = p['character']
-        annotations << ka
-      end
+
+    # the new local hash way
+    @players_hash.each_value do |player|
+      mp 'annotating player'
+      player_annotation = PlayerAnnotation.alloc.initWithCoordinate(
+        Utilities::format_to_location_coord(player['coordinate'])
+      )
+
+      player_annotation.color = UIColor.alloc.initWithCIColor(
+        CIColor.alloc.initWithString(player['color'])
+      )
+      player_annotation.title = player['display_name']
+      player_annotation.subtitle = player['character']
+      mp player_annotation
+      annotations << player_annotation
     end
+
     annotations
+
+    # the new firebase player way
+    # @ref.child('players').observeEventType(FIRDataEventTypeValue, withBlock:
+    #   lambda do |players_snapshot|
+    #     mp 'Iterating through players'
+    #     mp players_snapshot.value
+    #     # players_snapshot.children.each do |player_snapshot|
+    #     #   player = player_snapshot.value
+    #     #   mp player
+    #     #   player_annotation = PlayerAnnotation.alloc.initWithCoordinate(
+    #     #     Utilities::format_to_location_coord(player_snapshot.childSnapshotForPath('coordinate').value)
+    #     #   )
+    #     #   # player_annotation.color = p['color']
+    #     #   # player_annotation.title = p['display_name']
+    #     #   # player_annotation.subtitle = p['character']
+    #     #   mp player_annotation
+    #     #   annotations << player_annotation
+    #     # end
+    #     mp annotations
+    #     annotations
+    #   end
+    # )
+
+    # # the old teams way
+    # mp @teams_hash.values
+    # annotations = []
+    # @teams_hash.values.each do |t|
+    #   t['players'].values.each do |p|
+    #     mp p['color']
+    #     player_annotation = PlayerAnnotation.alloc.initWithCoordinate(
+    #       Utilities::format_to_location_coord(p['coordinate'])
+    #     )
+    #     # ka.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(t['color']))
+    #     player_annotation.color = p['color']
+    #     player_annotation.title = p['display_name']
+    #     player_annotation.subtitle = p['character']
+    #     mp player_annotation
+    #     annotations << player_annotation
+    #   end
+    # end
+    # mp annotations
+    # annotations
   end
 
 #   def pouwhenua_annotations
@@ -736,10 +736,10 @@ class TakaroFbo < FirebaseObject
 
   def marker_annotations
     __method__
-    mp @marker_hash.values
+    mp @markers_hash.values
     annotations = []
-      @marker_hash.values.each do |m|
-        pa = PouAnnotation.alloc.initWithCoordinate(
+      @markers_hash.values.each do |m|
+        pa = MarkerAnnotation.alloc.initWithCoordinate(
           Utilities::format_to_location_coord(m['coordinate'])
         )
         pa.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(m['color']))

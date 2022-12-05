@@ -11,6 +11,7 @@ class GameCountdownController < MachineViewController
     machine.when :starting do |state|
       state.on_entry do
         puts 'STARTING'.focus
+        Notification.center.post('game_state_playing_notification', nil)
         performSegueWithIdentifier('ToGame', sender: self)
       end
     end

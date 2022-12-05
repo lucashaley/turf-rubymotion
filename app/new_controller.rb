@@ -94,7 +94,8 @@ class NewController < MachineViewController
     # listen for the character selection
     @character_select_observer = Notification.center.observe 'SelectCharacter' do |notification|
       puts 'CHARACTER SELECT'.yellow
-      @takaro.local_kaitakaro.character = notification.data
+      # @takaro.local_kaitakaro.character = notification.data
+      @takaro.local_player.character = notification.data
     end
   end
 

@@ -68,6 +68,7 @@
 -(IBAction) setup_mapview;
 -(IBAction) setup_audio;
 -(IBAction) update_pouwhenua_label;
+-(IBAction) update_marker_label;
 -(IBAction) setup_timers;
 -(IBAction) timer_decrement;
 -(IBAction) handle_game_over;
@@ -88,7 +89,7 @@
 -(IBAction) player_for_audio:(id) filename;
 -(IBAction) play_forward_sound_thread;
 -(IBAction) play_forward_sound:(id) context;
--(IBAction) handle_new_pouwhenua;
+-(IBAction) handle_new_marker;
 -(IBAction) observe_new_pouwhenua;
 
 @end
@@ -259,6 +260,12 @@
 
 @end
 
+@interface Marker: FirebaseObject
+-(IBAction) initialize_firebase_observers;
+-(IBAction) destroy;
+
+@end
+
 @interface MenuController: MachineViewController
 
 @property IBOutlet UIButton * button_login;
@@ -313,6 +320,35 @@
 
 @end
 
+@interface Player: FirebaseObject
+-(IBAction) init_observers;
+-(IBAction) coordinate;
+-(IBAction) check_taiapa;
+-(IBAction) placing:(id) in_bool;
+-(IBAction) check_placing;
+-(IBAction) recalculate_team:(id) in_coordinate;
+-(IBAction) exit_bounds;
+-(IBAction) enter_bounds;
+-(IBAction) eject;
+-(IBAction) display_name;
+-(IBAction) updating;
+-(IBAction) name_and_character;
+-(IBAction) data_for_team;
+-(IBAction) data_for_pouwhenua;
+-(IBAction) data_for_marker;
+-(IBAction) character;
+-(IBAction) kapa;
+-(IBAction) team;
+-(IBAction) deploy_time;
+-(IBAction) lifespan_ms;
+-(IBAction) pouwhenua_current;
+-(IBAction) pouwhenua_decrement;
+-(IBAction) pouwhenua_increment;
+-(IBAction) marker_decrement;
+-(IBAction) marker_increment;
+
+@end
+
 @interface PlayerCell: UITableViewCell
 
 @property IBOutlet UILabel * player_name;
@@ -348,16 +384,14 @@
 @end
 
 @interface TakaroFbo: FirebaseObject
+-(IBAction) initialize_firebase_observers;
 -(IBAction) init_states;
--(IBAction) init_pouwhenua;
--(IBAction) init_kapa;
--(IBAction) init_local_kaitakaro:(id) in_character;
--(IBAction) create_kapa:(id) coordinate;
+-(IBAction) initialize_local_player:(id) in_character;
 -(IBAction) create_bot_player;
--(IBAction) add_kaitakaro:(id) in_kaitakaro;
+-(IBAction) add_player:(id) in_player;
 -(IBAction) kapa_with_key:(id) in_key;
 -(IBAction) get_kapa_for_coordinate:(id) coordinate;
--(IBAction) set_initial_pouwhenua;
+-(IBAction) set_initial_markers;
 -(IBAction) player_count_for_index:(id) in_index;
 -(IBAction) list_player_names_for_index:(id) in_index;
 -(IBAction) calculate_score;
@@ -370,11 +404,38 @@
 -(IBAction) pouwhenua_array;
 -(IBAction) pouwhenua_array_for_kapa:(id) kapa_key;
 -(IBAction) pouwhenua_array_enabled_only;
+-(IBAction) markers_array_enabled_only;
 -(IBAction) taiapa;
+-(IBAction) playfield;
 -(IBAction) waiting;
 -(IBAction) playing;
--(IBAction) kaitakaro_annotations;
--(IBAction) pouwhenua_annotations;
+-(IBAction) game_state;
+-(IBAction) player_annotations;
+-(IBAction) marker_annotations;
+
+@end
+
+@interface Team: FirebaseObject
+-(IBAction) add_player:(id) in_player;
+-(IBAction) remove_player:(id) in_player;
+-(IBAction) check_distance:(id) in_coordinate;
+-(IBAction) recalculate_coordinate;
+-(IBAction) list_display_names_and_classes;
+-(IBAction) players_hash;
+-(IBAction) color;
+-(IBAction) coordinate;
+-(IBAction) data_for_team;
+-(IBAction) data_for_pouwhenua;
+-(IBAction) format_to_location_coord:(id) input;
+-(IBAction) recursive_symbolize_keys:(id) hsh;
+
+@end
+
+@interface TeamManager: NSObject
+-(IBAction) initialize;
+-(IBAction) add_player_to_team:(id) in_player;
+-(IBAction) create_new_team:(id) in_coordinate;
+-(IBAction) find_nearest_team:(id) coordinates;
 
 @end
 

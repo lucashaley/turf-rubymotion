@@ -39,11 +39,11 @@ class Player < FirebaseObject
       k.coordinate_state.when :updating do |state|
         state.on_entry { puts 'coordinate_state enter updating'.pink }
         state.on_exit { puts 'coordinate_state exit updating'.pink }
+        # state.transition_to :waiting,
+        #   on_notification: 'Player_ChildChanged'
         state.transition_to :waiting,
-          on_notification: 'Player_ChildChanged'
-        state.transition_to :waiting,
-          on: :finished_updating
-          # action: proc { recalculate_team }
+          on: :finished_updating,
+          action: proc { Notification.center.post 'player_moved' }
       end
       # k.coordinate_state.when :recalculating_team do |state|
       #   state.on_entry { puts 'coordinate_state enter recalculating_team'.pink }
@@ -139,11 +139,14 @@ class Player < FirebaseObject
   def coordinate=(in_coordinate)
     mp __method__
 
-    # if we're still updating, return
-    # return if @location_dirty
+    # sanity check
+    mp 'current coord:'
+    mp coordinate
+    mp 'new coord:'
+    mp in_coordinate
 
     # check if we're still in the update state
-    if @coordinate_state.current_state.to_s == 'update'
+    if @coordinate_state.current_state.name == 'update'
       mp 'still updating'
       return
     end
@@ -154,12 +157,13 @@ class Player < FirebaseObject
       mp 'new coordinate is the same'
     end
 
+    # not sure we need this...
+    # or maybe we move it into the update block below?
+    # or even into the observer callback?
+    @coordinate_current = in_coordinate
+
     # Looks like we're updating, so set state
     @coordinate_state.event(:update)
-
-    # mark as dirty, so we can't do more updates until this cleans
-    # mp 'New coordinate: Setting location_dirty to true'
-    # @location_dirty = true
 
     # update the database if we've moved
     # update({ 'coordinate' => in_coordinate })
@@ -406,10 +410,14 @@ class Player < FirebaseObject
   def marker_decrement
     mp __method__
     @marker_current -= 1
+    # notification = -> { Notification.center.post 'UpdateMarkerLabel' }
+    Notification.center.post("UpdateMarkerLabel", nil)
   end
 
   def marker_increment
     mp __method__
     @marker_current += 1
+    # notification = -> { Notification.center.post 'UpdateMarkerLabel' }
+    Notification.center.post("UpdateMarkerLabel", nil)
   end
 end
