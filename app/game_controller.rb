@@ -93,21 +93,18 @@ class GameController < MachineViewController
     performSegueWithIdentifier('GameOver', sender: self)
   end
 
-  def format_seconds(in_seconds)
-    minutes = (in_seconds / 60).floor
-    seconds = (in_seconds % 60).round
-
-    "#{minutes}:#{seconds.to_s.rjust(2, '0')}"
-  end
-
   # rubocop:disable Metrics/AbcSize
   def calculate_score
     return if @voronoi_map.nil?
 
+    mp 'voronoi_map'
+    mp @voronoi_map
+
     areas_hash = {}
 
     @voronoi_map.voronoi_cells.each do |vc|
-      # mp vc.pylon['kapa_key']
+      mp 'voronoi cell'
+      mp vc
       verts = vc.vertices
 
       area = 0.0
@@ -125,7 +122,7 @@ class GameController < MachineViewController
           area += ((point.x * verts[0].y) - (verts[0].x * point.y))
         end
       end
-      # divide by 2 and get the absolute. I  have converted the result to metres but that is optional. Leave it in square inches if you prefer.
+      # divide by 2 and get the absolute.
       area = (area / (2.0 * 100_000)).abs.round(1)
 
       if areas_hash.key?(vc.pylon['kapa_key'])
@@ -135,7 +132,12 @@ class GameController < MachineViewController
       end
     end
 
+    mp 'areas_hash'
+    mp areas_hash
+
     total_areas_hash = areas_hash.values.inject(0, :+)
+    mp 'total_areas_hash'
+    mp total_areas_hash
 
     delta_hash = {}
     areas_hash.each do |key, v|
@@ -239,6 +241,7 @@ class GameController < MachineViewController
 
     @markers_change = Notification.center.observe 'markers_changed' do |_notification|
       mp 'markers_changed received'
+      @voronoi_map.recalculate_cells
       render_overlays
     end
 
@@ -349,9 +352,6 @@ class GameController < MachineViewController
   def mapView(map_view, viewForAnnotation: annotation)
     return nil if annotation == map_view.userLocation
 
-    # return pouwhenua_annotation(annotation) if annotation.class.to_s.end_with?('PouAnnotation')
-    # return kaitarako_annotation(annotation) if annotation.class.to_s.end_with?('KaitakaroAnnotation')
-
     return marker_annotation(annotation) if annotation.class.to_s.end_with?('MarkerAnnotation')
     return player_annotation(annotation) if annotation.class.to_s.end_with?('PlayerAnnotation')
   end
@@ -371,10 +371,10 @@ class GameController < MachineViewController
         # path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 14, 14), cornerRadius: 4)
         path = UIBezierPath.bezierPathWithRoundedRect(CGRectMake(1, 1, 24, 24), cornerRadius: 4)
 
-        UIColor.whiteColor.setFill
-        path.fill
+        # UIColor.whiteColor.setFill
+        # path.fill
         annotation.color.setStroke
-        path.lineWidth = 2.0
+        path.lineWidth = 4.0
         path.stroke
       end
     )
@@ -459,23 +459,13 @@ class GameController < MachineViewController
     end
 
     # This is a hack to get past having one pylon
-    # return if @voronoi_map.pylons.length < 2
-    # return if Machine.instance.takaro.pouwhenua_array.length < 2
-    # return if Machine.instance.takaro_fbo.pouwhenua_array.length < 2
-    mp Machine.instance.takaro_fbo.markers_hash
+    # mp Machine.instance.takaro_fbo.markers_hash
     return if Machine.instance.takaro_fbo.markers_hash.length < 2
 
     # add the pouwhenua
-    # map_view.addAnnotations(@voronoi_map.annotations)
-    # map_view.addAnnotations(Machine.instance.takaro_fbo.pouwhenua_annotations)
-    mp 'adding marker_annotations'
-    mp Machine.instance.takaro_fbo.marker_annotations
     map_view.addAnnotations(Machine.instance.takaro_fbo.marker_annotations)
 
     # add the players
-    # map_view.addAnnotations(Machine.instance.takaro_fbo.kaitakaro_annotations)
-    mp 'adding player_annotations'
-    mp Machine.instance.takaro_fbo.player_annotations
     map_view.addAnnotations(Machine.instance.takaro_fbo.player_annotations)
 
     @voronoi_map.voronoiCells.each do |cell|
@@ -558,5 +548,12 @@ class GameController < MachineViewController
   def observe_new_pouwhenua
     puts 'game_controller observe_new_pouwhenua'.blue if DEBUGGING
     render_overlays
+  end
+
+  def format_seconds(in_seconds)
+    minutes = (in_seconds / 60).floor
+    seconds = (in_seconds % 60).round
+
+    "#{minutes}:#{seconds.to_s.rjust(2, '0')}"
   end
 end
