@@ -7,7 +7,6 @@ class TakaroFbo < FirebaseObject
                 :local_kaitakaro,
                 :local_player,
                 :bot_centroid,
-                :local_pouwhenua,
                 :pouwhenua_is_dirty,
                 :markers_hash,
                 :game_state_machine,
@@ -20,7 +19,7 @@ class TakaroFbo < FirebaseObject
   MOVE_THRESHOLD = 2
   TEAM_COUNT = 2
   FIELD_SCALE = 3
-  BOT_DISTANCE = 0.0005
+  BOT_DISTANCE = 0.001
   BOT_TEAM_DISPLACEMENT = 5 * 10**-14
 
   def initialize(in_ref, in_data_hash)
@@ -33,7 +32,6 @@ class TakaroFbo < FirebaseObject
     @markers_hash = {}
     @players_hash = {}
     @local_kapa_array = []
-    @local_pouwhenua = []
     @pouwhenua_is_dirty = true
 
     puts 'TakaroFbo initialize'.red
@@ -91,8 +89,8 @@ class TakaroFbo < FirebaseObject
     # Markers
     @ref.child('markers').queryOrderedByChild('enabled').queryEqualToValue('true').observeEventType(FIRDataEventTypeValue, withBlock:
       lambda do |markers_snapshot|
-        mp 'MARKERS ENABLED CALLBACK'
-        mp markers_snapshot.value
+        # mp 'MARKERS ENABLED CALLBACK'
+        # mp markers_snapshot.value
         @markers_hash = markers_snapshot.value
         Notification.center.post("markers_changed", @markers_hash)
       end
@@ -100,8 +98,8 @@ class TakaroFbo < FirebaseObject
 
     @ref.child('game_state').observeEventType(
       FIRDataEventTypeValue, withBlock: lambda do |game_state_snapshot|
-        mp 'GAME_STATE SAVED'
-        mp game_state_snapshot.value
+        # mp 'GAME_STATE SAVED'
+        # mp game_state_snapshot.value
 
         if game_state_snapshot.value == 'ready'
           Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
@@ -117,7 +115,7 @@ class TakaroFbo < FirebaseObject
       _old_location = data.object['old_location']
 
       unless @local_player.nil?
-        mp 'updating location child'
+        # mp 'updating location child'
         @ref.child("location/#{@local_player.key}").setValue(new_location.to_hash)
       end
     end
@@ -208,26 +206,23 @@ class TakaroFbo < FirebaseObject
     @local_player = player
     mp 'local_player:'
     mp @local_player
-
-    # not sure we need this
-    add_player(player)
   end
 
   def create_bot_player
     mp __method__
 
-    mp 'bot_centroid before:'
-    mp @bot_centroid
-    mp 'local coords:'
-    mp @local_player.coordinate
+    # mp 'bot_centroid before:'
+    # mp @bot_centroid
+    # mp 'local coords:'
+    # mp @local_player.coordinate
 
     # grab local player coordinate if not defined
     @bot_centroid ||= {
       'latitude' => @local_player.coordinate['latitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE),
       'longitude' => @local_player.coordinate['longitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE)
     }
-    mp 'bot_centroid after:'
-    mp @bot_centroid
+    # mp 'bot_centroid after:'
+    # mp @bot_centroid
 
     bot_data = {
       'display_name' => 'Jimmy Bot',
@@ -246,34 +241,10 @@ class TakaroFbo < FirebaseObject
       'latitude' => @bot_centroid['latitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT),
       'longitude' => @bot_centroid['longitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT)
     }
-    mp bot.coordinate
+    # mp bot.coordinate
 
     # add_kaitakaro(bot)
-    @team_manager.add_player_to_team(bot)
-  end
-
-  def add_player(in_player)
-    puts "FBO:#{@class_name} add_player".green if DEBUGGING
-
-    # not sure we need this
-    @kaitakaro_array << in_player
-    @kaitakaro_hash[in_player.data_hash['display_name']] = in_player
-
-    Notification.center.post('PlayerNew', @kaitakaro_hash)
-  end
-
-  # This need to delete from both array and Hash
-  # and then delete the kapa if empty
-  def remove_kaitakaro_from_kapa(in_kaitakaro_id, in_kapa_id)
-    puts 'remove_kaitakaro_from_kapa'.light_blue
-
-    # Find the kapa
-    kapa = @local_kapa_array.select { |k| k.ref.key == in_kapa_id }.first
-    kapa_empty = kapa.remove_kaitakaro(in_kaitakaro_id)
-
-    kapa = nil if kapa_empty
-
-    @local_kapa_array.delete_if { |k| k.ref.key == in_kapa_id }.first
+    # @team_manager.add_player_to_team(bot)
   end
 
   def kapa_with_key(in_key)
@@ -311,7 +282,7 @@ class TakaroFbo < FirebaseObject
 
     # get the teams coordinates
     coord_array = []
-    mp ['teams_hash', @teams_hash]
+    # mp ['teams_hash', @teams_hash]
     # coord_array = @teams_hash { |k,v| v['coordinate'] }
     @teams_hash.each do |k, team|
       # data = k.data_for_pouwhenua
@@ -321,7 +292,7 @@ class TakaroFbo < FirebaseObject
         'coordinate' => team['coordinate'],
         'enabled' => 'true'
       }
-      mp new_marker_data
+      # mp new_marker_data
       new_marker_data.merge!('lifespan_ms' => duration * 60 * 1000)
       create_new_marker_from_hash(new_marker_data, true)
       coord_array << team['coordinate']
@@ -375,9 +346,9 @@ class TakaroFbo < FirebaseObject
 
   def create_new_marker_from_hash(arg_hash = {}, is_initial = false)
     mp __method__
-    mp arg_hash
-    mp @local_player
-    mp @local_player.marker_current
+    # mp arg_hash
+    # mp @local_player
+    # mp @local_player.marker_current
 
     # no availble markers
     if @local_player.marker_current <= 0 && !is_initial
@@ -484,7 +455,7 @@ class TakaroFbo < FirebaseObject
     mp __method__
     @ref.child('markers').queryOrderedByChild('enabled').queryEqualToValue('true').observeSingleEventOfType(FIRDataEventTypeValue, withBlock:
       lambda do |error, snapshot|
-        mp snapshot.value
+        # mp snapshot.value
         return snapshot.value
       end
     )
@@ -534,8 +505,6 @@ class TakaroFbo < FirebaseObject
 
   def score(kapa_key, score)
     puts "Score for #{kapa_key}: #{score}".focus
-    # mp kapa_hash
-    # mp local_kapa_array
   end
 
   # This uses the teams
@@ -546,7 +515,7 @@ class TakaroFbo < FirebaseObject
 
     # the new local hash way
     @players_hash.each_value do |player|
-      mp 'annotating player'
+      # mp player
       player_annotation = PlayerAnnotation.alloc.initWithCoordinate(
         Utilities::format_to_location_coord(player['coordinate'])
       )
@@ -556,7 +525,7 @@ class TakaroFbo < FirebaseObject
       )
       player_annotation.title = player['display_name']
       player_annotation.subtitle = player['character']
-      mp player_annotation
+
       annotations << player_annotation
     end
 
@@ -565,15 +534,20 @@ class TakaroFbo < FirebaseObject
 
   def marker_annotations
     __method__
-    mp @markers_hash.values
+
     annotations = []
-      @markers_hash.values.each do |m|
-        pa = MarkerAnnotation.alloc.initWithCoordinate(
-          Utilities::format_to_location_coord(m['coordinate'])
-        )
-        pa.color = UIColor.alloc.initWithCIColor(CIColor.alloc.initWithString(m['color']))
-        annotations << pa
-      end
+    @markers_hash.each_value do |marker|
+      marker_annotation = MarkerAnnotation.alloc.initWithCoordinate(
+        Utilities::format_to_location_coord(marker['coordinate'])
+      )
+
+      marker_annotation.color = UIColor.alloc.initWithCIColor(
+        CIColor.alloc.initWithString(marker['color'])
+      )
+
+      annotations << marker_annotation
+    end
+
     annotations
   end
 end

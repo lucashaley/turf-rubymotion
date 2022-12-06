@@ -9,16 +9,12 @@ class Machine
                 :firebase_user,
                 :firebase_displayname,
                 :firebase_email,
-                # :player,
                 :bounding_box,
-                # :db_game_ref,
-                # :db_ref,
                 :db,
                 :current_view,
                 :location_manager,
                 :tracking,
                 :auth_view_controller,
-                # :takaro,
                 :takaro_fbo,
                 :game_duration,
                 :local_character,
@@ -27,7 +23,7 @@ class Machine
                 :is_playing
 
   DEBUGGING = false
-  DESIRED_ACCURACY = 10
+  DESIRED_ACCURACY = 30
 
   # rubocop:disable Metrics
   def initialize

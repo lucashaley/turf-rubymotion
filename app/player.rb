@@ -140,10 +140,10 @@ class Player < FirebaseObject
     mp __method__
 
     # sanity check
-    mp 'current coord:'
-    mp coordinate
-    mp 'new coord:'
-    mp in_coordinate
+    # mp 'current coord:'
+    # mp coordinate
+    # mp 'new coord:'
+    # mp in_coordinate
 
     # check if we're still in the update state
     if @coordinate_state.current_state.name == 'update'
@@ -239,46 +239,46 @@ class Player < FirebaseObject
     Notification.center.post 'CrossedPlacementLimit'
   end
 
-  # TODO: Couldn't this all be in the .kapa method?
-  def recalculate_team(in_coordinate = coordinate)
-    puts "FBO:#{@class_name}:#{__LINE__} recalculate_team for #{display_name}".green if DEBUGGING
-    new_team = Machine.instance.takaro_fbo.get_team_for_coordinate(in_coordinate)
-
-    if new_team.nil?
-      # we did not find any nearby kapa.
-      puts 'Too far!'.red
-
-      # if the kaitakaro has a kapa already,
-      # it means they have moved away from their kapa
-      Team.remove_player_with_key(@ref.key, team['id']) unless team.nil?
-
-      # either way, remove the team from the player
-      self.team = nil
-    else
-      # we did find a kapa!
-      # it's the same kapa
-      if @data_hash.key?('team') && @data_hash['team']['id'] == new_team.ref.key
-        new_team.recalculate_coordinate
-        return
-      end
-
-      # if there is already a kapa, we need to remove the kaitakaro
-      # ahh yes, we must remove it from the _existing_ one, not the new one
-      puts "recalculate_team - existing data_hash team: #{@data_hash['team']}"
-      # unless @data_hash['kapa'].nil? or @data_hash['kapa'].count == 1
-      unless team.nil? or @data_hash['team'].count == 1
-        # what if it's the last one? Surely we don't delete it
-        Team.remove_player_with_key(@ref.key, team['team_key'])
-      end
-
-      # We might be adding it to the new kapa before it leaves the old one
-      # perhaps we need to pass a block?
-
-      puts "Adding #{display_name} to team #{new_team}".green
-
-      new_team.add_player(self)
-    end
-  end
+#   # TODO: Couldn't this all be in the .kapa method?
+#   def recalculate_team(in_coordinate = coordinate)
+#     puts "FBO:#{@class_name}:#{__LINE__} recalculate_team for #{display_name}".green if DEBUGGING
+#     new_team = Machine.instance.takaro_fbo.get_team_for_coordinate(in_coordinate)
+#
+#     if new_team.nil?
+#       # we did not find any nearby kapa.
+#       puts 'Too far!'.red
+#
+#       # if the kaitakaro has a kapa already,
+#       # it means they have moved away from their kapa
+#       Team.remove_player_with_key(@ref.key, team['id']) unless team.nil?
+#
+#       # either way, remove the team from the player
+#       self.team = nil
+#     else
+#       # we did find a kapa!
+#       # it's the same kapa
+#       if @data_hash.key?('team') && @data_hash['team']['id'] == new_team.ref.key
+#         new_team.recalculate_coordinate
+#         return
+#       end
+#
+#       # if there is already a kapa, we need to remove the kaitakaro
+#       # ahh yes, we must remove it from the _existing_ one, not the new one
+#       puts "recalculate_team - existing data_hash team: #{@data_hash['team']}"
+#       # unless @data_hash['kapa'].nil? or @data_hash['kapa'].count == 1
+#       unless team.nil? or @data_hash['team'].count == 1
+#         # what if it's the last one? Surely we don't delete it
+#         Team.remove_player_with_key(@ref.key, team['team_key'])
+#       end
+#
+#       # We might be adding it to the new kapa before it leaves the old one
+#       # perhaps we need to pass a block?
+#
+#       puts "Adding #{display_name} to team #{new_team}".green
+#
+#       new_team.add_player(self)
+#     end
+#   end
 
   def exit_bounds
     puts 'Kaitakaro exit_bounds'.pink
@@ -329,23 +329,26 @@ class Player < FirebaseObject
     }
   end
 
-  def data_for_pouwhenua
-    {
-      'key' => @ref.key,
-      'coordinate' => coordinate,
-      'lifespan_ms' => character['lifespan_ms'],
-      'color' => kapa['color'],
-      'kapa_key' => kapa['kapa_key'],
-      'kaitakaro_key' => key
-    }
-  end
+  # def data_for_pouwhenua
+  #   {
+  #     'key' => @ref.key,
+  #     'coordinate' => coordinate,
+  #     'lifespan_ms' => character['lifespan_ms'],
+  #     'color' => kapa['color'],
+  #     'kapa_key' => kapa['kapa_key'],
+  #     'kaitakaro_key' => key
+  #   }
+  # end
 
   def data_for_marker
+    mp __method__
+    # mp team
+    # mp @data_hash
     {
       'key' => @ref.key,
       'coordinate' => coordinate,
       'lifespan_ms' => character['lifespan_ms'],
-      'color' => team['color'],
+      'color' => color,
       'team_key' => team['team_key'],
       'player_key' => key
     }
@@ -353,20 +356,25 @@ class Player < FirebaseObject
 
   def character
     @data_hash['character']
+    @data_hash
   end
 
   def character=(in_character)
     update({ 'character' => in_character })
   end
 
-  def kapa
-    @data_hash['kapa']
+  def color
+    @data_hash['color']
   end
 
-  def kapa=(in_kapa)
-    result = in_kapa.nil? ? '' : in_kapa.data_for_kaitakaro
-    update({ 'kapa' => result })
-  end
+#   def kapa
+#     @data_hash['kapa']
+#   end
+#
+#   def kapa=(in_kapa)
+#     result = in_kapa.nil? ? '' : in_kapa.data_for_kaitakaro
+#     update({ 'kapa' => result })
+#   end
 
   def team
     @data_hash['team']
@@ -393,19 +401,19 @@ class Player < FirebaseObject
     @data_hash['character']['lifespan_ms']
   end
 
-  def pouwhenua_current
-    @data_hash['pouwhenua_current']
-  end
-
-  def pouwhenua_decrement
-    notification = -> { Notification.center.post 'UpdatePouwhenuaLabel' }
-    update_with_block({ 'pouwhenua_current' => pouwhenua_current - 1 }, &notification)
-  end
-
-  def pouwhenua_increment
-    notification = -> { Notification.center.post 'UpdatePouwhenuaLabel' }
-    update_with_block({ 'pouwhenua_current' => pouwhenua_current + 1 }, &notification)
-  end
+#   def pouwhenua_current
+#     @data_hash['pouwhenua_current']
+#   end
+#
+#   def pouwhenua_decrement
+#     notification = -> { Notification.center.post 'UpdatePouwhenuaLabel' }
+#     update_with_block({ 'pouwhenua_current' => pouwhenua_current - 1 }, &notification)
+#   end
+#
+#   def pouwhenua_increment
+#     notification = -> { Notification.center.post 'UpdatePouwhenuaLabel' }
+#     update_with_block({ 'pouwhenua_current' => pouwhenua_current + 1 }, &notification)
+#   end
 
   def marker_decrement
     mp __method__
