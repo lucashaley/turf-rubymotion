@@ -102,40 +102,6 @@ class Player < FirebaseObject
     end
   end
 
-#   def coordinate=(in_coordinate)
-#     puts "FBO:#{@class_name}:#{__LINE__} update_coordinate for #{display_name}".green if DEBUGGING
-#
-#     # if we're still updating, return
-#     return if @location_dirty
-#
-#     # check if we're still in the update state
-#     return if @coordinate_state.current_state.to_s == 'update'
-#
-#     # We haven't changed, so move on
-#     return if in_coordinate == coordinate
-#
-#     # Looks like we're updating, so set state
-#     @coordinate_state.event(:update)
-#
-#     # mark as dirty, so we can't do more updates until this cleans
-#     mp 'New coordinate: Setting location_dirty to true'
-#     @location_dirty = true
-#
-#     # update the database if we've moved
-#     update({ 'coordinate' => in_coordinate })
-#
-#     # check if we are outside the game field
-#     # We could use MKMapRectContainsPoint, but we would need to MapView MKMapRect
-#     # or we can use this algorithm: https://stackoverflow.com/a/23546284
-#     if Machine.instance.is_playing
-#       check_taiapa
-#       check_placing
-#     end
-#
-#     # check if we are outside the kapa starting zone
-#     # recalculate_kapa(in_coordinate) if Machine.instance.is_waiting
-#   end
-
   def coordinate=(in_coordinate)
     mp __method__
 
@@ -239,47 +205,6 @@ class Player < FirebaseObject
     Notification.center.post 'CrossedPlacementLimit'
   end
 
-#   # TODO: Couldn't this all be in the .kapa method?
-#   def recalculate_team(in_coordinate = coordinate)
-#     puts "FBO:#{@class_name}:#{__LINE__} recalculate_team for #{display_name}".green if DEBUGGING
-#     new_team = Machine.instance.takaro_fbo.get_team_for_coordinate(in_coordinate)
-#
-#     if new_team.nil?
-#       # we did not find any nearby kapa.
-#       puts 'Too far!'.red
-#
-#       # if the kaitakaro has a kapa already,
-#       # it means they have moved away from their kapa
-#       Team.remove_player_with_key(@ref.key, team['id']) unless team.nil?
-#
-#       # either way, remove the team from the player
-#       self.team = nil
-#     else
-#       # we did find a kapa!
-#       # it's the same kapa
-#       if @data_hash.key?('team') && @data_hash['team']['id'] == new_team.ref.key
-#         new_team.recalculate_coordinate
-#         return
-#       end
-#
-#       # if there is already a kapa, we need to remove the kaitakaro
-#       # ahh yes, we must remove it from the _existing_ one, not the new one
-#       puts "recalculate_team - existing data_hash team: #{@data_hash['team']}"
-#       # unless @data_hash['kapa'].nil? or @data_hash['kapa'].count == 1
-#       unless team.nil? or @data_hash['team'].count == 1
-#         # what if it's the last one? Surely we don't delete it
-#         Team.remove_player_with_key(@ref.key, team['team_key'])
-#       end
-#
-#       # We might be adding it to the new kapa before it leaves the old one
-#       # perhaps we need to pass a block?
-#
-#       puts "Adding #{display_name} to team #{new_team}".green
-#
-#       new_team.add_player(self)
-#     end
-#   end
-
   def exit_bounds
     puts 'Kaitakaro exit_bounds'.pink
     @in_boundary = false
@@ -349,7 +274,7 @@ class Player < FirebaseObject
       'coordinate' => coordinate,
       'lifespan_ms' => character['lifespan_ms'],
       'color' => color,
-      'team_key' => team['team_key'],
+      'team_key' => team,
       'player_key' => key
     }
   end

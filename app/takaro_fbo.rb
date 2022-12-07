@@ -284,10 +284,14 @@ class TakaroFbo < FirebaseObject
     coord_array = []
     # mp ['teams_hash', @teams_hash]
     # coord_array = @teams_hash { |k,v| v['coordinate'] }
+
+    mp 'iterating through teams'
     @teams_hash.each do |k, team|
-      # data = k.data_for_pouwhenua
+      mp 'team'
+      mp team
       new_marker_data = {
-        'kapa_key' => team['key'],
+        # 'key' => team['key'],
+        'team_key' => k,
         'color' => team['color'],
         'coordinate' => team['coordinate'],
         'enabled' => 'true'
@@ -397,9 +401,9 @@ class TakaroFbo < FirebaseObject
     } }
   end
 
-  def calculate_score
-    puts 'calculate_score'
-  end
+  # def calculate_score
+  #   puts 'calculate_score'
+  # end
 
   # Helpers
   def gamecode

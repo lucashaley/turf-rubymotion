@@ -95,6 +95,8 @@ class GameController < MachineViewController
 
   # rubocop:disable Metrics/AbcSize
   def calculate_score
+    mp __method__
+
     return if @voronoi_map.nil?
 
     mp 'voronoi_map'
@@ -124,11 +126,13 @@ class GameController < MachineViewController
       end
       # divide by 2 and get the absolute.
       area = (area / (2.0 * 100_000)).abs.round(1)
+      mp 'area'
+      mp area
 
-      if areas_hash.key?(vc.pylon['kapa_key'])
-        areas_hash[vc.pylon['kapa_key']] += area
+      if areas_hash.key?(vc.pylon['team_key'])
+        areas_hash[vc.pylon['team_key']] += area
       else
-        areas_hash[vc.pylon['kapa_key']] = area
+        areas_hash[vc.pylon['team_key']] = area
       end
     end
 
