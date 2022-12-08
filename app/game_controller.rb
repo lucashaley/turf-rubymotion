@@ -98,15 +98,15 @@ class GameController < MachineViewController
     mp __method__
 
     return if @voronoi_map.nil?
-
-    mp 'voronoi_map'
-    mp @voronoi_map
+#
+#     mp 'voronoi_map'
+#     mp @voronoi_map
 
     areas_hash = {}
 
     @voronoi_map.voronoi_cells.each do |vc|
-      mp 'voronoi cell'
-      mp vc
+      # mp 'voronoi cell'
+      # mp vc
       verts = vc.vertices
 
       area = 0.0
@@ -126,8 +126,8 @@ class GameController < MachineViewController
       end
       # divide by 2 and get the absolute.
       area = (area / (2.0 * 100_000)).abs.round(1)
-      mp 'area'
-      mp area
+      # mp 'area'
+      # mp area
 
       if areas_hash.key?(vc.pylon['team_key'])
         areas_hash[vc.pylon['team_key']] += area
@@ -136,19 +136,22 @@ class GameController < MachineViewController
       end
     end
 
-    mp 'areas_hash'
-    mp areas_hash
+    # mp 'areas_hash'
+    # mp areas_hash
 
     total_areas_hash = areas_hash.values.inject(0, :+)
-    mp 'total_areas_hash'
-    mp total_areas_hash
+    # mp 'total_areas_hash'
+    # mp total_areas_hash
 
     delta_hash = {}
     areas_hash.each do |key, v|
       s = ((v / total_areas_hash) * 100).round - 50
       s = s < 0 ? 0 : s
-      delta_hash[key] = (s / 10).round
+      delta_hash[key] = (s / 10).round # is this necessary?
     end
+
+    # mp 'delta_hash'
+    # mp delta_hash
 
     # This doesn't seem to work for this version?
     # delta_hash = areas_hash.transform_values { |v| ((v / total_areas_hash) * 100).round - 50 }
@@ -161,6 +164,9 @@ class GameController < MachineViewController
       end
     end
 
+    # mp 'scores_hash'
+    # mp @scores_hash
+
     left_score_label.text = @scores_hash.values[0].to_s
     right_score_label.text = @scores_hash.values[1].to_s
   end
@@ -168,22 +174,22 @@ class GameController < MachineViewController
 
   # rubocop:disable Metrics/AbcSize
   def init_observers
-    @map_refresh = Notification.center.observe 'MapRefresh' do |_notification|
-      puts 'map_refresh'.focus
-      observe_new_pouwhenua
-    end
-    @pouwhenua_new_observer = Notification.center.observe 'PouwhenuaNew' do |_notification|
-      puts 'pouwhenua_new_observer'.focus
-      observe_new_pouwhenua
-    end
-    @pouwhenuafbo_new_observer = Notification.center.observe 'PouwhenuaFbo_New' do |_notification|
-      puts 'pouwhenuafbo_new_observer'.focus
-      observe_new_pouwhenua
-    end
-    @pouwhenua_child_observer = Notification.center.observe 'PouwhenuaFbo_ChildAdded' do |_notification|
-      puts 'pouwhenua_child_observer'.focus
-      observe_new_pouwhenua
-    end
+    # @map_refresh = Notification.center.observe 'MapRefresh' do |_notification|
+    #   puts 'map_refresh'.focus
+    #   observe_new_pouwhenua
+    # end
+    # @pouwhenua_new_observer = Notification.center.observe 'PouwhenuaNew' do |_notification|
+    #   puts 'pouwhenua_new_observer'.focus
+    #   observe_new_pouwhenua
+    # end
+    # @pouwhenuafbo_new_observer = Notification.center.observe 'PouwhenuaFbo_New' do |_notification|
+    #   puts 'pouwhenuafbo_new_observer'.focus
+    #   observe_new_pouwhenua
+    # end
+    # @pouwhenua_child_observer = Notification.center.observe 'PouwhenuaFbo_ChildAdded' do |_notification|
+    #   puts 'pouwhenua_child_observer'.focus
+    #   observe_new_pouwhenua
+    # end
 
     @player_new_observer = Notification.center.observe 'PlayerNew' do |_notification|
       puts 'NEW PLAYER'
@@ -440,13 +446,13 @@ class GameController < MachineViewController
     rend
   end
 
-  def try_render_overlays
-#     puts 'try_render_overlays'
-#     return if @rendering
-#
-#     puts 'rendering'
-#     render_overlays
-  end
+#   def try_render_overlays
+# #     puts 'try_render_overlays'
+# #     return if @rendering
+# #
+# #     puts 'rendering'
+# #     render_overlays
+#   end
 
   def render_overlays
     mp __method__
