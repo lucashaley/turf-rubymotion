@@ -63,9 +63,13 @@ class TakaroFbo < FirebaseObject
     @ref.child('players').observeEventType(FIRDataEventTypeChildChanged, withBlock:
       lambda do |player_snapshot|
         mp 'Takaro observe player changed'
+        mp player_snapshot.valueInExportFormat
 
         # update the specific player
         @players_hash[player_snapshot.key] = player_snapshot.valueInExportFormat
+        mp @players_hash
+
+        Notification.center.post('player_moved')
       end)
     # Specific Team
     @ref.child('teams').observeEventType(FIRDataEventTypeChildChanged, withBlock:
@@ -519,7 +523,7 @@ class TakaroFbo < FirebaseObject
 
     # the new local hash way
     @players_hash.each_value do |player|
-      # mp player
+      mp player
       player_annotation = PlayerAnnotation.alloc.initWithCoordinate(
         Utilities::format_to_location_coord(player['coordinate'])
       )
