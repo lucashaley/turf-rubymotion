@@ -399,10 +399,12 @@ class TakaroFbo < FirebaseObject
     mp __method__
     puts "FBO:#{@class_name} list_player_names_for_index".green if DEBUGGING
 
-    @teams_hash.values[in_index]['players'].values.map{ |p| {
-      'display_name' => p['display_name'],
-      'character' => p['character']
-    } }
+    @teams_hash.values[in_index]['players'].values.map do |p|
+      {
+        'display_name' => p['display_name'],
+        'character' => p['character']
+      }
+    end
   end
 
   # def calculate_score
@@ -522,6 +524,7 @@ class TakaroFbo < FirebaseObject
     annotations = []
 
     # the new local hash way
+    mp 'iterating through players'
     @players_hash.each_value do |player|
       mp player
       player_annotation = PlayerAnnotation.alloc.initWithCoordinate(
