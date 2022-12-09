@@ -25,7 +25,7 @@ class TakaroFbo < FirebaseObject
   def initialize(in_ref, in_data_hash)
     mp __method__
 
-    @team_manager = TeamManager.new
+    # @team_manager = TeamManager.new
     @kaitakaro_array = []
     @kaitakaro_hash = {}
     @teams_hash = {}
