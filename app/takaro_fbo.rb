@@ -19,8 +19,12 @@ class TakaroFbo < FirebaseObject
   MOVE_THRESHOLD = 2
   TEAM_COUNT = 2
   FIELD_SCALE = 3
-  BOT_DISTANCE = 0.001
-  BOT_TEAM_DISPLACEMENT = 5 * 10**-14
+  BOT_TEAM_DISTANCE = 5.0
+  BOT_TEAM_DISTANCE_FACTOR = 4
+  BOT_DISTANCE = 5.0
+  BOT_DISTANCE_FACTOR = 14
+  # BOT_DISTANCE = 0.0015
+  # BOT_TEAM_DISPLACEMENT = BigDecimal(5 * 10**-12)
 
   def initialize(in_ref, in_data_hash)
     mp __method__
@@ -222,29 +226,46 @@ class TakaroFbo < FirebaseObject
 
     # grab local player coordinate if not defined
     @bot_centroid ||= {
-      'latitude' => @local_player.coordinate['latitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE),
-      'longitude' => @local_player.coordinate['longitude'] + rand(-BOT_DISTANCE..BOT_DISTANCE)
+      'latitude' => @local_player.coordinate['latitude'] + (rand(-BOT_TEAM_DISTANCE..BOT_DISTANCE) * 10**-BOT_TEAM_DISTANCE_FACTOR),
+      'longitude' => @local_player.coordinate['longitude'] + (rand(-BOT_DISTANCE..BOT_DISTANCE) * 10**-BOT_TEAM_DISTANCE_FACTOR)
     }
-    # mp 'bot_centroid after:'
-    # mp @bot_centroid
+    mp 'bot_centroid'
+    mp @bot_centroid
+
+    lat_range = BigDecimal(rand(-BOT_DISTANCE..BOT_DISTANCE) * 10**-BOT_DISTANCE_FACTOR)
+    mp lat_range
+    new_lat = BigDecimal(@bot_centroid['latitude']) + lat_range
+    long_range = BigDecimal(rand(-BOT_TEAM_DISTANCE..BOT_TEAM_DISTANCE) * 10**-BOT_DISTANCE_FACTOR)
+    mp long_range
+    new_long = BigDecimal(@bot_centroid['longitude']) + long_range
+    mp new_lat
+    mp new_long
+    bot_coordinate = {
+      'latitude' => new_lat,
+      'longitude' => new_long
+    }
+    mp bot_coordinate
 
     bot_data = {
-      'display_name' => 'Jimmy Bot',
+      'display_name' => 'Jimmy Bot ' + rand(1..10).to_s,
       'character' => {
         'deploy_time' => 4,
         'lifespan_ms' => 280_000,
         'pylon_start' => 3,
         'title' => 'Bot Character'
-      }
+      },
+      'coordinate' => bot_coordinate,
     }
 
     bot_ref = @ref.child('players').childByAutoId
     bot = Player.new(bot_ref, bot_data, true)
 
-    bot.coordinate = {
-      'latitude' => @bot_centroid['latitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT),
-      'longitude' => @bot_centroid['longitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT)
-    }
+    # Do we do this afterwards to trigger the team sorting?
+
+    # bot.coordinate = {
+    #   'latitude' => @bot_centroid['latitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT),
+    #   'longitude' => @bot_centroid['longitude'] + rand(-BOT_TEAM_DISPLACEMENT..BOT_TEAM_DISPLACEMENT)
+    # }
     # mp bot.coordinate
 
     # add_kaitakaro(bot)
