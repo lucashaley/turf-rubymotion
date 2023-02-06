@@ -73,6 +73,7 @@ class GameController < MachineViewController
       0.1,
       target: self,
       selector: 'try_render_overlays',
+      # selector: 'render_overlays',
       userInfo: nil,
       repeats: true
     )
@@ -89,7 +90,7 @@ class GameController < MachineViewController
   end
 
   def handle_game_over
-    $logger.info 'handle_game_over'
+    mp 'handle_game_over'
     performSegueWithIdentifier('GameOver', sender: self)
   end
 
@@ -126,8 +127,8 @@ class GameController < MachineViewController
       end
       # divide by 2 and get the absolute.
       area = (area / (2.0 * 100_000)).abs.round(1)
-      # mp 'area'
-      # mp area
+      mp 'area'
+      mp area
 
       if areas_hash.key?(vc.pylon['team_key'])
         areas_hash[vc.pylon['team_key']] += area
@@ -136,22 +137,27 @@ class GameController < MachineViewController
       end
     end
 
-    # mp 'areas_hash'
-    # mp areas_hash
+    mp 'areas_hash'
+    mp areas_hash
 
     total_areas_hash = areas_hash.values.inject(0, :+)
-    # mp 'total_areas_hash'
-    # mp total_areas_hash
+    mp 'total_areas_hash'
+    mp total_areas_hash
 
     delta_hash = {}
+
+    # something is going on here
     areas_hash.each do |key, v|
+      mp key
       s = ((v / total_areas_hash) * 100).round - 50
+      mp s
       s = s < 0 ? 0 : s
-      delta_hash[key] = (s / 10).round # is this necessary?
+      mp s
+      delta_hash[key] = s == 0 ? 0 : (s / 10).round # is this necessary?
     end
 
-    # mp 'delta_hash'
-    # mp delta_hash
+    mp 'delta_hash'
+    mp delta_hash
 
     # This doesn't seem to work for this version?
     # delta_hash = areas_hash.transform_values { |v| ((v / total_areas_hash) * 100).round - 50 }
@@ -164,8 +170,8 @@ class GameController < MachineViewController
       end
     end
 
-    # mp 'scores_hash'
-    # mp @scores_hash
+    mp 'scores_hash'
+    mp @scores_hash
 
     left_score_label.text = @scores_hash.values[0].to_s
     right_score_label.text = @scores_hash.values[1].to_s
@@ -446,13 +452,13 @@ class GameController < MachineViewController
     rend
   end
 
-#   def try_render_overlays
-# #     puts 'try_render_overlays'
-# #     return if @rendering
-# #
-# #     puts 'rendering'
-# #     render_overlays
-#   end
+  def try_render_overlays
+    puts 'try_render_overlays'
+    return if @rendering
+
+    puts 'rendering'
+    render_overlays
+  end
 
   def render_overlays
     mp __method__

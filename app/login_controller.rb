@@ -12,7 +12,7 @@ class LoginController < MachineViewController
     # This is GIDSignIn version
     # create notifications
     Notification.center.observe 'ASAuthorizationAppleIDProviderCredentialRevokedNotification' do |_notification|
-      $logger.warn 'SignInWithAppleStateChanged'
+      mp 'SignInWithAppleStateChanged'
     end
   end
 
@@ -23,28 +23,28 @@ class LoginController < MachineViewController
   # and
   #   app.entitlements['com.apple.developer.applesignin'] = ['Default']
   def handle_apple_authorization(sender)
-    $logger.info 'handle_apple_authorization'
+    mp 'handle_apple_authorization'
 
     # the 'nonce' is a random string that is used to confirm the authentication
     # for Firebase logins using Apple
     @nonce = generate_nonce
 
     appleID_provider = ASAuthorizationAppleIDProvider.alloc.init
-    $logger.info appleID_provider
+    mp appleID_provider
 
     # Create the request, and encode the nonce
     request = appleID_provider.createRequest
     request.nonce = @nonce.SHA256
 
     request.requestedScopes = [ASAuthorizationScopeFullName, ASAuthorizationScopeEmail]
-    $logger.info request
+    mp request
 
     # the argument needs to be an array
     auth_controller = ASAuthorizationController.alloc.initWithAuthorizationRequests([request])
-    $logger.info auth_controller
+    mp auth_controller
     auth_controller.delegate = self
     auth_controller.presentationContextProvider = self
-    $logger.info auth_controller
+    mp auth_controller
 
     # start the process
     auth_controller.performRequests
@@ -58,7 +58,7 @@ class LoginController < MachineViewController
       return
     end
 
-    $logger.info 'didCompleteWithAuthorization'
+    mp 'didCompleteWithAuthorization'
 
     # create a firebase credential for the apple auth
     credential = FIROAuthProvider.credentialWithProviderID(
@@ -72,20 +72,20 @@ class LoginController < MachineViewController
 
   # - (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithError:(NSError *)error;
   def authorizationController(auth_controller, didCompleteWithError: error)
-    $logger.info 'didCompleteWithError'
+    mp 'didCompleteWithError'
     # again, something useful should happen here
   end
 
   # ASAuthorizationControllerPresentationContextProviding
   # - (ASPresentationAnchor)presentationAnchorForAuthorizationController:(ASAuthorizationController *)controller;
   def presentationAnchorForAuthorizationController(controller)
-    $logger.info 'presentationAnchorForAuthorizationController'
+    mp 'presentationAnchorForAuthorizationController'
     view.window
   end
 
   # this is an action attached to a button in IB
   def handle_google_authorization(sender)
-    $logger.info 'handle_google_authorization'
+    mp 'handle_google_authorization'
 
     # get the config from the current Firebase app
     gid_config = GIDConfiguration.alloc.initWithClientID(FIRApp.defaultApp.options.clientID)
@@ -99,7 +99,7 @@ class LoginController < MachineViewController
   end
 
   def complete_google_authorization(user, error)
-    $logger.info 'complete_google_authorization'
+    mp 'complete_google_authorization'
 
     unless error.nil?
       $logger.error error.localizedDescription
@@ -120,7 +120,7 @@ class LoginController < MachineViewController
 
   def complete_authorization(credential)
     # from either Apple or Google, we get a firebase credential
-    $logger.info 'complete_authorization'
+    mp 'complete_authorization'
 
     # async call to sign into Firebase using the credential
     Dispatch::Queue.new("turf-test-db").async do
