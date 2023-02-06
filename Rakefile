@@ -36,7 +36,7 @@ Motion::Project::App.setup do |app|
   app.name = 'Turf'
 
   # version for your app
-  app.version = '0.1.11'
+  app.version = '0.1.13'
 
   # ===========================================================================================
   # 3. Set your deployment target (it's recommended that you at least target 10.0 and above).
@@ -105,19 +105,19 @@ Motion::Project::App.setup do |app|
 #     app.codesign_certificate = MotionProvisioning.certificate(
 #       type: :development,
 #       platform: :ios)
-# 
+#
 #     app.provisioning_profile = MotionProvisioning.profile(
 #       bundle_identifier: app.identifier,
 #       app_name: app.name,
 #       platform: :ios,
 #       type: :development)
 #   end
-# 
+#
 #   app.release do
 #     app.codesign_certificate = MotionProvisioning.certificate(
 #       type: :distribution,
 #       platform: :ios)
-# 
+#
 #     app.provisioning_profile = MotionProvisioning.profile(
 #       bundle_identifier: app.identifier,
 #       app_name: app.name,
@@ -145,17 +145,17 @@ Motion::Project::App.setup do |app|
   #    Application Loader.
   # ===========================================================================================
   # app.development do
-  #   app.codesign_certificate = 
-  #   app.provisioning_profile = 
+  #   app.codesign_certificate =
+  #   app.provisioning_profile =
   # end
 
   # this works
   app.release do
-    app.codesign_certificate = "Apple Distribution: Lucas Haley (3DZ7KWNU9A)"
-    app.provisioning_profile = 'provisioning/TurfDistribution.mobileprovision'
+    app.codesign_certificate = "iPhone Distribution: Lucas Haley (3DZ7KWNU9A)"
+    app.provisioning_profile = 'provisioning/TurfDistribution02052023.mobileprovision'
   end
   app.development do
-    app.codesign_certificate = "Apple Development: Lucas Haley (RU52PCAUBM)"
+    app.codesign_certificate = "iPhone Development: Lucas Haley (RU52PCAUBM)"
     app.provisioning_profile = 'provisioning/TurfDevelopment.mobileprovision'
   end
 
@@ -190,7 +190,7 @@ Motion::Project::App.setup do |app|
   }]
   # https://github.com/amirrajan/rubymotion-applied/issues/127
   app.info_plist['FirebaseAppDelegateProxyEnabled'] = false
-  
+
   app.info_plist['bugsnag'] = [{
     'apiKey' => ['3cab9a5e6b16897ab5e965083c5b4fd7']
   }]
@@ -219,7 +219,7 @@ Motion::Project::App.setup do |app|
     # pod 'MapboxStatic.swift', '~> 0.12'
 
     pod 'NSHash'
-    
+
     # https://app.bugsnag.com
     pod 'Bugsnag'
   end

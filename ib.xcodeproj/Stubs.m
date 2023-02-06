@@ -27,34 +27,25 @@
 @implementation InfoViewController
 @end
 
-@implementation KaitakaroAnnotation
+@implementation MarkerAnnotation
 @end
 
 @implementation MKPolygon
 @end
 
-@implementation PouAnnotation
-@end
-
-@implementation PouSite
-@end
-
-@implementation Pouwhenua
-@end
-
-@implementation Pylon
+@implementation PlayerAnnotation
 @end
 
 @implementation PylonAnnotation
 @end
 
-@implementation PylonCell
+@implementation VoronoiCell
 @end
 
 @implementation VoronoiMap
 @end
 
-@implementation Wakawaka
+@implementation VoronoiSite
 @end
 
 @implementation JoinExistingController
@@ -96,9 +87,6 @@
 @implementation PouwhenuaFbo
 @end
 
-@implementation ClayPathMaker
-@end
-
 @implementation SelectCharacterController
 @end
 
@@ -112,9 +100,6 @@
 @end
 
 @implementation Team
-@end
-
-@implementation TeamManager
 @end
 
 @implementation String

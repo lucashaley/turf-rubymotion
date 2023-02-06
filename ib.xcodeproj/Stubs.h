@@ -67,19 +67,17 @@
 
 -(IBAction) setup_mapview;
 -(IBAction) setup_audio;
--(IBAction) update_pouwhenua_label;
 -(IBAction) update_marker_label;
 -(IBAction) setup_timers;
 -(IBAction) timer_decrement;
 -(IBAction) handle_game_over;
--(IBAction) format_seconds:(id) in_seconds;
 -(IBAction) calculate_score;
 -(IBAction) init_observers;
 -(IBAction) viewDidLoad;
 -(IBAction) button_down;
 -(IBAction) button_up;
--(IBAction) pouwhenua_annotation:(id) annotation;
--(IBAction) kaitarako_annotation:(id) annotation;
+-(IBAction) marker_annotation:(id) annotation;
+-(IBAction) player_annotation:(id) annotation;
 -(IBAction) try_render_overlays;
 -(IBAction) render_overlays;
 -(IBAction) touch_down;
@@ -91,6 +89,7 @@
 -(IBAction) play_forward_sound:(id) context;
 -(IBAction) handle_new_marker;
 -(IBAction) observe_new_pouwhenua;
+-(IBAction) format_seconds:(id) in_seconds;
 
 @end
 
@@ -113,41 +112,16 @@
 
 @end
 
-@interface KaitakaroAnnotation: MKPointAnnotation
+@interface MarkerAnnotation: MKPointAnnotation
+-(IBAction) description;
+
 @end
 
 @interface MKPolygon: NSObject
 @end
 
-@interface PouAnnotation: MKPointAnnotation
-@end
-
-@interface PouSite: Site
-@end
-
-@interface Pouwhenua: Site
--(IBAction) distance_from_pylon:(id) pylon;
--(IBAction) distance_from_location:(id) location;
--(IBAction) set_location:(id) location;
--(IBAction) lifespan_color;
--(IBAction) set_uuid:(id) new_uuid;
--(IBAction) set_annotation:(id) new_annotation;
--(IBAction) get_uicolor;
--(IBAction) to_hash;
--(IBAction) recursive_symbolize_keys:(id) h;
-
-@end
-
-@interface Pylon: Site
--(IBAction) distance_from_pylon:(id) pylon;
--(IBAction) distance_from_location:(id) location;
--(IBAction) to_s;
--(IBAction) setLocation:(id) location;
--(IBAction) to_hash;
--(IBAction) lifespan_color;
--(IBAction) set_uuid:(id) new_uuid;
--(IBAction) set_annotation:(id) new_annotation;
--(IBAction) get_uicolor;
+@interface PlayerAnnotation: MKPointAnnotation
+-(IBAction) description;
 
 @end
 
@@ -161,27 +135,23 @@
 
 @end
 
-@interface PylonCell: NSObject
--(IBAction) edges;
--(IBAction) vertices;
--(IBAction) overlay;
-
-@end
-
-@interface VoronoiMap: NSObject
--(IBAction) initialize;
--(IBAction) voronoi_cells;
--(IBAction) annotations;
-
-@end
-
-@interface Wakawaka: NSObject
+@interface VoronoiCell: NSObject
 -(IBAction) color;
 -(IBAction) edges;
 -(IBAction) vertices;
 -(IBAction) overlay;
 -(IBAction) to_s;
 
+@end
+
+@interface VoronoiMap: NSObject
+-(IBAction) initialize;
+-(IBAction) recalculate_cells;
+-(IBAction) voronoi_cells;
+
+@end
+
+@interface VoronoiSite: Site
 @end
 
 @interface JoinExistingController: MachineViewController
@@ -326,7 +296,6 @@
 -(IBAction) check_taiapa;
 -(IBAction) placing:(id) in_bool;
 -(IBAction) check_placing;
--(IBAction) recalculate_team:(id) in_coordinate;
 -(IBAction) exit_bounds;
 -(IBAction) enter_bounds;
 -(IBAction) eject;
@@ -334,16 +303,12 @@
 -(IBAction) updating;
 -(IBAction) name_and_character;
 -(IBAction) data_for_team;
--(IBAction) data_for_pouwhenua;
 -(IBAction) data_for_marker;
 -(IBAction) character;
--(IBAction) kapa;
+-(IBAction) color;
 -(IBAction) team;
 -(IBAction) deploy_time;
 -(IBAction) lifespan_ms;
--(IBAction) pouwhenua_current;
--(IBAction) pouwhenua_decrement;
--(IBAction) pouwhenua_increment;
 -(IBAction) marker_decrement;
 -(IBAction) marker_increment;
 
@@ -360,9 +325,6 @@
 @interface PouwhenuaFbo: FirebaseObject
 -(IBAction) destroy;
 
-@end
-
-@interface ClayPathMaker: NSObject
 @end
 
 @interface SelectCharacterController: MachineViewController
@@ -385,16 +347,14 @@
 
 @interface TakaroFbo: FirebaseObject
 -(IBAction) initialize_firebase_observers;
--(IBAction) init_states;
+-(IBAction) initialize_state_machine;
 -(IBAction) initialize_local_player:(id) in_character;
 -(IBAction) create_bot_player;
--(IBAction) add_player:(id) in_player;
 -(IBAction) kapa_with_key:(id) in_key;
 -(IBAction) get_kapa_for_coordinate:(id) coordinate;
 -(IBAction) set_initial_markers;
 -(IBAction) player_count_for_index:(id) in_index;
 -(IBAction) list_player_names_for_index:(id) in_index;
--(IBAction) calculate_score;
 -(IBAction) gamecode;
 -(IBAction) duration;
 -(IBAction) kapa_hash;
@@ -428,14 +388,6 @@
 -(IBAction) data_for_pouwhenua;
 -(IBAction) format_to_location_coord:(id) input;
 -(IBAction) recursive_symbolize_keys:(id) hsh;
-
-@end
-
-@interface TeamManager: NSObject
--(IBAction) initialize;
--(IBAction) add_player_to_team:(id) in_player;
--(IBAction) create_new_team:(id) in_coordinate;
--(IBAction) find_nearest_team:(id) coordinates;
 
 @end
 

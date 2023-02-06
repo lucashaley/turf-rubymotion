@@ -8,7 +8,8 @@ gem 'rake'
 gem 'motion-cocoapods', path: '/Users/lucashaley/Documents/GitHub/motion-cocoapods/'
 
 # Disabling as it doesn't seem to work 5/22
-# gem 'motion-provisioning'
+# gem "fastlane", "2.176.0"
+gem 'motion-provisioning'
 
 # gem "bubble-wrap", git: "https://github.com/rubymotion-community/BubbleWrap"
 
