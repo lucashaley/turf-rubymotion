@@ -7,6 +7,7 @@ class Player < FirebaseObject
                 :coordinate_state,
                 :marker_current,
                 :coordinate_current,
+                :in_turf
   attr_reader :location_update_observer
 
   @location_dirty = false
