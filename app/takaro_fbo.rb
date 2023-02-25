@@ -325,7 +325,7 @@ class TakaroFbo < FirebaseObject
         'enabled' => 'true'
       }
       # mp new_marker_data
-      new_marker_data.merge!('lifespan_ms' => duration * 60 * 1000)
+      new_marker_data.merge!('lifespan' => duration * 60)
       create_new_marker_from_hash(new_marker_data, true)
       coord_array << team['coordinate']
     end

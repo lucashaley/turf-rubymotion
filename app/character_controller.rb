@@ -13,21 +13,21 @@ class CharacterController < UIViewController
       'scout' => {
         'deploy_time' => 4,
         # "lifespan_ms" => 2 * 60 * 1000,
-        'lifespan_ms' => 4 * 1000,
+        'lifespan' => 4 * 1000,
         'pouwhenua_start' => 8,
         'title' => 'Scout'
       },
       'tank' => {
         'deploy_time' => 6,
         # "lifespan_ms" => 8 * 60 * 1000,
-        'lifespan_ms' => 8 * 1000,
+        'lifespan' => 8 * 1000,
         'pouwhenua_start' => 3,
         'title' => 'Tank'
       },
       'commander' => {
         'deploy_time' => 8,
         # "lifespan_ms" => 5 * 60 * 1000,
-        'lifespan_ms' => 5 * 1000,
+        'lifespan' => 5 * 1000,
         'pouwhenua_start' => 4,
         'title' => 'Commander'
       }

@@ -308,7 +308,7 @@
 -(IBAction) color;
 -(IBAction) team;
 -(IBAction) deploy_time;
--(IBAction) lifespan_ms;
+-(IBAction) lifespan;
 -(IBAction) marker_decrement;
 -(IBAction) marker_increment;
 

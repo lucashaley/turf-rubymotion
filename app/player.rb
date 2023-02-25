@@ -268,11 +268,12 @@ class Player < FirebaseObject
   def data_for_marker
     mp __method__
     # mp team
-    # mp @data_hash
+    mp @data_hash
+    mp character['lifespan']
     {
       'key' => @ref.key,
       'coordinate' => coordinate,
-      'lifespan_ms' => character['lifespan_ms'],
+      'lifespan' => character['lifespan'],
       'color' => color,
       'team_key' => team,
       'player_key' => key
@@ -322,8 +323,8 @@ class Player < FirebaseObject
     @data_hash['character']['deploy_time']
   end
 
-  def lifespan_ms
-    @data_hash['character']['lifespan_ms']
+  def lifespan
+    @data_hash['character']['lifespan']
   end
 
 #   def pouwhenua_current
