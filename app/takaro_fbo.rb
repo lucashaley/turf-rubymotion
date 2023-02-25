@@ -11,6 +11,7 @@ class TakaroFbo < FirebaseObject
                 :markers_hash,
                 :game_state_machine,
                 :players_hash,
+                :host,
                 :taiapa_region # TODO: this might be hash later?
 
   DEBUGGING = true
@@ -41,6 +42,8 @@ class TakaroFbo < FirebaseObject
     puts 'TakaroFbo initialize'.red
     super.tap do |t|
       unless in_data_hash.nil?
+        t.host = false
+
         t.initialize_firebase_observers
 
         # set up game state state machine

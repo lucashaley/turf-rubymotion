@@ -12,6 +12,9 @@ class GameOptionsController < MachineViewController
     )
     @takaro_fbo = Machine.instance.takaro_fbo
     Notification.center.post("game_state_options_notification", nil)
+
+    @takaro_fbo.host = true
+
   end
 
   def select_duration(sender)
