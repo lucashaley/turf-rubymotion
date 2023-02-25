@@ -265,7 +265,9 @@
 @property IBOutlet UILabel * gamecode;
 @property IBOutlet CharacterController * character_view;
 @property IBOutlet UIButton * continue_button;
+@property IBOutlet UIButton * button_continue;
 @property IBOutlet UIButton * cancel_button;
+@property IBOutlet UIButton * button_pylon;
 @property IBOutlet UITableView * table_team_a;
 @property IBOutlet UITableView * table_team_b;
 @property IBOutlet UILabel * not_close_enough;

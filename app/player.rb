@@ -6,7 +6,7 @@ class Player < FirebaseObject
                 :state_waiting,
                 :coordinate_state,
                 :marker_current,
-                :coordinate_current
+                :coordinate_current,
   attr_reader :location_update_observer
 
   @location_dirty = false
@@ -282,7 +282,7 @@ class Player < FirebaseObject
 
   def character
     @data_hash['character']
-    @data_hash
+    # @data_hash
   end
 
   def character=(in_character)

@@ -42,6 +42,13 @@ class GameController < MachineViewController
   def update_marker_label
     mp __method__
     pouwhenua_label.text = '•' * Machine.instance.takaro_fbo.local_player.marker_current
+
+    # change the enable of the button
+    if Machine.instance.takaro_fbo.local_player.marker_current <= 0
+      button_pylon.enabled = false
+    else
+      button_pylon.enabled = false & Machine.instance.takaro_fbo.local_player.in_boundary
+    end
   end
 
   # https://www.raywenderlich.com/2156-rubymotion-tutorial-for-beginners-part-2

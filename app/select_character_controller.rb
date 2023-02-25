@@ -25,6 +25,7 @@ class SelectCharacterController < MachineViewController
       },
       'commander' => {
         'deploy_time' => 5,
+        'lifespan' => 1.minutes,
         'pouwhenua_start' => 3,
         'title' => 'Commander',
         'can_see_into_enemy_turf' => true,

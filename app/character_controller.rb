@@ -1,6 +1,6 @@
 class CharacterController < UIViewController
   extend IB
-  
+
   attr_accessor :player_classes
 
   outlet :scout_button, UIButton
@@ -64,14 +64,14 @@ class CharacterController < UIViewController
 
     # This sends it directly to the Takaro
     # But this won't work with the Join Controller, as the Takaro doesn't exist until
-    # the player enters the gamecode    
+    # the player enters the gamecode
     # Machine.instance.current_view.takaro.local_kaitakaro_hash['player_class'] = player_class
     # Machine.instance.current_view.takaro.local_kaitakaro.character_hash = player_class
     # Machine.instance.current_view.takaro.local_kaitakaro.character = player_class
-    
+
     # directly make a local variable on the Controller, for Join Controller
     Machine.instance.current_view.local_character = player_class
-    
+
     # post notification for New Controller
     Notification.center.post("SelectCharacter", player_class)
 

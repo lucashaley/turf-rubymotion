@@ -87,7 +87,10 @@ class TakaroFbo < FirebaseObject
             Notification.center.post('teams_changed', @teams_hash)
           end
         )
-      end)
+      end
+    )
+
+
     # All Teams
     # @ref.child('teams').observeEventType(FIRDataEventTypeValue, withBlock:
     #   lambda do |teams_snapshot|
@@ -399,11 +402,14 @@ class TakaroFbo < FirebaseObject
     #   @ref.child('markers').childByAutoId, new_markers_hash
     # )
 
+    # Okay, but this doesnt allow for a death timer!!
     mp 'creating new marker'
-    new_marker = @ref.child('markers').childByAutoId
-    new_marker.setValue(
-      new_markers_hash
-    )
+    # new_marker = @ref.child('markers').childByAutoId
+    # new_marker.setValue(
+    #   new_markers_hash
+    # )
+
+    fb_marker = Marker.new(@ref.child('markers').childByAutoId, new_markers_hash)
 
     @local_player.marker_decrement unless is_initial
   end

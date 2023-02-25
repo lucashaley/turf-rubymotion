@@ -2,7 +2,9 @@ class NewController < MachineViewController
   outlet :gamecode, UILabel
   outlet :character_view, CharacterController
   outlet :continue_button, UIButton
+  outlet :button_continue, UIButton
   outlet :cancel_button, UIButton
+  outlet :button_pylon, UIButton
 
   outlet :table_team_a, UITableView
   outlet :table_team_b, UITableView
@@ -35,7 +37,11 @@ class NewController < MachineViewController
     # @takaro.init_local_kaitakaro(Machine.instance.local_character)
     @takaro.initialize_local_player(Machine.instance.local_character)
 
-    Notification.center.post("game_state_waiting_room_notification", nil)
+    Notification.center.post('game_state_waiting_room_notification', nil)
+  end
+
+  def viewWillAppear(_animated)
+    continue_button.enabled = @takaro.host
   end
 
   def init_observers

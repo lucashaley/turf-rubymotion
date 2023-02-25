@@ -40,7 +40,7 @@
             <objects>
                 <viewController storyboardIdentifier="Settings" id="lbW-wk-URB" customClass="SettingsController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="WB8-qf-O3B">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Settings." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mz6-br-Zm7">
@@ -395,7 +395,9 @@
                     </view>
                     <navigationItem key="navigationItem" id="xrk-ks-pwB"/>
                     <connections>
+                        <outlet property="button_continue" destination="UmA-Sh-xgH" id="b2B-u4-bnt"/>
                         <outlet property="cancel_button" destination="NQU-5x-TWF" id="3tI-a0-mQn"/>
+                        <outlet property="continue_button" destination="UmA-Sh-xgH" id="7c7-hG-ZSo"/>
                         <outlet property="gamecode" destination="V47-r9-v7Y" id="zbY-mU-uIr"/>
                         <outlet property="not_close_enough" destination="AFw-8c-ST2" id="twh-B8-0Ii"/>
                         <outlet property="table_team_a" destination="AgA-Xk-jr9" id="txv-ZG-ZEt"/>
@@ -919,7 +921,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
             <objects>
                 <viewController id="QAX-Yg-aGW" userLabel="GameOver" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="eK7-1n-UgD">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Game O'er" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bWj-6U-z6w">
@@ -948,7 +950,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
     <resources>
         <image name="10.square" catalog="system" width="128" height="114"/>
         <image name="20.square" catalog="system" width="128" height="114"/>
-        <image name="5.square" catalog="system" width="32" height="32"/>
+        <image name="5.square" catalog="system" width="128" height="114"/>
         <image name="google.png" width="18" height="18"/>
         <image name="plus.square.fill" catalog="system" width="128" height="114"/>
         <systemColor name="labelColor">
