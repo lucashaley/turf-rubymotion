@@ -4,7 +4,7 @@ class Player < FirebaseObject
                 :machine,
                 :button_down_location,
                 :state_waiting,
-                :coordinate_state,
+                :coordinate_machine,
                 :marker_current,
                 :coordinate_current,
                 :in_turf
@@ -13,7 +13,7 @@ class Player < FirebaseObject
   @location_dirty = false
 
   DEBUGGING = true
-  PLACEMENT_DISTANCE_LIMIT = 4
+  PLACEMENT_DISTANCE_LIMIT = 1 # what unit is this?
 
   def initialize(in_ref, in_data_hash, in_bot = false)
     @location_update_observer = nil
@@ -21,61 +21,91 @@ class Player < FirebaseObject
     # set the current pouwhenua
     in_data_hash.merge!('pouwhenua_current' => in_data_hash['character']['pouwhenua_start'])
 
-    super(in_ref, in_data_hash).tap do |k|
+    super(in_ref, in_data_hash).tap do |new_player|
       @is_bot = in_bot
       @in_boundary = true
       @marker_current = in_data_hash['marker_current'] || 0
       @coordinate_current = { 'latitude' => 0, 'longitude' => 0 }
-      k.init_observers unless @is_bot
+      new_player.initialize_observers unless @is_bot
+      new_player.initialize_firebase_observers unless @is_bot
 
       Notification.center.post 'PlayerNew'
 
-      # STATE MACHINE: COORDINATE
-      k.coordinate_state = StateMachine::Base.new start_state: :waiting, verbose: DEBUGGING
-      k.coordinate_state.when :waiting do |state|
-        state.on_entry { puts 'coordinate_state enter waiting'.pink }
-        state.on_exit { puts 'coordinate_state exit waiting'.pink }
-        state.transition_to :updating, on: :update
-      end
-      k.coordinate_state.when :updating do |state|
-        state.on_entry { puts 'coordinate_state enter updating'.pink }
-        state.on_exit { puts 'coordinate_state exit updating'.pink }
-        # state.transition_to :waiting,
-        #   on_notification: 'Player_ChildChanged'
-        state.transition_to :waiting,
-          on: :finished_updating,
-          action: proc { Notification.center.post 'player_moved' }
-      end
-      # k.coordinate_state.when :recalculating_team do |state|
-      #   state.on_entry { puts 'coordinate_state enter recalculating_team'.pink }
-      #   state.transition_to :waiting, on: :finished
-      # end
-      k.coordinate_state.start!
+      new_player.initialize_state_machine
+      new_player.machine.start!
 
-      # STATE MACHINE: PLAYING
-      k.machine = StateMachine::Base.new start_state: :in_bounds, verbose: DEBUGGING
-      k.machine.when :in_bounds do |state|
-        state.on_entry { enter_bounds }
-        state.transition_to :out_of_bounds,
-                            on: :exit_bounds
-      end
-      k.machine.when :out_of_bounds do |state|
-        state.on_entry { exit_bounds }
-        state.transition_to :in_bounds,
-                            on: :enter_bounds
-        # state.transition_to :ejected,
-        #                     after: 3
-      end
-      k.machine.when :ejected do |state|
-        state.on_entry { eject }
-      end
-      k.machine.start!
+      new_player.initialize_coordinate_machine
+      new_player.coordinate_machine.start!
     end
     Utilities::puts_close
   end
 
-  def init_observers
-    puts "FBO:#{@class_name}:#{__LINE__} init_observers".green if DEBUGGING
+  def initialize_state_machine
+    mp __method__
+
+    @machine = StateMachine::Base.new start_state: :waiting, verbose: DEBUGGING
+    @machine.when :waiting do |state|
+      # This is the state when the player is in the waiting room
+      state.on_entry { mp 'player waiting' }
+      state.transition_to :ready,
+                          on: :player_ready
+    end
+    @machine.when :ready do |state|
+      # This is the state when the player has received the go signal
+      state.on_entry { mp 'player ready' }
+      state.transition_to :in_bounds,
+                          on: :player_playing
+    end
+    @machine.when :in_bounds do |state|
+      state.on_entry { enter_bounds }
+      state.transition_to :out_of_bounds,
+                          on: :exit_bounds
+    end
+    @machine.when :out_of_bounds do |state|
+      state.on_entry { exit_bounds }
+      state.transition_to :in_bounds,
+                          on: :enter_bounds
+      state.transition_to :ejected,
+                          after: 3
+    end
+    @machine.when :ejected do |state|
+      state.on_entry { eject }
+    end
+  end
+
+  def initialize_coordinate_machine
+    mp __method__
+
+    @coordinate_machine = StateMachine::Base.new start_state: :waiting, verbose: DEBUGGING
+    @coordinate_machine.when :waiting do |state|
+      state.transition_to :updating, on: :update
+    end
+    @coordinate_machine.when :updating do |state|
+      # state.on_entry { puts 'coordinate_state enter updating'.pink }
+      # state.on_exit { puts 'coordinate_state exit updating'.pink }
+      # state.transition_to :waiting,
+      #   on_notification: 'Player_ChildChanged'
+      state.transition_to :waiting,
+        on: :finished_updating,
+        action: proc { Notification.center.post 'player_moved' }
+    end
+  end
+
+  def initialize_observers
+    mp __method__
+
+    @location_update_observer = Notification.center.observe 'UpdateLocation' do |data|
+      puts 'TAKARO UPDATELOCALPLAYERPOSITION LOCATION'.yellow if DEBUGGING
+
+      new_location = data.object['new_location']
+      _old_location = data.object['old_location']
+
+      self.coordinate = new_location.to_hash
+    end
+  end
+
+  def initialize_firebase_observers
+    mp __method__
 
     @ref.child('team').observeEventType(
       FIRDataEventTypeChildAdded, withBlock:
@@ -86,21 +116,13 @@ class Player < FirebaseObject
       end
     )
 
-    @ref.child('marker_current').observeEventType(FIRDataEventTypeChildChanged, withBlock:
+    @ref.child('marker_current').observeEventType(
+      FIRDataEventTypeChildChanged, withBlock:
       lambda do |marker_snapshot|
         puts "FBO:#{@class_name} MARKER CURRENT CHANGED".red if DEBUGGING
         @marker_current = marker_snapshot.value
       end
     )
-
-    @location_update_observer = Notification.center.observe 'UpdateLocation' do |data|
-      puts 'TAKARO UPDATELOCALPLAYERPOSITION LOCATION'.yellow if DEBUGGING
-
-      new_location = data.object['new_location']
-      _old_location = data.object['old_location']
-
-      self.coordinate = new_location.to_hash
-    end
   end
 
   def coordinate=(in_coordinate)
@@ -113,7 +135,7 @@ class Player < FirebaseObject
     # mp in_coordinate
 
     # check if we're still in the update state
-    if @coordinate_state.current_state.name == 'update'
+    if @coordinate_machine.current_state.name == 'updating'
       mp 'still updating'
       return
     end
@@ -122,6 +144,10 @@ class Player < FirebaseObject
     # return if in_coordinate == coordinate
     if in_coordinate == coordinate
       mp 'new coordinate is the same'
+
+      # not sure we need this!
+      # @coordinate_machine.event :finished_updating
+      return
     end
 
     # not sure we need this...
@@ -130,7 +156,7 @@ class Player < FirebaseObject
     @coordinate_current = in_coordinate
 
     # Looks like we're updating, so set state
-    @coordinate_state.event(:update)
+    @coordinate_machine.event(:update)
 
     # update the database if we've moved
     # update({ 'coordinate' => in_coordinate })
@@ -139,7 +165,7 @@ class Player < FirebaseObject
         'coordinate' => in_coordinate
       }, withCompletionBlock: lambda do | error, coordinate_ref |
         mp 'finished updating'
-        @coordinate_state.event :finished_updating
+        @coordinate_machine.event :finished_updating
       end
     )
 
@@ -149,13 +175,16 @@ class Player < FirebaseObject
 
     # This should happen server side?
 
-    # if Machine.instance.is_playing
-    #   check_taiapa
-    #   check_placing
-    # end
+    if Machine.instance.is_playing
+      check_taiapa
+      check_placing
+    end
 
     # check if we are outside the kapa starting zone
     # recalculate_kapa(in_coordinate) if Machine.instance.is_waiting
+
+  rescue
+    mp 'Rescued from player::coordinate'
   end
 
   # https://stackoverflow.com/a/23546284
@@ -193,32 +222,38 @@ class Player < FirebaseObject
   end
 
   def check_placing
-    puts "FBO:#{@class_name}:#{__LINE__} check_placing".green if DEBUGGING
+    mp __method__
+    # puts "FBO:#{@class_name}:#{__LINE__} check_placing".green if DEBUGGING
 
+    # get out if we haven't set up the down location
     return if @button_down_location.nil?
 
     distance = Utilities::get_distance(@button_down_location, coordinate)
-    puts "Distance: #{distance}".focus
+    mp "check_placing distance: #{distance}"
 
     return if distance < PLACEMENT_DISTANCE_LIMIT
 
-    puts 'MOVED TOO FAR!!'.focus
+    mp 'check_placing MOVED TOO FAR!!'
     Notification.center.post 'CrossedPlacementLimit'
   end
 
   def exit_bounds
-    puts 'Kaitakaro exit_bounds'.pink
+    mp __method__
+
     @in_boundary = false
     Notification.center.post 'BoundaryExit'
   end
 
   def enter_bounds
-    puts 'Kaitakaro enter_bounds'.pink
+    mp __method__
+
     @in_boundary = true
     Notification.center.post 'BoundaryEnter'
   end
 
   def eject
+    mp __method__
+
     puts 'EJECTED!!!!'.focus
   end
 
