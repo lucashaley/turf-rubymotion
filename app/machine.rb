@@ -9,6 +9,7 @@ class Machine
                 :firebase_user,
                 :firebase_displayname,
                 :firebase_email,
+                :recovery_displayname,
                 :bounding_box,
                 :db,
                 :current_view,
@@ -20,7 +21,8 @@ class Machine
                 :local_character,
                 :gamecode,
                 :is_waiting,
-                :is_playing
+                :is_playing,
+                :horizontal_accuracy
 
   DEBUGGING = false
   DESIRED_ACCURACY = 30
@@ -182,12 +184,19 @@ class Machine
   def locationManager(_manager, didUpdateToLocation: new_location, fromLocation: old_location)
     puts 'MACHINE: DIDUPDATETOLOCATION'.blue if DEBUGGING
 
+    @horizontal_accuracy = new_location.horizontalAccuracy
+    accurate = @horizontal_accuracy <= DESIRED_ACCURACY
     # Check for reasonable accuracy
     # https://stackoverflow.com/a/13502503
     puts "horizontalAccuracy: #{new_location.horizontalAccuracy}".focus
-    return if new_location.horizontalAccuracy > DESIRED_ACCURACY
 
-    # Notification.center.post(
+    Notification.center.post(
+      'accuracy_change',
+      { 'accurate' => accurate }
+    )
+
+    return unless accurate
+
     Notification.center.post(
       'UpdateLocation',
       { 'new_location' => new_location, 'old_location' => old_location }

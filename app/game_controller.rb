@@ -134,8 +134,8 @@ class GameController < MachineViewController
       end
       # divide by 2 and get the absolute.
       area = (area / (2.0 * 100_000)).abs.round(1)
-      mp 'area'
-      mp area
+      # mp 'area'
+      # mp area
 
       if areas_hash.key?(vc.pylon['team_key'])
         areas_hash[vc.pylon['team_key']] += area
@@ -144,12 +144,12 @@ class GameController < MachineViewController
       end
     end
 
-    mp 'areas_hash'
-    mp areas_hash
+    # mp 'areas_hash'
+    # mp areas_hash
 
     total_areas_hash = areas_hash.values.inject(0, :+)
-    mp 'total_areas_hash'
-    mp total_areas_hash
+    # mp 'total_areas_hash'
+    # mp total_areas_hash
 
     delta_hash = {}
 
@@ -163,8 +163,8 @@ class GameController < MachineViewController
       delta_hash[key] = s == 0 ? 0 : (s / 10).round # is this necessary?
     end
 
-    mp 'delta_hash'
-    mp delta_hash
+    # mp 'delta_hash'
+    # mp delta_hash
 
     # This doesn't seem to work for this version?
     # delta_hash = areas_hash.transform_values { |v| ((v / total_areas_hash) * 100).round - 50 }
@@ -177,8 +177,8 @@ class GameController < MachineViewController
       end
     end
 
-    mp 'scores_hash'
-    mp @scores_hash
+    # mp 'scores_hash'
+    # mp @scores_hash
 
     left_score_label.text = @scores_hash.values[0].to_s
     right_score_label.text = @scores_hash.values[1].to_s
@@ -248,6 +248,7 @@ class GameController < MachineViewController
     end
 
     @placement_observer = Notification.center.observe 'CrossedPlacementLimit' do |_notification|
+      mp 'Player has moved too far while placing'
       @button_cancel_audio.play
       @button_fsm.event(:button_cancel)
     end
@@ -271,6 +272,16 @@ class GameController < MachineViewController
     @player_move = Notification.center.observe 'player_moved' do |_notification|
       mp 'player_moved received'
       render_overlays
+    end
+
+    @accuracy_change = Notification.center.observe 'accuracy_change' do |notification|
+      begin
+        mp 'accuracy_change received'
+        mp "change to: #{notification.object['accurate']}"
+        button_pylon.enabled = notification.object['accurate']
+      rescue
+        mp 'Something happened in the accuracy change'
+      end
     end
   end
   # rubocop:enable Metrics/AbcSize

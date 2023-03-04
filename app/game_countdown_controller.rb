@@ -2,21 +2,10 @@ class GameCountdownController < MachineViewController
   def viewDidLoad
     super
 
-    machine = StateMachine::Base.new start_state: :waiting, verbose: DEBUGGING
-    machine.when :waiting do |state|
-      state.on_entry { puts 'Countdown state waiting'.pink }
-      state.transition_to :starting,
-                          after: 4
+    @location_update_observer = Notification.center.observe 'CountdownSegueToGame' do |data|
+      mp 'LETS GOOOOOOOOOOOOOOOO!!!'
+      Notification.center.post('game_state_playing_notification', nil)
+      performSegueWithIdentifier('ToGame', sender: self)
     end
-    machine.when :starting do |state|
-      state.on_entry do
-        puts 'STARTING'.focus
-        Notification.center.post('game_state_playing_notification', nil)
-        performSegueWithIdentifier('ToGame', sender: self)
-      end
-    end
-    machine.start!
-
-    Notification.center.post("game_state_countdown_notification", nil)
   end
 end

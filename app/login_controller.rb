@@ -1,4 +1,6 @@
 class LoginController < MachineViewController
+  attr_accessor :recovery_displayname
+
   # outlet :result, UILabel
   outlet :button_apple, UIButton
   outlet :button_google, UIButton
@@ -55,10 +57,18 @@ class LoginController < MachineViewController
   def authorizationController(auth_controller, didCompleteWithAuthorization: authorization)
     if authorization.nil?
       # probably more graceful things should happen here
+      mp 'Authorization is nil!'
       return
     end
 
     mp 'didCompleteWithAuthorization'
+
+    # grab the apple credential
+    apple_credential = authorization.credential
+    mp 'testing credential:'
+    mp apple_credential.displayName
+    Machine.instance.recovery_displayname = apple_credential.displayName
+    @recovery_displayname = apple_credential.displayName
 
     # create a firebase credential for the apple auth
     credential = FIROAuthProvider.credentialWithProviderID(
@@ -74,6 +84,7 @@ class LoginController < MachineViewController
   def authorizationController(auth_controller, didCompleteWithError: error)
     mp 'didCompleteWithError'
     # again, something useful should happen here
+    mp error.localizedDescription
   end
 
   # ASAuthorizationControllerPresentationContextProviding
@@ -142,7 +153,19 @@ class LoginController < MachineViewController
         # here I'm setting the internal info particular for my app
         # note that the providerData is an array, even if it's just 1 long
         Machine.instance.firebase_user = auth_result.user
+
         Machine.instance.firebase_displayname = auth_result.user.providerData[0].displayName
+        mp 'firebase_displayname:'
+        mp Machine.instance.firebase_displayname
+
+        if Machine.instance.firebase_displayname.nil?
+          mp 'name is nil!'
+          change_request = auth_result.user.profileChangeRequest
+          mp change_request
+          change_request.displayName = @recovery_displayname
+          change_request.commitChanges
+        end
+
         Machine.instance.firebase_email = auth_result.user.providerData[0].email
 
         # and return to the main menu, with the new login in place
