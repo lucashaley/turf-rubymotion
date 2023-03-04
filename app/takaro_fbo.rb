@@ -68,7 +68,9 @@ class TakaroFbo < FirebaseObject
 #       end)
     # Specific Players
     @ref.child('players').observeEventType(FIRDataEventTypeChildChanged, withBlock:
-      lambda do |player_snapshot|
+      lambda do |error, player_snapshot|
+        Bugsnag.notifyError(error) unless error.nil?
+
         mp 'Takaro observe player changed'
         mp player_snapshot.valueInExportFormat
 
@@ -83,6 +85,7 @@ class TakaroFbo < FirebaseObject
       lambda do |teams_snapshot|
         teams_snapshot.ref.parent.getDataWithCompletionBlock(
           lambda do |error, snapshot|
+            Bugsnag.notifyError(error) unless error.nil?
             @teams_hash = snapshot.childSnapshotForPath('teams').valueInExportFormat
             Notification.center.post('teams_changed', @teams_hash)
           end
@@ -117,6 +120,31 @@ class TakaroFbo < FirebaseObject
 
         if game_state_snapshot.value == 'ready'
           Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
+          @ref.child('player_status').updateChildValues(
+            {
+              @local_player.key => 'ready'
+            }
+          )
+        end
+      end
+    )
+
+    @ref.child('player_status').observeEventType(
+      FIRDataEventTypeValue, withBlock: lambda do |player_status_snapshot|
+        mp 'PLAYER_STATUS CHANGED'
+        mp player_status_snapshot.value
+
+        return if player_status_snapshot.value.nil?
+
+        # oh shit this works!
+        mp player_status_snapshot.value.values.all? { |p| p == 'ready' }
+
+        if player_status_snapshot.value.values.all? { |p| p == 'ready' }
+          # We are all ready to go
+          mp 'HERE WEEEEE GOOOOOOOOOOOOO'
+
+          @ref.child('game_state').setValue('ready')
+          Notification.center.post('CountdownSegueToGame', nil)
         end
       end
     )
@@ -178,8 +206,7 @@ class TakaroFbo < FirebaseObject
       state.transition_to :countdown,
                           on_notification: 'game_state_countdown_notification',
                           action: proc {
-                            self.game_state = 'countdown'
-                            Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
+                            self.game_state = 'ready'
                           }
     end
     ####################
@@ -191,7 +218,7 @@ class TakaroFbo < FirebaseObject
       state.transition_to :playing,
                           on_notification: 'game_state_playing_notification',
                           action: proc {
-                            self.game_state = 'playing'
+                            self.game_state = 'playing' if @host
                           }
     end
     ####################
@@ -208,18 +235,28 @@ class TakaroFbo < FirebaseObject
 
   def initialize_local_player(in_character)
     puts "FBO:#{@class_name} initialize_local_player".green if DEBUGGING
+    player_name = Machine.instance.firebase_user.providerData[0].displayName
+    player_name = 'Tony Butt' if player_name.nil?
+
     player_ref = @ref.child('players').childByAutoId
     player = Player.new(
       player_ref,
       {
         'character' => in_character,
-        'display_name' => Machine.instance.firebase_user.providerData[0].displayName,
+        'display_name' => player_name,
         'marker_current' => in_character['pouwhenua_start']
       }
     )
     @local_player = player
     mp 'local_player:'
     mp @local_player
+
+    # set the player status section
+    @ref.child('player_status').updateChildValues(
+      {
+        @local_player.key => 'waiting'
+      }
+    )
   end
 
   def create_bot_player
@@ -554,7 +591,7 @@ class TakaroFbo < FirebaseObject
     annotations = []
 
     # the new local hash way
-    mp 'iterating through players'
+    # mp 'iterating through players'
     @players_hash.each_value do |player|
       mp player
       player_annotation = PlayerAnnotation.alloc.initWithCoordinate(
