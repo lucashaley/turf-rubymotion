@@ -14,7 +14,7 @@ class VoronoiCell # < Cell
   end
 
   def color
-    mp __method__
+    # mp __method__
     @cell.site.color
   end
 
@@ -23,12 +23,12 @@ class VoronoiCell # < Cell
   end
 
   def vertices
-    mp __method__
+    # mp __method__
     vertices_from_cell(@cell)
   end
 
   def overlay
-    mp __method__
+    # mp __method__
     # THIS IS OTHER PLACES TOO?
     overlay = overlay_from_vertices(vertices)
     overlay.overlayColor = self.color
@@ -36,6 +36,6 @@ class VoronoiCell # < Cell
   end
 
   def to_s
-    puts "Wakawaka! cell: #{@cell}; cell site: #{@cell.site}; vertices: #{vertices}; edges: #{edges}; pylon: #{@pylon}"
+    puts "VoronoiCell! cell: #{@cell}; cell site: #{@cell.site}; vertices: #{vertices}; edges: #{edges}; pylon: #{@pylon}"
   end
 end
