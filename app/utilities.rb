@@ -109,9 +109,35 @@ class MKMapRect
   end
 end
 
+class MKCoordinateSpan
+  def to_hash
+    {
+      'latitude_delta' => self.latitudeDelta,
+      'longitude_delta' => self.longitudeDelta
+    }
+  end
+end
+
+class MKCoordinateRegion
+  def to_hash
+    {
+      'center' => self.center.to_hash,
+      'span' => self.span.to_hash
+    }
+  end
+end
+
 class Hash
   def to_CLLocationCoordinate2D
     CLLocationCoordinate2DMake(self['latitude'], self['longitude'])
+  end
+
+  def self.to_MKCoordinateRegion
+    MKCoordinateRegionMakeWithDistance(
+      self['center'].to_CLLocationCoordinate2D,
+      self['span']['latitude_delta'],
+      self['span']['longitude_delta']
+    )
   end
 
   def extract(*keys)
