@@ -52,7 +52,7 @@ class NewController < MachineViewController
 
     Notification.center.addObserver(self,
                                     selector: 'handle_changed_player',
-                                    name: 'PlayerChanged',
+                                    name: 'player_changed',
                                     object: nil)
 
     Notification.center.addObserver(self,
@@ -108,32 +108,37 @@ class NewController < MachineViewController
   ### TABLE STUFF
   # Useful: https://code.tutsplus.com/tutorials/ios-sdk-crafting-custom-uitableview-cells--mobile-15702
   def tableView(table_view, cellForRowAtIndexPath: index_path)
-    puts 'NEWCONTROLLER TABLEVIEW CELLFORROW'.blue if DEBUGGING
+    begin
+      puts 'NEWCONTROLLER TABLEVIEW CELLFORROW'.blue if DEBUGGING
+      mp __method__
 
-    cell = table_view.dequeueReusableCellWithIdentifier(CELL_IDENTIFIER)
-    # unless cell
-    #   cell = UITableViewCell.alloc.initWithStyle(UITableViewCellStyleSubtitle, reuseIdentifier: CELL_IDENTIFIER)
-    # end
-    cell ||= UITableViewCell.alloc.initWithStyle(UITableViewCellStyleSubtitle, reuseIdentifier: CELL_IDENTIFIER)
+      cell = table_view.dequeueReusableCellWithIdentifier(CELL_IDENTIFIER)
+      # unless cell
+      #   cell = UITableViewCell.alloc.initWithStyle(UITableViewCellStyleSubtitle, reuseIdentifier: CELL_IDENTIFIER)
+      # end
+      cell ||= UITableViewCell.alloc.initWithStyle(UITableViewCellStyleSubtitle, reuseIdentifier: CELL_IDENTIFIER)
 
-    table = case table_view
-            when @table_team_a then TABLEVIEW_TEAM_A
-            when @table_team_b then TABLEVIEW_TEAM_B
-            else 'poop'
-            end
-    puts "table: #{table}; row: #{index_path.row}"
+      table = case table_view
+              when @table_team_a then TABLEVIEW_TEAM_A
+              when @table_team_b then TABLEVIEW_TEAM_B
+              else 'poop'
+              end
+      puts "table: #{table}; row: #{index_path.row}"
 
-    player = @takaro.list_player_names_for_index(table)[index_path.row]
+      player = @takaro.list_player_names_for_index(table)[index_path.row]
 
-    puts '⌞'
-    puts 'player:'.red
-    mp player
-    puts '⌜'
+      puts '⌞'
+      puts 'player:'.red
+      mp player
+      puts '⌜'
 
-    cell.textLabel.text = player['display_name']
-    cell.detailTextLabel.text = player['character']
+      cell.textLabel.text = player['display_name']
+      cell.detailTextLabel.text = player['character']
 
-    cell
+      cell
+    rescue Exception => exception
+      Bugsnag.notify(exception)
+    end
   end
 
   # def tableView(table_view, didDeselectRowAtIndexPath: index_path)

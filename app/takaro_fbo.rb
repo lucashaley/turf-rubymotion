@@ -13,6 +13,7 @@ class TakaroFbo < FirebaseObject
                 :players_hash,
                 :host,
                 :taiapa_region # TODO: this might be hash later?
+                # :playfield_region
 
   DEBUGGING = true
 
@@ -68,17 +69,19 @@ class TakaroFbo < FirebaseObject
 #       end)
     # Specific Players
     @ref.child('players').observeEventType(FIRDataEventTypeChildChanged, withBlock:
-      lambda do |error, player_snapshot|
-        Bugsnag.notifyError(error) unless error.nil?
-
+      lambda do |player_snapshot|
         mp 'Takaro observe player changed'
         mp player_snapshot.valueInExportFormat
+
+        Utilities::breadcrumb("#{__method__} player changed")
 
         # update the specific player
         @players_hash[player_snapshot.key] = player_snapshot.valueInExportFormat
         mp @players_hash
 
-        Notification.center.post('player_moved')
+        Notification.center.post('player_changed')
+
+        # Should this update the UI? In watingi room
       end)
     # Specific Team
     @ref.child('teams').observeEventType(FIRDataEventTypeChildChanged, withBlock:
@@ -119,35 +122,47 @@ class TakaroFbo < FirebaseObject
         # mp game_state_snapshot.value
 
         if game_state_snapshot.value == 'ready'
-          Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
-          @ref.child('player_status').updateChildValues(
-            {
-              @local_player.key => 'ready'
-            }
-          )
+          Utilities::breadcrumb('Machine responding to game_state')
+
+          Notification.center.post('game_state_playing_notification', nil)
+
+          # this was the old way
+          # Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
+
+          # this needs to move
+          # @ref.child('player_status').updateChildValues(
+          #   {
+          #     @local_player.key => 'ready'
+          #   }
+          # )
         end
       end
     )
 
-    @ref.child('player_status').observeEventType(
-      FIRDataEventTypeValue, withBlock: lambda do |player_status_snapshot|
-        mp 'PLAYER_STATUS CHANGED'
-        mp player_status_snapshot.value
-
-        return if player_status_snapshot.value.nil?
-
-        # oh shit this works!
-        mp player_status_snapshot.value.values.all? { |p| p == 'ready' }
-
-        if player_status_snapshot.value.values.all? { |p| p == 'ready' }
-          # We are all ready to go
-          mp 'HERE WEEEEE GOOOOOOOOOOOOO'
-
-          @ref.child('game_state').setValue('ready')
-          Notification.center.post('CountdownSegueToGame', nil)
-        end
-      end
-    )
+#     @ref.child('player_status').observeEventType(
+#       FIRDataEventTypeValue, withBlock: lambda do |player_status_snapshot|
+#         mp 'PLAYER_STATUS CHANGED'
+#         mp player_status_snapshot.value
+#
+#         return if player_status_snapshot.value.nil?
+#
+#         # oh shit this works!
+#         mp player_status_snapshot.value.values.all? { |p| p == 'ready' }
+#
+#         if player_status_snapshot.value.values.all? { |p| p == 'ready' }
+#           # We are all ready to go
+#           mp 'HERE WEEEEE GOOOOOOOOOOOOO'
+#
+#           # @ref.child('game_state').setValue('ready')
+#
+#           # this sends to game_countdown_controller
+#           # Notification.center.post('CountdownSegueToGame', nil)
+#
+#           # this sends to takaro game_state_machine
+#           # Notification.center.post('game_state_playing_notification', nil)
+#         end
+#       end
+#     )
 
     # This updates the player location in the location child
     @location_update_observer = Notification.center.observe 'UpdateLocation' do |data|
@@ -206,7 +221,8 @@ class TakaroFbo < FirebaseObject
       state.transition_to :countdown,
                           on_notification: 'game_state_countdown_notification',
                           action: proc {
-                            self.game_state = 'ready'
+                            # self.game_state = 'ready'
+                            Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
                           }
     end
     ####################
@@ -218,6 +234,7 @@ class TakaroFbo < FirebaseObject
       state.transition_to :playing,
                           on_notification: 'game_state_playing_notification',
                           action: proc {
+                            performSegueWithIdentifier('ToGame', sender: self)
                             self.game_state = 'playing' if @host
                           }
     end
@@ -276,18 +293,18 @@ class TakaroFbo < FirebaseObject
     mp @bot_centroid
 
     lat_range = BigDecimal(rand(-BOT_DISTANCE..BOT_DISTANCE) * 10**-BOT_DISTANCE_FACTOR)
-    mp lat_range
+    # mp lat_range
     new_lat = BigDecimal(@bot_centroid['latitude']) + lat_range
     long_range = BigDecimal(rand(-BOT_TEAM_DISTANCE..BOT_TEAM_DISTANCE) * 10**-BOT_DISTANCE_FACTOR)
-    mp long_range
+    # mp long_range
     new_long = BigDecimal(@bot_centroid['longitude']) + long_range
-    mp new_lat
-    mp new_long
+    # mp new_lat
+    # mp new_long
     bot_coordinate = {
       'latitude' => new_lat,
       'longitude' => new_long
     }
-    mp bot_coordinate
+    # mp bot_coordinate
 
     bot_data = {
       'display_name' => 'Jimmy Bot ' + rand(1..10).to_s,
@@ -411,6 +428,12 @@ class TakaroFbo < FirebaseObject
       'latitude_delta' => latitude_delta * FIELD_SCALE,
       'longitude_delta' => longitude_delta * FIELD_SCALE
     }
+
+    self.playfield_region = MKCoordinateRegionMakeWithDistance(
+      midpoint_location.coordinate,
+      latitude_delta * FIELD_SCALE,
+      longitude_delta * FIELD_SCALE
+    )
 
     Notification.center.post('game_state_countdown_notification', nil)
   end
@@ -554,6 +577,19 @@ class TakaroFbo < FirebaseObject
     @data_hash['playfield']
   end
 
+  def playfield_region=(in_region)
+    update({ 'playfield_region' => in_region.to_hash })
+  end
+
+  def playfield_region
+    mp __method__
+    mp @data_hash['playfield_region']
+
+    hash_to_MKCoordinateRegion(@data_hash['playfield_region'])
+
+    # @data_hash['playfield_region'].to_MKCoordinateRegion
+  end
+
   def waiting?
     @data_hash['waiting']
   end
@@ -584,6 +620,14 @@ class TakaroFbo < FirebaseObject
     puts "Score for #{kapa_key}: #{score}".focus
   end
 
+  def set_local_player_status(in_status)
+    @ref.child('player_status').updateChildValues(
+      {
+        @local_player.key => in_status
+      }
+    )
+  end
+
   # This uses the teams
   # but we can also use the players, now that they each have a color
   def player_annotations
@@ -593,7 +637,7 @@ class TakaroFbo < FirebaseObject
     # the new local hash way
     # mp 'iterating through players'
     @players_hash.each_value do |player|
-      mp player
+      # mp player
       player_annotation = PlayerAnnotation.alloc.initWithCoordinate(
         Utilities::format_to_location_coord(player['coordinate'])
       )
@@ -627,5 +671,17 @@ class TakaroFbo < FirebaseObject
     end
 
     annotations
+  end
+
+  def hash_to_CLLocationCoordinate2D(in_hash)
+    CLLocationCoordinate2DMake(in_hash['latitude'], in_hash['longitude'])
+  end
+
+  def hash_to_MKCoordinateRegion(in_hash)
+    MKCoordinateRegionMakeWithDistance(
+      hash_to_CLLocationCoordinate2D(in_hash['center']),
+      in_hash['span']['latitude_delta'],
+      in_hash['span']['longitude_delta']
+    )
   end
 end

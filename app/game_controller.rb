@@ -112,36 +112,41 @@ class GameController < MachineViewController
 
     areas_hash = {}
 
-    @voronoi_map.voronoi_cells.each do |vc|
-      # mp 'voronoi cell'
-      # mp vc
-      verts = vc.vertices
+    begin
+      @voronoi_map.voronoi_cells.each do |vc|
+        # mp 'voronoi cell'
+        # mp vc
+        verts = vc.vertices
 
-      area = 0.0
-      verts.each_with_index do |point, index|
-        if index + 1 < verts.length
-          point2 = verts[index + 1]
+        area = 0.0
+        verts.each_with_index do |point, index|
+          if index + 1 < verts.length
+            point2 = verts[index + 1]
+          end
+          if point2
+            # shoelace algorithm
+            # area = area + ((point.x * point2.y) - (point2.x * point.y))
+            area += ((point.x * point2.y) - (point2.x * point.y))
+          else
+            # use the first point with the last point when all the other points have been done
+            # area = area + ((point.x * verts[0].y) - (verts[0].x * point.y))
+            area += ((point.x * verts[0].y) - (verts[0].x * point.y))
+          end
         end
-        if point2
-          # shoelace algorithm
-          # area = area + ((point.x * point2.y) - (point2.x * point.y))
-          area += ((point.x * point2.y) - (point2.x * point.y))
+        # divide by 2 and get the absolute.
+        area = (area / (2.0 * 100_000)).abs.round(1)
+        # mp 'area'
+        # mp area
+
+        if areas_hash.key?(vc.pylon['team_key'])
+          areas_hash[vc.pylon['team_key']] += area
         else
-          # use the first point with the last point when all the other points have been done
-          # area = area + ((point.x * verts[0].y) - (verts[0].x * point.y))
-          area += ((point.x * verts[0].y) - (verts[0].x * point.y))
+          areas_hash[vc.pylon['team_key']] = area
         end
       end
-      # divide by 2 and get the absolute.
-      area = (area / (2.0 * 100_000)).abs.round(1)
-      # mp 'area'
-      # mp area
-
-      if areas_hash.key?(vc.pylon['team_key'])
-        areas_hash[vc.pylon['team_key']] += area
-      else
-        areas_hash[vc.pylon['team_key']] = area
-      end
+    rescue Exception => exception
+      Bugsnag.leaveBreadcrumbWithMessage('calculate_score')
+      Bugsnag.notify(exception)
     end
 
     # mp 'areas_hash'
@@ -218,6 +223,7 @@ class GameController < MachineViewController
     end
     # BOUNDARY ENTER
     @enter_observer = Notification.center.observe 'BoundaryEnter' do |_notification|
+      Utilities::breadcrumb('BoundaryEnter')
       @boundary_audio.stop
       # enable the pylon button
       button_pylon.enabled = true
@@ -226,6 +232,8 @@ class GameController < MachineViewController
     end
     # PLAYER DISAPPEAR
     @disappear_observer = Notification.center.observe 'PlayerDisappear' do |_notification|
+        Utilities::breadcrumb('PlayerDisappear')
+
       # puts 'PLAYER DISAPPEAR'.yellow
 
       # set the player state
@@ -237,6 +245,7 @@ class GameController < MachineViewController
     end
     # PLAYER APPEAR
     @appear_observer = Notification.center.observe 'PlayerAppear' do |_notification|
+      Utilities::breadcrumb('PlayerAppear')
       # puts 'PLAYER APPEAR'.yellow
 
       # set the player state
@@ -269,8 +278,8 @@ class GameController < MachineViewController
       render_overlays
     end
 
-    @player_move = Notification.center.observe 'player_moved' do |_notification|
-      mp 'player_moved received'
+    @player_move = Notification.center.observe 'player_changed' do |_notification|
+      mp 'player_changed received'
       render_overlays
     end
 
@@ -309,11 +318,26 @@ class GameController < MachineViewController
     @scores = [0, 0]
     @scores_hash = {}
 
-    map_view.setRegion(Machine.instance.takaro_fbo.taiapa_region, animated: false)
-    map_view.setCameraBoundary(
-      MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro_fbo.taiapa_region),
-      animated: true
-    )
+    begin
+      # map_view.setRegion(Machine.instance.takaro_fbo.taiapa_region, animated: false)
+      # map_view.setCameraBoundary(
+      #   MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro_fbo.taiapa_region),
+      #   animated: true
+      # )
+
+      mp 'Taiapa vs Playfield!'
+      mp Machine.instance.takaro_fbo.taiapa_region
+      mp Machine.instance.takaro_fbo.playfield
+      mp Machine.instance.takaro_fbo.playfield_region
+
+      map_view.setRegion(Machine.instance.takaro_fbo.playfield_region, animated: false)
+      map_view.setCameraBoundary(
+        MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro_fbo.playfield_region),
+        animated: true
+      )
+    rescue Exception => exception
+      Bugsnag.notify(exception)
+    end
 
     init_observers
     setup_audio
