@@ -14,6 +14,9 @@ Lint/UnusedMethodArgument:
   Enabled: false
   AllowUnusedKeywordArguments: true
 
+Lint/RescueException:
+  Enabled: false
+
 Metrics/BlockLength:
   IgnoredMethods:
     - tableView
@@ -26,14 +29,14 @@ Metrics/ClassLength:
 
 Metrics/CyclomaticComplexity:
   Max: 15
-  
+
 Metrics/MethodLength:
   # Enabled: false
   Max: 60
 
 Metrics/PerceivedComplexity:
   Max: 16
-  
+
 Metrics/AbcSize:
   Max: 40
 
@@ -48,7 +51,7 @@ Style/ColonMethodCall:
 
 Style/Documentation:
   Enabled: false
-  
+
 Style/OptionalBooleanParameter:
   AllowedMethods: ['initialize']
 
