@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 gem 'rake'
 # Add your dependencies here:
 
+gem 'cocoapods', '1.11.2'
 # gem "motion-cocoapods"
 # gem 'motion-cocoapods', path: '/Users/lhaley/Documents/Projects/Personal/motion-cocoapods/'
 gem 'motion-cocoapods', path: '/Users/lucashaley/Documents/GitHub/motion-cocoapods/'

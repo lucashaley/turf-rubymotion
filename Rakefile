@@ -36,7 +36,7 @@ Motion::Project::App.setup do |app|
   app.name = 'Turf!'
 
   # version for your app
-  app.version = '0.1.20'
+  app.version = '0.1.27'
 
   # ===========================================================================================
   # 3. Set your deployment target (it's recommended that you at least target 10.0 and above).
@@ -191,9 +191,9 @@ Motion::Project::App.setup do |app|
   # https://github.com/amirrajan/rubymotion-applied/issues/127
   app.info_plist['FirebaseAppDelegateProxyEnabled'] = false
 
-  app.info_plist['bugsnag'] = [{
-    'apiKey' => ['3cab9a5e6b16897ab5e965083c5b4fd7']
-  }]
+  app.info_plist['bugsnag'] = {
+    'apiKey' => '3cab9a5e6b16897ab5e965083c5b4fd7'
+  }
 
   app.pods do
     # use_frameworks!

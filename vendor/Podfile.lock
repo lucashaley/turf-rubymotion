@@ -5,6 +5,7 @@ PODS:
   - AppAuth/Core (1.5.0)
   - AppAuth/ExternalUserAgent (1.5.0):
     - AppAuth/Core
+  - Bugsnag (6.25.2)
   - Firebase (8.10.0):
     - Firebase/Core (= 8.10.0)
   - Firebase/Auth (8.10.0):
@@ -165,6 +166,7 @@ PODS:
   - PromisesObjC (2.1.0)
 
 DEPENDENCIES:
+  - Bugsnag
   - Firebase (~> 8.10.0)
   - Firebase/Auth (~> 8.10.0)
   - Firebase/Database
@@ -180,6 +182,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - AppAuth
+    - Bugsnag
     - Firebase
     - FirebaseAnalytics
     - FirebaseAuth
@@ -207,6 +210,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   AppAuth: 80317d99ac7ff2801a2f18ff86b48cd315ed465d
+  Bugsnag: 1c916461d37fa0763782f5518f4e59b335ce665e
   Firebase: 44213362f1dcc52555b935dc925ed35ac55f1b20
   FirebaseAnalytics: 319c9b3b1bdd400d60e2f415dff0c5f6959e6760
   FirebaseAuth: 59a2d2b933b5b79e18fb1e6ad230c6abdaa73d26
@@ -232,6 +236,6 @@ SPEC CHECKSUMS:
   NSHash: 036c03781d372c288d332b512b203e7bb832e46e
   PromisesObjC: 99b6f43f9e1044bd87a95a60beff28c2c44ddb72
 
-PODFILE CHECKSUM: 84fd341c71e67f0c6ef7a23cba6795d0b40f8d85
+PODFILE CHECKSUM: 512d748c694522d317df9652dc1f34eebed4dbda
 
 COCOAPODS: 1.11.2

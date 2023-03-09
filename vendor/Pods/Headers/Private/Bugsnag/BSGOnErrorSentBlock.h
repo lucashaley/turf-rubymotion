@@ -1,0 +1,1 @@
+../../../Bugsnag/Bugsnag/KSCrash/Source/KSCrash/Reporting/Filters/BSGOnErrorSentBlock.h

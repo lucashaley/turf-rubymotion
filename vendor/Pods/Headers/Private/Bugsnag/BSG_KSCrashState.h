@@ -1,0 +1,1 @@
+../../../Bugsnag/Bugsnag/KSCrash/Source/KSCrash/Recording/BSG_KSCrashState.h

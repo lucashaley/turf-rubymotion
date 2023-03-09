@@ -195,4 +195,8 @@ module Utilities
     puts "|\n" * 2
     puts "\n"
   end
+
+  def breadcrumb(message)
+    Bugsnag.leaveBreadcrumbWithMessage(message)
+  end
 end

@@ -15,8 +15,15 @@ class AppDelegate
     # $logger = Motion::Lager.new(level: 'debug') # default
 
     # Trying BugSnag
-    Bugsnag.start
-    # Bugsnag.notifyError(NSError.errorWithDomain('com.animatology'), code:408, userInfo:nil)
+    mp 'Bugsnag...'
+    begin
+      Bugsnag.start
+      Bugsnag.leaveBreadcrumbWithMessage('Bugsnag started.')
+    rescue Exception => exception
+      mp 'something went wrong with Bugsnag'
+      mp exception.reason
+      mp exception.callStackSymbols
+    end
 
     # Testing JavaScriptCore
 #     puts "Testing JavaScriptCore"

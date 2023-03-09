@@ -1,0 +1,1 @@
+../../../Bugsnag/Bugsnag/Metadata/BugsnagMetadata+Private.h

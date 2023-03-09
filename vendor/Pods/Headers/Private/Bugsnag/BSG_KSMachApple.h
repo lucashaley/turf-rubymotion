@@ -1,0 +1,1 @@
+../../../Bugsnag/Bugsnag/KSCrash/Source/KSCrash/Recording/Tools/BSG_KSMachApple.h

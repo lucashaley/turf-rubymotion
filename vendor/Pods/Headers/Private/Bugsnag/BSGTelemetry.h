@@ -1,0 +1,1 @@
+../../../Bugsnag/Bugsnag/Helpers/BSGTelemetry.h

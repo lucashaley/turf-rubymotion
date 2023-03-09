@@ -1,0 +1,1 @@
+../../../Bugsnag/Bugsnag/Delivery/BSGConnectivity.h

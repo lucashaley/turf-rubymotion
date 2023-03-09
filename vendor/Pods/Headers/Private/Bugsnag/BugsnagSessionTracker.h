@@ -1,0 +1,1 @@
+../../../Bugsnag/Bugsnag/BugsnagSessionTracker.h

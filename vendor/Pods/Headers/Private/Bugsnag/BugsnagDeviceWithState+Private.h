@@ -1,0 +1,1 @@
+../../../Bugsnag/Bugsnag/Payload/BugsnagDeviceWithState+Private.h

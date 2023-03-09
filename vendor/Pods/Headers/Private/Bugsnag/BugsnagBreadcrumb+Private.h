@@ -1,0 +1,1 @@
+../../../Bugsnag/Bugsnag/Payload/BugsnagBreadcrumb+Private.h

@@ -1,0 +1,1 @@
+../../../Bugsnag/Bugsnag/include/Bugsnag/BugsnagAppWithState.h
