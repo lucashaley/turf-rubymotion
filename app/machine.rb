@@ -54,6 +54,7 @@ class Machine
     # http://www.zenruby.info/2016/05/procs-and-lambdas-closures-in-ruby.html
     handle_auth_state_changed = proc do |auth, user|
       puts 'handle_auth_state_changed'.red
+      Utilities::breadcrumb('handle_auth_state_changed')
 
       if auth.currentUser
         puts 'User already logged in'.pink
@@ -85,6 +86,7 @@ class Machine
     providers << FUIGoogleAuth.alloc.init
     providers << FUIOAuth.appleAuthProvider
     providers << FUIEmailAuth.alloc.init
+    # providers << FUIGameCenterAuth.alloc.init
     @auth_ui.providers = providers
 
     @auth_view_controller = @auth_ui.authViewController
@@ -157,13 +159,16 @@ class Machine
   def segue(name)
     puts 'MACHINE SEGUE'.blue if DEBUGGING
 
+    Bugsnag.leaveBreadcrumbWithMessage("Performing segue: #{name}")
+
     # Can't we just use the current view controller shortcut?
     @delegate.window.rootViewController.performSegueWithIdentifier(name, sender: self)
   end
 
-  def authUI(authUI, didSignInWithAuthDataResult: result, error: _error)
+  def authUI(authUI, didSignInWithAuthDataResult: result, error: error)
     puts 'MACHINE DID_SIGN_IN'.blue if DEBUGGING
     puts 'insane'.red
+    Bugsnag.notifyError(error)
   end
 
   def initialize_location_manager
@@ -172,8 +177,8 @@ class Machine
       lm.requestWhenInUseAuthorization
 
       # constant needs to be capitalized because Ruby
-      lm.desiredAccuracy = KCLLocationAccuracyBestForNavigation
-      # lm.desiredAccuracy = KCLLocationAccuracyBest
+      # lm.desiredAccuracy = KCLLocationAccuracyBestForNavigation
+      lm.desiredAccuracy = KCLLocationAccuracyBest
       lm.distanceFilter = 2
       lm.startUpdatingLocation
       lm.delegate = self
@@ -206,6 +211,7 @@ class Machine
   def locationManager(_manager, didFailWithError: error)
     puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
     Notification.center.post 'PlayerDisappear'
+    Bugsnag.notifyError(error)
   end
 
   def check_for_game(gamecode)
@@ -217,7 +223,9 @@ class Machine
     # puts this_query.ref.URL
     # puts "_this_query: #{_this_query}"
     this_query.getDataWithCompletionBlock(
-      lambda do |_error, snapshot|
+      lambda do |error, snapshot|
+        Bugsnag.notifyError(error) unless error.nil?
+
         puts "#{snapshot.key}: #{snapshot.value}".red
         next_snapshot = snapshot.children.nextObject # rename this, not a ref
         # game = Game.init_with_hash({key: next_ref.key}.merge(next_ref.value))

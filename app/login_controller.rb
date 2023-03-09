@@ -65,6 +65,8 @@ class LoginController < MachineViewController
 
     # grab the apple credential
     apple_credential = authorization.credential
+    Utilities::breadcrumb("#{__method__}: apple_credential")
+    Utilities::breadcrumb(apple_credential.displayName)
     mp 'testing credential:'
     mp apple_credential.displayName
     Machine.instance.recovery_displayname = apple_credential.displayName
@@ -85,6 +87,7 @@ class LoginController < MachineViewController
     mp 'didCompleteWithError'
     # again, something useful should happen here
     mp error.localizedDescription
+    Bugsnag.notifyError(error)
   end
 
   # ASAuthorizationControllerPresentationContextProviding
@@ -117,6 +120,7 @@ class LoginController < MachineViewController
       $logger.error error.userInfo
       return
     end
+    Bugsnag.notifyError(error) unless error.nil?
 
     # create a firebase credential
     # this is more straightforward, because Firebase is Google
@@ -137,16 +141,18 @@ class LoginController < MachineViewController
     Dispatch::Queue.new("turf-test-db").async do
       FIRAuth.auth.signInWithCredential(credential, completion: lambda do |auth_result, error|
         unless error.nil?
-          $logger.error error.localizedDescription
+          mp error.localizedDescription
           return
         end
 
+        Bugsnag.notifyError(error) unless error.nil?
+
         if auth_result.nil?
-          $logger.error 'no auth_result!'
+          mp 'no auth_result!'
           return
         end
         if auth_result.credential.nil?
-          $logger.error 'no auth_result.credentail!'
+          mp 'no auth_result.credentail!'
           return
         end
 

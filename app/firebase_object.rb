@@ -24,7 +24,7 @@ class FirebaseObject
     puts "FBO:#{@class_name} INITIALIZE".green if DEBUGGING
 
     start_observing
-    
+
     push unless in_data_hash.empty?
     pull if in_data_hash.empty?
 
@@ -40,8 +40,9 @@ class FirebaseObject
     # puts "FBO:#{@class_name} PUSH".green if DEBUGGING
     @ref.setValue(
       @data_hash, withCompletionBlock:
-      lambda do |_error, _ref|
+      lambda do |error, _ref|
         puts "FBO:#{@class_name} setValue".green
+        Bugsnag.notifyError(error) unless error.nil?
       end
     )
   end
@@ -138,7 +139,8 @@ class FirebaseObject
     @ref.updateChildValues(
       node_hash,
       withCompletionBlock:
-        lambda do |_error, _ref|
+        lambda do |error, _ref|
+          Bugsnag.notifyError(error) unless error.nil?
           in_proc.call
         end
     )

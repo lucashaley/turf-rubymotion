@@ -48,6 +48,7 @@ class JoinExistingController < MachineViewController
              .getDataWithCompletionBlock(
           lambda do |error, snapshot|
             mp error unless error.nil?
+            Bugsnag.notifyError(error) unless error.nil?
 
             game_snapshot = snapshot.children.nextObject
             game_hash = game_snapshot.valueInExportFormat
