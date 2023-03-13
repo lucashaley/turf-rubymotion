@@ -70,11 +70,6 @@ class TakaroFbo < FirebaseObject
     # Specific Players
     @ref.child('players').observeEventType(FIRDataEventTypeChildChanged, withBlock:
       lambda do |player_snapshot|
-        mp 'Takaro observe player changed'
-        mp player_snapshot.valueInExportFormat
-
-        Utilities::breadcrumb("#{__method__} player changed")
-
         # update the specific player
         @players_hash[player_snapshot.key] = player_snapshot.valueInExportFormat
         mp @players_hash
@@ -82,18 +77,37 @@ class TakaroFbo < FirebaseObject
         Notification.center.post('player_changed')
 
         # Should this update the UI? In watingi room
-      end)
+      end.weak!
+    )
+
     # Specific Team
     @ref.child('teams').observeEventType(FIRDataEventTypeChildChanged, withBlock:
       lambda do |teams_snapshot|
         teams_snapshot.ref.parent.getDataWithCompletionBlock(
           lambda do |error, snapshot|
             Bugsnag.notifyError(error) unless error.nil?
-            @teams_hash = snapshot.childSnapshotForPath('teams').valueInExportFormat
-            Notification.center.post('teams_changed', @teams_hash)
+
+            # first we're going to check if the team has a coordinate
+            mp 'iterate through teams'
+            mp snapshot.childSnapshotForPath('teams').valueInExportFormat
+            mp teams_snapshot.value
+            snapshot.childSnapshotForPath('teams').valueInExportFormat.each do |key, temp_team|
+              mp temp_team
+              if temp_team.has_key?('coordinate')
+                mp 'team has coordinate'
+                @teams_hash[key] = temp_team
+                Notification.center.post('teams_changed', @teams_hash)
+              else
+                mp 'team does not have coordinate'
+              end
+            end
+
+
+            # @teams_hash = snapshot.childSnapshotForPath('teams').valueInExportFormat
+            # Notification.center.post('teams_changed', @teams_hash)
           end
         )
-      end
+      end.weak!
     )
 
 
@@ -113,7 +127,7 @@ class TakaroFbo < FirebaseObject
         # mp markers_snapshot.value
         @markers_hash = markers_snapshot.value
         Notification.center.post("markers_changed", @markers_hash)
-      end
+      end.weak!
     )
 
     @ref.child('game_state').observeEventType(
@@ -122,7 +136,12 @@ class TakaroFbo < FirebaseObject
         # mp game_state_snapshot.value
 
         if game_state_snapshot.value == 'ready'
-          Utilities::breadcrumb('Machine responding to game_state')
+          Utilities::breadcrumb('Machine responding to game_state ready')
+          set_local_player_state('ready')
+        end
+
+        if game_state_snapshot.value == 'playing'
+          Utilities::breadcrumb('Machine responding to game_state playing')
 
           Notification.center.post('game_state_playing_notification', nil)
 
@@ -136,7 +155,7 @@ class TakaroFbo < FirebaseObject
           #   }
           # )
         end
-      end
+      end.weak!
     )
 
 #     @ref.child('player_status').observeEventType(
@@ -192,7 +211,17 @@ class TakaroFbo < FirebaseObject
       state.on_exit { mp 'game_state end initializing' }
       state.transition_to :options,
                           on_notification: 'game_state_options_notification',
-                          action: proc { self.game_state = 'options' }
+                          action: proc {
+                            Utilities::breadcrumb('game_state initializing to options')
+                            self.game_state = 'options'
+                          }
+      state.on_exit { mp 'game_state end initializing' }
+      state.transition_to :join,
+                          on_notification: 'game_state_join_notification',
+                          action: proc {
+                            Utilities::breadcrumb('game_state initializing to join')
+                            self.game_state = 'join' # this might be a problem
+                          }
     end
     ####################
     # OPTIONS
@@ -200,8 +229,23 @@ class TakaroFbo < FirebaseObject
       state.on_entry { mp 'game_state start options' }
       state.on_exit { mp 'game_state end options' }
       state.transition_to :character_selection,
-                          on_notification: 'game_state_charcater_selection_notification',
-                          action: proc { self.game_state = 'character_selection' }
+                          on_notification: 'game_state_character_selection_notification',
+                          action: proc {
+                            Utilities::breadcrumb('game_state options to character_selection')
+                            self.game_state = 'character_selection'
+                          }
+    end
+    ####################
+    # JOIN
+    @game_state_machine.when :join do |state|
+      state.on_entry { mp 'game_state start join' }
+      state.on_exit { mp 'game_state end join' }
+      state.transition_to :character_selection,
+                          on_notification: 'game_state_character_selection_notification',
+                          action: proc {
+                            Utilities::breadcrumb('game_state join to character_selection')
+                            self.game_state = 'character_selection'
+                          }
     end
     ####################
     # CHARACTER SELECTION
@@ -210,7 +254,10 @@ class TakaroFbo < FirebaseObject
       state.on_exit { mp 'game_state end character_selection' }
       state.transition_to :waiting_room,
                           on_notification: 'game_state_waiting_room_notification',
-                          action: proc { self.game_state = 'waiting_room' }
+                          action: proc {
+                            Utilities::breadcrumb('game_state character_selection to waiting_room')
+                            self.game_state = 'waiting_room'
+                          }
     end
     ####################
     # WAITING ROOM
@@ -221,8 +268,18 @@ class TakaroFbo < FirebaseObject
       state.transition_to :countdown,
                           on_notification: 'game_state_countdown_notification',
                           action: proc {
+                            Utilities::breadcrumb('game_state waiting_room to countdown')
+                            Utilities::breadcrumb('Segue ToGameCountdown')
                             # self.game_state = 'ready'
                             Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
+                          }
+
+      state.transition_to :playing,
+                          on_notification: 'game_state_playing_notification',
+                          action: proc {
+                            mp 'Transitioning to game'
+                            Utilities::breadcrumb('game_state waiting_room to playing')
+                            Machine.instance.segue('ToGame')
                           }
     end
     ####################
@@ -234,7 +291,10 @@ class TakaroFbo < FirebaseObject
       state.transition_to :playing,
                           on_notification: 'game_state_playing_notification',
                           action: proc {
-                            performSegueWithIdentifier('ToGame', sender: self)
+                            Utilities::breadcrumb('game_state countdown to playing')
+                            # performSegueWithIdentifier('ToGame', sender: self)
+                            presentingViewController.dismissViewControllerAnimated(true, completion: nil)
+                            Machine.instance.segue('ToGame')
                             self.game_state = 'playing' if @host
                           }
     end
@@ -269,7 +329,7 @@ class TakaroFbo < FirebaseObject
     mp @local_player
 
     # set the player status section
-    @ref.child('player_status').updateChildValues(
+    @ref.child('player_states').updateChildValues(
       {
         @local_player.key => 'waiting'
       }
@@ -435,7 +495,10 @@ class TakaroFbo < FirebaseObject
       longitude_delta * FIELD_SCALE
     )
 
-    Notification.center.post('game_state_countdown_notification', nil)
+    # we're trying not doing the countdown screen
+    # and instead just flagging game_status as ready
+    # Notification.center.post('game_state_countdown_notification', nil)
+    set_game_status('ready')
   end
   # rubocop:enable Metrics/AbcSize
 
@@ -620,18 +683,22 @@ class TakaroFbo < FirebaseObject
     puts "Score for #{kapa_key}: #{score}".focus
   end
 
-  def set_local_player_status(in_status)
-    @ref.child('player_status').updateChildValues(
+  def set_local_player_state(in_state)
+    @ref.child('player_states').updateChildValues(
       {
-        @local_player.key => in_status
+        @local_player.key => in_state
       }
     )
+  end
+
+  def set_game_status(in_status)
+    @ref.child('game_state').setValue(in_status)
   end
 
   # This uses the teams
   # but we can also use the players, now that they each have a color
   def player_annotations
-    mp __method__
+    # mp __method__
     annotations = []
 
     # the new local hash way
@@ -655,7 +722,7 @@ class TakaroFbo < FirebaseObject
   end
 
   def marker_annotations
-    __method__
+    # mp __method__
 
     annotations = []
     @markers_hash.each_value do |marker|
@@ -674,10 +741,15 @@ class TakaroFbo < FirebaseObject
   end
 
   def hash_to_CLLocationCoordinate2D(in_hash)
+    mp __method__
+    mp 'in_coord'
     CLLocationCoordinate2DMake(in_hash['latitude'], in_hash['longitude'])
   end
 
   def hash_to_MKCoordinateRegion(in_hash)
+    mp __method__
+    mp 'in_region'
+    mp in_hash
     MKCoordinateRegionMakeWithDistance(
       hash_to_CLLocationCoordinate2D(in_hash['center']),
       in_hash['span']['latitude_delta'],

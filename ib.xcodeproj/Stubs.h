@@ -158,10 +158,12 @@
 
 @property IBOutlet UITextField * gamecode;
 @property IBOutlet UIButton * continue_button;
+@property IBOutlet UIButton * cancel_button;
 
 -(IBAction) viewWillAppear:(id) animated;
 -(IBAction) textFieldShouldEndEditing:(id) text_field;
 -(IBAction) check_input_text;
+-(IBAction) cancel_new_game;
 
 @end
 
@@ -293,7 +295,10 @@
 @end
 
 @interface Player: FirebaseObject
--(IBAction) init_observers;
+-(IBAction) initialize_state_machine;
+-(IBAction) initialize_coordinate_machine;
+-(IBAction) initialize_observers;
+-(IBAction) initialize_firebase_observers;
 -(IBAction) coordinate;
 -(IBAction) check_taiapa;
 -(IBAction) placing:(id) in_bool;
@@ -369,11 +374,16 @@
 -(IBAction) markers_array_enabled_only;
 -(IBAction) taiapa;
 -(IBAction) playfield;
+-(IBAction) playfield_region;
 -(IBAction) waiting;
 -(IBAction) playing;
 -(IBAction) game_state;
+-(IBAction) set_local_player_state:(id) in_state;
+-(IBAction) set_game_status:(id) in_status;
 -(IBAction) player_annotations;
 -(IBAction) marker_annotations;
+-(IBAction) hash_to_CLLocationCoordinate2D:(id) in_hash;
+-(IBAction) hash_to_MKCoordinateRegion:(id) in_hash;
 
 @end
 
@@ -426,7 +436,6 @@
 -(IBAction) to_hash;
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
--(IBAction) to_CLLocationCoordinate2D;
 
 @end
 
@@ -435,7 +444,7 @@
 -(IBAction) to_s;
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
--(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) to_;
 
 @end
 
@@ -445,15 +454,32 @@
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
 -(IBAction) to_CLLocationCoordinate2D;
--(IBAction) test;
--(IBAction) minutes;
--(IBAction) recursive_symbolize_keys:(id) h;
 
 @end
 
 @interface MKMapPoint: NSObject
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
+-(IBAction) to_hash;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+-(IBAction) recursive_symbolize_keys:(id) h;
+
+@end
+
+@interface MKMapRect: NSObject
+-(IBAction) to_cgrect;
+-(IBAction) to_hash;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+-(IBAction) recursive_symbolize_keys:(id) h;
+
+@end
+
+@interface MKCoordinateSpan: NSObject
+-(IBAction) to_hash;
 -(IBAction) to_CLLocationCoordinate2D;
 -(IBAction) test;
 -(IBAction) minutes;
@@ -462,14 +488,15 @@
 
 @end
 
-@interface MKMapRect: NSObject
--(IBAction) to_cgrect;
+@interface MKCoordinateRegion: NSObject
+-(IBAction) to_hash;
 -(IBAction) to_CLLocationCoordinate2D;
 -(IBAction) test;
 -(IBAction) minutes;
 -(IBAction) recursive_symbolize_keys:(id) h;
 -(IBAction) format_to_location_coord:(id) input;
 -(IBAction) random_color;
+-(IBAction) puts_open;
 
 @end
 
@@ -482,6 +509,7 @@
 -(IBAction) random_color;
 -(IBAction) puts_open;
 -(IBAction) puts_close;
+-(IBAction) breadcrumb:(id) message;
 
 @end
 
@@ -492,6 +520,7 @@
 -(IBAction) random_color;
 -(IBAction) puts_open;
 -(IBAction) puts_close;
+-(IBAction) breadcrumb:(id) message;
 
 @end
 

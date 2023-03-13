@@ -23,7 +23,9 @@ module VoronoiUtilities
 
     vertices
   end
-  alias :verticesFromCell :vertices_from_cell
+  # is it better to use alias_method?
+  # alias :verticesFromCell :vertices_from_cell
+  alias_method :verticesFromCell, :vertices_from_cell
 
   def overlay_from_vertices(vertices)
     mp __method__

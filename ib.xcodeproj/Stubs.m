@@ -126,6 +126,12 @@
 @implementation MKMapRect
 @end
 
+@implementation MKCoordinateSpan
+@end
+
+@implementation MKCoordinateRegion
+@end
+
 @implementation Hash
 @end
 

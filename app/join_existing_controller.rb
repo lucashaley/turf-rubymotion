@@ -1,12 +1,16 @@
 class JoinExistingController < MachineViewController
   outlet :gamecode, UITextField
   outlet :continue_button, UIButton
+  outlet :cancel_button, UIButton
 
   DEBUGGING = true
 
   def viewWillAppear(animated)
     super
     puts 'JOINCONTROLLER VIEWWILLAPPEAR'.blue if DEBUGGING
+
+    # this shows the keyboard
+    gamecode.becomeFirstResponder
 
     # get the current player's location
     puts 'Location?'.red
@@ -17,6 +21,8 @@ class JoinExistingController < MachineViewController
       puts 'Text did change'.blue if DEBUGGING
       check_input_text
     end
+
+    Notification.center.post('game_state_join_notification', nil)
 
     puts 'Trying Firebase Object'.red
     TakaroFbo.new(Machine.instance.db.referenceWithPath('tests').childByAutoId, { name: 'tomato' })
@@ -41,6 +47,7 @@ class JoinExistingController < MachineViewController
     if gamecode.text.length == 6
       # TODO: This should probably be threaded
 
+      # this should also check for game_status waiting_room
       Machine.instance.db.referenceWithPath('games')
              .queryOrderedByChild('gamecode')
              .queryEqualToValue(gamecode.text)
@@ -50,17 +57,27 @@ class JoinExistingController < MachineViewController
             mp error unless error.nil?
             Bugsnag.notifyError(error) unless error.nil?
 
-            game_snapshot = snapshot.children.nextObject
-            game_hash = game_snapshot.valueInExportFormat
+            # Utilities::breadcrumb(snapshot.nil?)
 
-            puts 'OHHH JESUS HERE WE GO'.focus
-            Machine.instance.takaro_fbo = TakaroFbo.new(game_snapshot.ref, {})
-            mp Machine.instance.takaro_fbo
+            mp snapshot.childrenCount
+            return if snapshot.nil?
 
-            continue_button.enabled = true
+            begin
+              game_snapshot = snapshot.children.nextObject
+              game_hash = game_snapshot.valueInExportFormat
 
-            # hide the keyboard
-            gamecode.resignFirstResponder
+              puts 'OHHH JESUS HERE WE GO'.focus
+              Machine.instance.takaro_fbo = TakaroFbo.new(game_snapshot.ref, {})
+              mp Machine.instance.takaro_fbo
+
+              continue_button.enabled = true
+
+              # hide the keyboard
+              gamecode.resignFirstResponder
+            rescue Exception => e
+              Utilities::breadcrumb('joining didnt work')
+              Bugsnag.notify(e)
+            end
           end
         )
     else
@@ -68,4 +85,12 @@ class JoinExistingController < MachineViewController
     end
   end
   # rubocop:enable Metrics/AbcSize
+
+  def cancel_new_game
+    puts 'JoinController: cancel_new_game'
+    @takaro = nil
+    Machine.instance.takaro_fbo = nil
+    Machine.instance.segue('ToMenu')
+    # self.presentingViewController.dismissViewControllerAnimated(true, completion:nil)
+  end
 end

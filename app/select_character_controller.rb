@@ -49,7 +49,7 @@ class SelectCharacterController < MachineViewController
     # with the new new/join system, we have the gamecode
     puts "Takaro gamecode: #{Machine.instance.takaro_fbo.gamecode}".red
 
-    Notification.center.post("game_state_charcater_selection_notification", nil)
+    Notification.center.post("game_state_character_selection_notification", nil)
   end
 
   def create_character_button(title, index)

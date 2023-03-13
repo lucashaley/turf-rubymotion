@@ -187,27 +187,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="ERG-Fk-UNd">
-                                <rect key="frame" x="238" y="602" width="121" height="45"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
-                                <state key="normal" title="Continue"/>
-                                <connections>
-                                    <segue destination="wqV-fq-isP" kind="show" identifier="ToSelectCharacter" id="zAq-bV-BBM"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="3Sd-oY-JDw">
-                                <rect key="frame" x="16" y="602" width="92" height="45"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
-                                <state key="normal" title="Cancel">
-                                    <color key="titleColor" systemColor="systemRedColor"/>
-                                </state>
-                                <connections>
-                                    <action selector="cancel_new_game" destination="lpe-LN-HM1" eventType="touchUpInside" id="MM5-OY-Vyw"/>
-                                    <action selector="dismiss_new" destination="lpe-LN-HM1" eventType="touchUpInside" id="RX2-Dr-w5R"/>
-                                </connections>
-                            </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Join Game." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p2E-iv-0zM">
                                 <rect key="frame" x="72" y="44" width="233" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -229,6 +208,27 @@
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="40"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no"/>
                             </textField>
+                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="ERG-Fk-UNd">
+                                <rect key="frame" x="238" y="272" width="121" height="45"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
+                                <state key="normal" title="Continue"/>
+                                <connections>
+                                    <segue destination="wqV-fq-isP" kind="show" identifier="ToSelectCharacter" id="zAq-bV-BBM"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="3Sd-oY-JDw">
+                                <rect key="frame" x="16" y="272" width="92" height="45"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
+                                <state key="normal" title="Cancel">
+                                    <color key="titleColor" systemColor="systemRedColor"/>
+                                </state>
+                                <connections>
+                                    <action selector="cancel_new_game" destination="lpe-LN-HM1" eventType="touchUpInside" id="MM5-OY-Vyw"/>
+                                    <action selector="dismiss_new" destination="lpe-LN-HM1" eventType="touchUpInside" id="RX2-Dr-w5R"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="u0U-09-dUu"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -403,11 +403,12 @@
                         <outlet property="table_team_a" destination="AgA-Xk-jr9" id="txv-ZG-ZEt"/>
                         <outlet property="table_team_b" destination="4iH-LO-1V0" id="Wsb-ey-Qbr"/>
                         <segue destination="DBm-GU-flj" kind="presentation" identifier="ToGameCountdown" id="qm1-1Y-u3f"/>
+                        <segue destination="Ba5-Em-l6K" kind="show" identifier="ToGame" id="rnn-hE-pAp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Qc1-zH-G8o" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3128.8000000000002" y="2377.9610194902552"/>
+            <point key="canvasLocation" x="3076" y="2391"/>
         </scene>
         <!--Login Controller-->
         <scene sceneID="uw0-iv-ilF">
@@ -603,10 +604,11 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" text="This game was made by Lucas Haley using the following tools: - RubyMotion - Google Firebase  Playtesters Harry Ford, Stu Dixon" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rMD-Zc-Qeg">
+                            <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rMD-Zc-Qeg">
                                 <rect key="frame" x="16" y="138" width="343" height="484"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <string key="text">This game was made by Lucas Haley using the following tools: - RubyMotion - Google Firebase  Playtesters Harry Ford, Stu Dixon, Morgan Odland</string>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="20"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -821,7 +823,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="QP6-o5-4ce" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3970" y="2378"/>
+            <point key="canvasLocation" x="3958" y="2035"/>
         </scene>
         <!--Game Controller-->
         <scene sceneID="YfJ-45-oed">
@@ -943,7 +945,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="gPf-Yu-zFj"/>
+        <segue reference="rnn-hE-pAp"/>
         <segue reference="Gh1-WF-AJg"/>
         <segue reference="zAq-bV-BBM"/>
     </inferredMetricsTieBreakers>

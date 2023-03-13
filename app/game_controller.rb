@@ -158,14 +158,19 @@ class GameController < MachineViewController
 
     delta_hash = {}
 
-    # something is going on here
-    areas_hash.each do |key, v|
-      mp key
-      s = ((v / total_areas_hash) * 100).round - 50
-      mp s
-      s = s < 0 ? 0 : s
-      mp s
-      delta_hash[key] = s == 0 ? 0 : (s / 10).round # is this necessary?
+    begin
+      # something is going on here
+      areas_hash.each do |key, v|
+        mp key
+        s = ((v / total_areas_hash) * 100).round - 50
+        mp s
+        s = s < 0 ? 0 : s
+        mp s
+        delta_hash[key] = s == 0 ? 0 : (s / 10).round # is this necessary?
+      end
+    rescue Exception => exception
+      mp exception.reason
+      Bugsnag.notify(exception)
     end
 
     # mp 'delta_hash'
@@ -314,7 +319,10 @@ class GameController < MachineViewController
     super
     mp 'GAMECONTROLLER: VIEWDIDLOAD'.light_blue
 
-    Machine.instance.is_playing = true
+    # Machine.instance.is_playing = true
+    Machine.instance.takaro_fbo.set_local_player_state('playing')
+
+    # should these be here?
     @scores = [0, 0]
     @scores_hash = {}
 
@@ -326,8 +334,11 @@ class GameController < MachineViewController
       # )
 
       mp 'Taiapa vs Playfield!'
+      mp 'taiapa'
       mp Machine.instance.takaro_fbo.taiapa_region
+      mp 'playfield'
       mp Machine.instance.takaro_fbo.playfield
+      mp 'playfield_region'
       mp Machine.instance.takaro_fbo.playfield_region
 
       map_view.setRegion(Machine.instance.takaro_fbo.playfield_region, animated: false)

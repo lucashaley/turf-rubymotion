@@ -22,7 +22,8 @@ class Machine
                 :gamecode,
                 :is_waiting,
                 :is_playing,
-                :horizontal_accuracy
+                :horizontal_accuracy,
+                :app_state_machine
 
   DEBUGGING = false
   DESIRED_ACCURACY = 30
@@ -44,7 +45,10 @@ class Machine
     FIRApp.configure
     @db_app = FIRApp.defaultApp
     # puts "Machine App:#{@db_app.name}"
-    @db = FIRDatabase.databaseForApp(@db_app)
+
+    # this connects to the default asia db
+    # @db = FIRDatabase.databaseForApp(@db_app)
+    @db = FIRDatabase.databaseWithURL('https://turf-us.firebaseio.com')
 
     #####################
     # AUTHENTICATION
@@ -91,6 +95,15 @@ class Machine
 
     @auth_view_controller = @auth_ui.authViewController
     puts "Machine auth_view_controller: #{auth_view_controller}"
+
+    @app_state_machine = StateMachine::Base.new start_state: :splash, verbose: DEBUGGING
+    @app_state_machine.when :splash do |state|
+      state.transition_to :menu,
+                          after: 10,
+                          on: :splashToMenu,
+                          action: proc { transition_splash_to_main_menu }
+    end
+    @app_state_machine.start!
 
     ####################
     # STATEMACHINE
@@ -149,6 +162,10 @@ class Machine
   def self.instance
     Dispatch.once { @instance ||= new }
     @instance
+  end
+
+  def transition_splash_to_main_menu
+    mp 'TRANSITION'
   end
 
   def state=(state)
@@ -211,7 +228,7 @@ class Machine
   def locationManager(_manager, didFailWithError: error)
     puts "\n\nOOPS LOCATION MANAGER FAIL\n\n"
     Notification.center.post 'PlayerDisappear'
-    Bugsnag.notifyError(error)
+    # Bugsnag.notifyError(error)
   end
 
   def check_for_game(gamecode)

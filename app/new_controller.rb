@@ -23,7 +23,7 @@ class NewController < MachineViewController
 
   def viewDidLoad
     super
-    puts 'NEWCONTROLLER: VIEWDIDLOAD'.light_blue
+    mp 'NEWCONTROLLER: VIEWDIDLOAD'.light_blue
 
     init_observers
 
@@ -92,14 +92,14 @@ class NewController < MachineViewController
 
     # Listen for gamecode
     @gamecode_new_observer = Notification.center.observe 'GamecodeNew' do |notification|
-      puts 'new_controller: NEW'.yellow
+      mp 'new_controller: NEW'.yellow
 
       gamecode.text = notification.object
     end
 
     # listen for the character selection
     @character_select_observer = Notification.center.observe 'SelectCharacter' do |notification|
-      puts 'CHARACTER SELECT'.yellow
+      mp 'CHARACTER SELECT'.yellow
       # @takaro.local_kaitakaro.character = notification.data
       @takaro.local_player.character = notification.data
     end
@@ -109,7 +109,7 @@ class NewController < MachineViewController
   # Useful: https://code.tutsplus.com/tutorials/ios-sdk-crafting-custom-uitableview-cells--mobile-15702
   def tableView(table_view, cellForRowAtIndexPath: index_path)
     begin
-      puts 'NEWCONTROLLER TABLEVIEW CELLFORROW'.blue if DEBUGGING
+      mp 'NEWCONTROLLER TABLEVIEW CELLFORROW'.blue if DEBUGGING
       mp __method__
 
       cell = table_view.dequeueReusableCellWithIdentifier(CELL_IDENTIFIER)
