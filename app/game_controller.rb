@@ -210,7 +210,7 @@ class GameController < MachineViewController
     # end
 
     @player_new_observer = Notification.center.observe 'PlayerNew' do |_notification|
-      puts 'NEW PLAYER'
+      mp 'NEW PLAYER'
     end
     # BOUNDARY EXIT
     @exit_observer = Notification.center.observe 'BoundaryExit' do |_notification|
@@ -268,7 +268,7 @@ class GameController < MachineViewController
     # end
 
     @marker_label_observer = Notification.center.observe 'UpdateMarkerLabel' do |_notification|
-      puts 'GameController: UpdateMarkerLabel'.focus
+      mp 'GameController: UpdateMarkerLabel'.focus
       update_marker_label
     end
 
@@ -296,7 +296,7 @@ class GameController < MachineViewController
   # rubocop:enable Metrics/AbcSize
 
   def viewWillAppear(_animated)
-    puts 'GAME_CONTROLLER: VIEWWILLAPPEAR'.light_blue
+    mp 'GAME_CONTROLLER: VIEWWILLAPPEAR'.light_blue
 
     # we now use a background image?
     # button_pylon.setImage(icon_image(:awesome, :plus_circle, size: 100, color: UIColor.redColor), forState: UIControlStateNormal)
@@ -312,7 +312,7 @@ class GameController < MachineViewController
   # rubocop:disable Metrics/AbcSize
   def viewDidLoad
     super
-    puts 'GAMECONTROLLER: VIEWDIDLOAD'.light_blue
+    mp 'GAMECONTROLLER: VIEWDIDLOAD'.light_blue
 
     Machine.instance.is_playing = true
     @scores = [0, 0]
@@ -388,7 +388,7 @@ class GameController < MachineViewController
   end
 
   def button_down
-    puts 'GameController button_down'.red
+    mp 'GameController button_down'.red
 
     # change the button color
     button_color(UIColor.systemRedColor)
@@ -397,7 +397,7 @@ class GameController < MachineViewController
   end
 
   def button_up
-    puts 'GameController button_up'.red
+    mp 'GameController button_up'.red
 
     # change the button color
     button_color(UIColor.labelColor)
@@ -495,15 +495,15 @@ class GameController < MachineViewController
   end
 
   def try_render_overlays
-    puts 'try_render_overlays'
+    # puts 'try_render_overlays'
     return if @rendering
 
-    puts 'rendering'
+    # puts 'rendering'
     render_overlays
   end
 
   def render_overlays
-    mp __method__
+    # mp __method__
 
     @rendering = true
 
@@ -534,17 +534,17 @@ class GameController < MachineViewController
   end
 
   def touch_down
-    puts 'touch down'
+    mp 'touch down'
     @button_fsm.event(:button_down)
   end
 
   def touch_up
-    puts 'touch up'
+    mp 'touch up'
     @button_fsm.event(:button_up)
   end
 
   def touch_out
-    puts 'touch out'
+    mp 'touch out'
     @button_fsm.event(:button_cancel)
   end
 
@@ -604,7 +604,7 @@ class GameController < MachineViewController
   end
 
   def observe_new_pouwhenua
-    puts 'game_controller observe_new_pouwhenua'.blue if DEBUGGING
+    mp 'game_controller observe_new_pouwhenua'.blue if DEBUGGING
     render_overlays
   end
 
