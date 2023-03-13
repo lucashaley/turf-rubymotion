@@ -100,8 +100,42 @@ class Machine
     @app_state_machine.when :splash do |state|
       state.transition_to :menu,
                           after: 10,
-                          on: :splashToMenu,
+                          on_notification: :app_splash_to_menu,
                           action: proc { transition_splash_to_main_menu }
+    end
+    @app_state_machine.when :main_menu do |state|
+      state.transition_to :credits,
+                          on: :app_main_menu_to_credits,
+                          action: proc { transition_main_menu_to_credits }
+      state.transition_to :settings,
+                          on: :app_main_menu_to_settings,
+                          action: proc { transition_main_menu_to_settings }
+      state.transition_to :characters,
+                          on: :app_main_menu_to_characters,
+                          action: proc { transition_main_menu_to_characters }
+      state.transition_to :how_to_play,
+                          on: :app_main_menu_to_how_to_play,
+                          action: proc { transition_main_menu_to_how_to_play }
+    end
+    @app_state_machine.when :credits do |state|
+      state.transition_to :main_menu,
+                          on: :app_credits_to_main_menu,
+                          action: proc { transition_credits_to_main_menu }
+    end
+    @app_state_machine.when :settings do |state|
+      state.transition_to :main_menu,
+                          on: :app_settings_to_main_menu,
+                          action: proc { transition_settings_to_main_menu }
+    end
+    @app_state_machine.when :characters do |state|
+      state.transition_to :main_menu,
+                          on: :app_characters_to_main_menu,
+                          action: proc { transition_characters_to_main_menu }
+    end
+    @app_state_machine.when :how_to_play do |state|
+      state.transition_to :main_menu,
+                          on: :app_how_to_play_to_main_menu,
+                          action: proc { transition_how_to_play_to_main_menu }
     end
     @app_state_machine.start!
 
@@ -165,7 +199,87 @@ class Machine
   end
 
   def transition_splash_to_main_menu
-    mp 'TRANSITION'
+    mp __method__
+  end
+
+  def transition_main_menu_to_credits
+    mp __method__
+  end
+
+  def transition_credits_to_main_menu
+    mp __method__
+  end
+
+  def transition_main_menu_to_settings
+    mp __method__
+  end
+
+  def transition_settings_to_main_menu
+    mp __method__
+  end
+
+  def transition_main_menu_to_characters
+    mp __method__
+  end
+
+  def transition_characters_to_main_menu
+    mp __method__
+  end
+
+  def transition_main_menu_to_how_to_play
+    mp __method__
+  end
+
+  def transition_how_to_play_to_main_menu
+    mp __method__
+  end
+
+  def transition_main_menu_to_log_in
+    mp __method__
+  end
+
+  def transition_log_in_to_main_menu
+    mp __method__
+  end
+
+  def transition_main_menu_to_options
+    mp __method__
+  end
+
+  def transition_options_to_main_menu
+    mp __method__
+  end
+
+  def transition_options_to_character_select
+    mp __method__
+  end
+
+  def transition_character_select_to_main_menu
+    mp __method__
+  end
+
+  def transition_character_select_to_waiting_room
+    mp __method__
+  end
+
+  def transition_waiting_room_to_main_menu
+    mp __method__
+  end
+
+  def transition_waiting_room_to_game
+    mp __method__
+  end
+
+  def transition_game_to_main_menu
+    mp __method__
+  end
+
+  def transition_game_to_game_over
+    mp __method__
+  end
+
+  def transition_game_over_to_main_menu
+    mp __method__
   end
 
   def state=(state)

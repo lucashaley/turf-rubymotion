@@ -7,6 +7,7 @@ class SplashController < MachineViewController
   end
 
   def handleSingleTap(recognizer)
+    Notification.center.post('app_splash_to_menu', nil)
     Machine.instance.fsm.event(:splashToMenu)
   end
 end
