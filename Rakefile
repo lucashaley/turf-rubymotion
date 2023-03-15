@@ -36,7 +36,7 @@ Motion::Project::App.setup do |app|
   app.name = 'Turf!'
 
   # version for your app
-  app.version = '0.1.30'
+  app.version = '0.1.32'
 
   # ===========================================================================================
   # 3. Set your deployment target (it's recommended that you at least target 10.0 and above).
@@ -77,7 +77,7 @@ Motion::Project::App.setup do |app|
   app.info_plist['UIRequiredDeviceCapabilities'] = ['arm64']
 
   # app.frameworks += ['CoreLocation', 'MessageUI', 'MapKit', 'AudioToolbox', 'JavaScriptCore', 'FirebaseAnalytics']
-  app.frameworks += ['CoreLocation', 'MessageUI', 'MapKit', 'AudioToolbox', 'JavaScriptCore', 'AuthenticationServices']
+  app.frameworks += ['CoreLocation', 'MessageUI', 'MapKit', 'AudioToolbox', 'JavaScriptCore', 'AuthenticationServices', 'SpriteKit']
 
   # This is a force, as for some reason the pods weren't including the resources
   app.resources_dirs += ['vendor/Pods/FirebaseAuthUI/FirebaseAuthUI/Sources/Resources/']

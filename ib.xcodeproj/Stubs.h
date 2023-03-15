@@ -64,6 +64,7 @@
 @property IBOutlet UILabel * pouwhenua_label;
 @property IBOutlet UILabel * left_score_label;
 @property IBOutlet UILabel * right_score_label;
+@property IBOutlet SKScene * skview;
 
 -(IBAction) setup_mapview;
 -(IBAction) setup_audio;
@@ -160,6 +161,7 @@
 @property IBOutlet UIButton * continue_button;
 @property IBOutlet UIButton * cancel_button;
 
+-(IBAction) viewDidLoad;
 -(IBAction) viewWillAppear:(id) animated;
 -(IBAction) textFieldShouldEndEditing:(id) text_field;
 -(IBAction) check_input_text;
@@ -225,6 +227,27 @@
 
 @interface Machine: NSObject
 -(IBAction) initialize;
+-(IBAction) transition_splash_to_main_menu;
+-(IBAction) transition_main_menu_to_credits;
+-(IBAction) transition_credits_to_main_menu;
+-(IBAction) transition_main_menu_to_settings;
+-(IBAction) transition_settings_to_main_menu;
+-(IBAction) transition_main_menu_to_characters;
+-(IBAction) transition_characters_to_main_menu;
+-(IBAction) transition_main_menu_to_how_to_play;
+-(IBAction) transition_how_to_play_to_main_menu;
+-(IBAction) transition_main_menu_to_log_in;
+-(IBAction) transition_log_in_to_main_menu;
+-(IBAction) transition_main_menu_to_options;
+-(IBAction) transition_options_to_main_menu;
+-(IBAction) transition_options_to_character_select;
+-(IBAction) transition_character_select_to_main_menu;
+-(IBAction) transition_character_select_to_waiting_room;
+-(IBAction) transition_waiting_room_to_main_menu;
+-(IBAction) transition_waiting_room_to_game;
+-(IBAction) transition_game_to_main_menu;
+-(IBAction) transition_game_to_game_over;
+-(IBAction) transition_game_over_to_main_menu;
 -(IBAction) state;
 -(IBAction) segue:(id) name;
 -(IBAction) initialize_location_manager;

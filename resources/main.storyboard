@@ -729,7 +729,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
             <objects>
                 <viewController id="J8r-WN-OqI" userLabel="How To Play" customClass="InfoViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Vos-tZ-lyl">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="How to Play:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gEE-kr-X96">
@@ -740,7 +740,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
                                 <nil key="highlightedColor"/>
                             </label>
                             <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I6g-Zo-6qu">
-                                <rect key="frame" x="16" y="154" width="343" height="473"/>
+                                <rect key="frame" x="16" y="154" width="343" height="493"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <string key="text">Turf! is a real-time strategy game you play in real life.   Each player can place markers in their current location.   Each marker claims a certain amount of area.  Your score is based on how large your area is compared to the other team's area.  To start, cluster your teammates together in one location. The other team clusters in a different location. The playfield size is based on the distance between the two first positions.</string>
                                 <color key="textColor" systemColor="labelColor"/>
@@ -899,6 +899,10 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <skView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dNz-ce-jUT">
+                                <rect key="frame" x="278" y="512" width="80" height="135"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </skView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="FWJ-cs-fAn"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -910,6 +914,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
                         <outlet property="map_view" destination="1Dc-fj-9gV" id="8g3-Ac-JlA"/>
                         <outlet property="pouwhenua_label" destination="Jam-GE-hkW" id="Sao-Z6-NBx"/>
                         <outlet property="right_score_label" destination="0ai-Br-HTN" id="xNb-r0-QCZ"/>
+                        <outlet property="skview" destination="dNz-ce-jUT" id="ecJ-qE-9R1"/>
                         <outlet property="timer_label" destination="yK6-Fr-IwJ" id="HAM-Cy-pSl"/>
                         <segue destination="QAX-Yg-aGW" kind="showDetail" identifier="GameOver" id="FbP-rI-VQN"/>
                     </connections>

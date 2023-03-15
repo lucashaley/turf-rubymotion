@@ -7,6 +7,7 @@ class GameController < MachineViewController
   outlet :pouwhenua_label, UILabel
   outlet :left_score_label, UILabel
   outlet :right_score_label, UILabel
+  outlet :skview, SKView
 
   attr_accessor :voronoi_map,
                 :game,
@@ -318,6 +319,9 @@ class GameController < MachineViewController
   def viewDidLoad
     super
     mp 'GAMECONTROLLER: VIEWDIDLOAD'.light_blue
+
+    mp 'SKScene'
+    mp @skview
 
     # Machine.instance.is_playing = true
     Machine.instance.takaro_fbo.set_local_player_state('playing')
