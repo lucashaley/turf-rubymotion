@@ -104,7 +104,7 @@ class GameController < MachineViewController
 
   # rubocop:disable Metrics/AbcSize
   def calculate_score
-    mp __method__
+    # mp __method__
 
     return if @voronoi_map.nil?
 #
@@ -162,11 +162,11 @@ class GameController < MachineViewController
     begin
       # something is going on here
       areas_hash.each do |key, v|
-        mp key
+        # mp key
         s = ((v / total_areas_hash) * 100).round - 50
-        mp s
+        # mp s
         s = s < 0 ? 0 : s
-        mp s
+        # mp s
         delta_hash[key] = s == 0 ? 0 : (s / 10).round # is this necessary?
       end
     rescue Exception => exception
