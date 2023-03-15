@@ -5,6 +5,11 @@ class JoinExistingController < MachineViewController
 
   DEBUGGING = true
 
+  def viewDidLoad
+    super
+    Notification.center.post('app_state_join_view', nil)
+  end
+
   def viewWillAppear(animated)
     super
     puts 'JOINCONTROLLER VIEWWILLAPPEAR'.blue if DEBUGGING
@@ -23,6 +28,7 @@ class JoinExistingController < MachineViewController
     end
 
     Notification.center.post('game_state_join_notification', nil)
+
 
     puts 'Trying Firebase Object'.red
     TakaroFbo.new(Machine.instance.db.referenceWithPath('tests').childByAutoId, { name: 'tomato' })

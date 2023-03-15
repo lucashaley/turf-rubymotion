@@ -130,6 +130,7 @@ class MenuController < MachineViewController
 
   def action_game_new(sender)
     puts "MENUCONTROLLER ACTION_GAME_NEW".blue if DEBUGGING
+    Notification.center.post('app_main_menu_to_options')
   end
 
   def action_game_join(sender)
