@@ -63,6 +63,12 @@
 @implementation Machine
 @end
 
+@implementation MachineLocation
+@end
+
+@implementation MachineLogin
+@end
+
 @implementation Marker
 @end
 

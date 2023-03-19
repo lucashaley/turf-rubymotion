@@ -175,11 +175,13 @@ class NewController < MachineViewController
   end
 
   def cancel_new_game
-    puts 'NewController: cancel_new_game'
+    mp __method__
+
     @takaro = nil
     Machine.instance.takaro_fbo = nil
     Machine.instance.segue('ToMenu')
-    # self.presentingViewController.dismissViewControllerAnimated(true, completion:nil)
+
+    app_machine.event(:app_waiting_room_to_main_menu)
   end
 
   # https://stackoverflow.com/questions/16668436/how-to-send-in-app-sms-using-rubymotion

@@ -1,8 +1,8 @@
-class InfoViewController < UIViewController
+class InfoViewController < MachineViewController
   extend IB
   outlet :button_close, UIButton
 
   def close(sender)
-    presentingViewController.dismissViewControllerAnimated(true, completion: nil)
+    app_machine.event(:dismiss_info_view)
   end
 end

@@ -220,7 +220,7 @@ class TakaroFbo < FirebaseObject
                           on_notification: 'game_state_join_notification',
                           action: proc {
                             Utilities::breadcrumb('game_state initializing to join')
-                            self.game_state = 'join' # this might be a problem
+                            # self.game_state = 'join' # this might be a problem
                           }
     end
     ####################
@@ -231,8 +231,8 @@ class TakaroFbo < FirebaseObject
       state.transition_to :character_selection,
                           on_notification: 'game_state_character_selection_notification',
                           action: proc {
-                            Utilities::breadcrumb('game_state options to character_selection')
-                            self.game_state = 'character_selection'
+                            # Utilities::breadcrumb('game_state options to character_selection')
+                            # self.game_state = 'character_selection'
                           }
     end
     ####################
@@ -243,8 +243,8 @@ class TakaroFbo < FirebaseObject
       state.transition_to :character_selection,
                           on_notification: 'game_state_character_selection_notification',
                           action: proc {
-                            Utilities::breadcrumb('game_state join to character_selection')
-                            self.game_state = 'character_selection'
+                            # Utilities::breadcrumb('game_state join to character_selection')
+                            # self.game_state = 'character_selection'
                           }
     end
     ####################
@@ -255,8 +255,8 @@ class TakaroFbo < FirebaseObject
       state.transition_to :waiting_room,
                           on_notification: 'game_state_waiting_room_notification',
                           action: proc {
-                            Utilities::breadcrumb('game_state character_selection to waiting_room')
-                            self.game_state = 'waiting_room'
+                            # Utilities::breadcrumb('game_state character_selection to waiting_room')
+                            # self.game_state = 'waiting_room'
                           }
     end
     ####################

@@ -1,38 +1,27 @@
 class GameOptionsController < MachineViewController
-  def viewDidLoad
-    super
-
-    # get the current player's location
-    puts 'Location?'.red
-    Machine.instance.initialize_location_manager
-
-    # Should probably check this out
-    Machine.instance.takaro_fbo = TakaroFbo.new(
-      Machine.instance.db.referenceWithPath('games').childByAutoId,
-      { 'gamecode' => rand(36**6).to_s(36) }
-    )
-    @takaro_fbo = Machine.instance.takaro_fbo
-
-    @takaro_fbo.host = true
-
-    Notification.center.post('game_state_options_notification', nil)
-  end
-
   def select_duration(sender)
-    puts 'GAMEOPTIONSCONTROLLER: select_duration'.blue
-    puts "sender: #{sender.inspect}".yellow
+    mp __method__
 
     # TODO: this should probably just be set on continue
     case sender.selectedSegmentIndex
     when 0
-      @takaro_fbo.duration = 5.0
-      Machine.instance.game_duration = 5.0
+      current_game.duration = 5
     when 1
-      @takaro_fbo.duration = 10.0
-      Machine.instance.game_duration = 10.0
+      current_game.duration = 10
     when 2
-      @takaro_fbo.duration = 20.0
-      Machine.instance.game_duration = 20.0
+      current_game.duration = 20
     end
+  end
+
+  def action_continue
+    mp __method__
+
+    app_machine.event(:app_game_options_to_character_select)
+  end
+
+  def action_cancel
+    mp __method__
+
+    app_machine.event(:app_game_options_to_main_menu)
   end
 end

@@ -7,56 +7,49 @@ class MenuController < MachineViewController
   outlet :button_characters, UIButton
   outlet :button_game_new, UIButton
   outlet :button_game_join, UIButton
+  outlet :button_credits, UIButton
+  outlet :button_how_to_play, UIButton
 
   def viewDidLoad
     super
     puts "MENUCONTROLLER VIEWDIDLOAD".blue if DEBUGGING
 
-    # # better way to check using GID?
-    # if Machine.instance.google_user
-    #   button_login.hidden = true
-    #   button_logout.hidden = false
-    #   button_game_new.enabled = true
-    #   button_game_join.enabled = true
-    # else
-    #   button_login.hidden = false
-    #   button_logout.hidden = true
-    #   button_game_new.enabled = false
-    #   button_game_join.enabled = false
-    # end
-
     Notification.center.observe 'UserLogIn' do |notification|
       mp 'menu_controller UserLogIn'
-      button_login.hidden = true
-      button_logout.hidden = false
-      button_game_new.enabled = true
-      button_game_join.enabled = true
+      buttons_logged_in
     end
     Notification.center.observe 'UserLogOut' do |notification|
       mp 'menu_controller UserLogOut'
-      button_login.hidden = false
-      button_logout.hidden = true
-      button_game_new.enabled = false
-      button_game_join.enabled = false
+      buttons_logged_out
     end
   end
 
   def viewWillAppear(_animated)
     if Machine.instance.firebase_user
-      button_login.hidden = true
-      button_logout.hidden = false
-      button_game_new.enabled = true
-      button_game_join.enabled = true
+      buttons_logged_in
     else
-      button_login.hidden = false
-      button_logout.hidden = true
-      button_game_new.enabled = false
-      button_game_join.enabled = false
+      buttons_logged_out
     end
   end
 
   def controlTouched(sender)
     puts "touched".pink
+  end
+
+  def buttons_logged_in
+    mp __method__
+    button_login.hidden = true
+    button_logout.hidden = false
+    button_game_new.enabled = true
+    button_game_join.enabled = true
+  end
+
+  def buttons_logged_out
+    mp __method__
+    button_login.hidden = false
+    button_logout.hidden = true
+    button_game_new.enabled = false
+    button_game_join.enabled = false
   end
 
   def action_login(sender)
@@ -94,10 +87,7 @@ class MenuController < MachineViewController
           FIRAuth.auth.signInWithCredential(credential, completion: lambda do |authResult, error|
             puts user.profile.name
             Machine.instance.google_user = user
-            button_login.hidden = true
-            button_logout.hidden = false
-            button_game_new.enabled = true
-            button_game_join.enabled = true
+            buttons_logged_in
             # dismiss_modal
           end)
         end
@@ -110,47 +100,36 @@ class MenuController < MachineViewController
     GIDSignIn.sharedInstance.signOut
     Machine.instance.google_user = nil
     Machine.instance.firebase_user = nil
-    button_login.hidden = false
-    button_logout.hidden = true
-    button_game_new.enabled = false
-    button_game_join.enabled = false
+    buttons_logged_out
   end
 
   def action_test(sender)
     presentViewController(Machine.instance.auth_view_controller, animated: true, completion: nil)
   end
 
+  def action_credits(sender)
+    mp __method__
+    app_machine.event(:app_main_menu_to_credits)
+  end
+
   def action_settings(sender)
-    # TODO
+    mp __method__
+    app_machine.event(:app_main_menu_to_settings)
   end
 
   def action_characters(sender)
-    # TODO
+    mp __method__
+    app_machine.event(:app_main_menu_to_characters)
   end
 
   def action_game_new(sender)
-    puts "MENUCONTROLLER ACTION_GAME_NEW".blue if DEBUGGING
-    Notification.center.post('app_main_menu_to_options')
+    mp __method__
+    app_machine.event(:app_main_menu_to_game_options)
   end
 
   def action_game_join(sender)
-    puts "MENUCONTROLLER ACTION_GAME_JOIN".blue if DEBUGGING
-  end
-
-  def login
-    mp 'menu_controller login'
-    button_login.hidden = true
-    button_logout.hidden = false
-    button_game_new.enabled = true
-    button_game_join.enabled = true
-  end
-
-  def logout
-    mp 'menu_controller logout'
-    button_login.hidden = false
-    button_logout.hidden = true
-    button_game_new.enabled = false
-    button_game_join.enabled = false
+    mp __method__
+    app_machine.event(:app_main_menu_to_game_join)
   end
 
   def action_dismiss_login(segue)

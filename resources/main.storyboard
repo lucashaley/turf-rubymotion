@@ -67,31 +67,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dEV-ue-rb9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1963.7681159420292" y="696.19565217391312"/>
-        </scene>
-        <!--Character Controller-->
-        <scene sceneID="Ipg-Zq-YE0">
-            <objects>
-                <viewController id="eZk-Vt-bN8" customClass="CharacterController" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="zlO-dz-iSu">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Select your character." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gxM-Qp-khQ">
-                                <rect key="frame" x="16" y="20" width="343" height="135"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="black" pointSize="42"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="z1Q-Oc-yGC"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="wcd-Km-ZQr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1247" y="696"/>
+            <point key="canvasLocation" x="1172" y="-89"/>
         </scene>
         <!--Game Options Controller-->
         <scene sceneID="hBv-wd-0hq">
@@ -107,8 +83,7 @@
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
                                 <state key="normal" title="Continue"/>
                                 <connections>
-                                    <action selector="continue_button_action:" destination="lpe-LN-HM1" eventType="primaryActionTriggered" id="aDd-sZ-zWU"/>
-                                    <segue destination="wqV-fq-isP" kind="show" id="7CE-HL-6xe"/>
+                                    <action selector="action_continue" destination="D6e-Fq-pwC" eventType="touchUpInside" id="Vao-Tf-VD4"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="QWh-j5-SXl">
@@ -169,6 +144,17 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="S46-Gs-3Rc">
+                                <rect key="frame" x="16" y="602" width="92" height="45"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="27"/>
+                                <state key="normal" title="Cancel">
+                                    <color key="titleColor" systemColor="systemRedColor"/>
+                                </state>
+                                <connections>
+                                    <action selector="action_cancel" destination="D6e-Fq-pwC" eventType="touchUpInside" id="NJ5-NS-kBY"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="bhb-OA-gOn"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -505,8 +491,6 @@
                                 <state key="normal" title="Join Game"/>
                                 <connections>
                                     <action selector="action_game_join:" destination="8aw-7i-1GL" eventType="touchUpInside" id="xZT-h8-u6t"/>
-                                    <action selector="controlTouched:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="fjK-Wc-arU"/>
-                                    <segue destination="yrq-QV-Ttd" kind="show" id="8nZ-W4-aV6"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zaA-2e-wRn">
@@ -526,7 +510,7 @@
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="30"/>
                                 <state key="normal" title="Credits"/>
                                 <connections>
-                                    <segue destination="V95-ki-Mtz" kind="presentation" identifier="Credits" id="wLe-Y7-83p"/>
+                                    <action selector="action_credits:" destination="8aw-7i-1GL" eventType="touchUpInside" id="vsG-9G-Ydx"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rrg-Qe-RcH">
@@ -547,8 +531,6 @@
                                 <state key="normal" title="New Game"/>
                                 <connections>
                                     <action selector="action_game_new:" destination="8aw-7i-1GL" eventType="touchUpInside" id="uCP-UC-Hp2"/>
-                                    <action selector="controlTouched:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="o7G-5N-GUe"/>
-                                    <segue destination="D6e-Fq-pwC" kind="show" id="A0l-yH-QJJ"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4WQ-qH-OPY">
@@ -578,21 +560,24 @@
                     <navigationItem key="navigationItem" id="54s-Zn-EcE"/>
                     <connections>
                         <outlet property="button_characters" destination="zaA-2e-wRn" id="DVm-Qy-nE5"/>
+                        <outlet property="button_credits" destination="yZe-pO-jvE" id="93H-Wt-6sC"/>
                         <outlet property="button_game_join" destination="1qN-iL-YZT" id="LOK-4R-Ylg"/>
                         <outlet property="button_game_new" destination="CgZ-4X-Ile" id="jhH-7y-K7M"/>
+                        <outlet property="button_how_to_play" destination="4WQ-qH-OPY" id="VZc-BM-262"/>
                         <outlet property="button_login" destination="cTN-nS-xGa" id="S52-Ho-NwD"/>
                         <outlet property="button_logout" destination="vnp-ag-rR7" id="GKv-Cu-Xk4"/>
                         <outlet property="button_settings" destination="rrg-Qe-RcH" id="3o2-Ne-Xxo"/>
+                        <segue destination="V95-ki-Mtz" kind="presentation" identifier="segue_main_menu_to_credits" id="DnR-2j-Ffn"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EKc-Hd-gDV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2135.1999999999998" y="-175.86206896551727"/>
+            <point key="canvasLocation" x="2185" y="-202"/>
         </scene>
         <!--Credits-->
         <scene sceneID="Sgn-Hu-PiO">
             <objects>
-                <viewController id="V95-ki-Mtz" userLabel="Credits" customClass="InfoViewController" sceneMemberID="viewController">
+                <viewController title="credits" id="V95-ki-Mtz" userLabel="Credits" customClass="InfoViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8GG-Cl-TLL">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -632,7 +617,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bdv-j4-9bT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3694" y="-962"/>
+            <point key="canvasLocation" x="1172" y="-1456"/>
         </scene>
         <!--Characters-->
         <scene sceneID="8Lc-MU-Xti">
@@ -722,14 +707,14 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zss-5Q-elc" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4391" y="-962"/>
+            <point key="canvasLocation" x="1172" y="-777"/>
         </scene>
         <!--How To Play-->
         <scene sceneID="Xfa-LP-fsD">
             <objects>
                 <viewController id="J8r-WN-OqI" userLabel="How To Play" customClass="InfoViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Vos-tZ-lyl">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="How to Play:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gEE-kr-X96">
@@ -740,7 +725,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
                                 <nil key="highlightedColor"/>
                             </label>
                             <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I6g-Zo-6qu">
-                                <rect key="frame" x="16" y="154" width="343" height="493"/>
+                                <rect key="frame" x="16" y="154" width="343" height="473"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <string key="text">Turf! is a real-time strategy game you play in real life.   Each player can place markers in their current location.   Each marker claims a certain amount of area.  Your score is based on how large your area is compared to the other team's area.  To start, cluster your teammates together in one location. The other team clusters in a different location. The playfield size is based on the distance between the two first positions.</string>
                                 <color key="textColor" systemColor="labelColor"/>
@@ -781,8 +766,16 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
                     <connections>
                         <segue destination="Y6W-OH-hqX" kind="relationship" relationship="rootViewController" id="Eaz-XX-zsw"/>
                         <segue destination="8aw-7i-1GL" kind="show" identifier="ToMenu" id="61o-Lf-6W7"/>
-                        <segue destination="eZk-Vt-bN8" kind="presentation" identifier="ToCharacter" id="8aD-bN-U3a"/>
                         <segue destination="Ba5-Em-l6K" kind="show" identifier="ToGame" id="gPf-Yu-zFj"/>
+                        <segue destination="V95-ki-Mtz" kind="presentation" identifier="to_credits" id="BT3-o1-w5e"/>
+                        <segue destination="ht5-qr-rPr" kind="presentation" identifier="to_characters" id="HJf-DH-fL5"/>
+                        <segue destination="lbW-wk-URB" kind="presentation" identifier="to_settings" id="yeJ-P1-bvu"/>
+                        <segue destination="wqV-fq-isP" kind="show" identifier="to_character_select" id="VrU-Rr-6l5"/>
+                        <segue destination="D6e-Fq-pwC" kind="show" identifier="to_game_options" id="mVd-Xp-Af7"/>
+                        <segue destination="yrq-QV-Ttd" kind="show" identifier="to_join_game" id="yQo-xJ-39h"/>
+                        <segue destination="8aw-7i-1GL" kind="show" identifier="to_main_menu" id="JBy-U0-KON"/>
+                        <segue destination="lpe-LN-HM1" kind="show" identifier="to_waiting_room" id="hNw-ba-MiR"/>
+                        <segue destination="Ba5-Em-l6K" kind="show" id="fvt-AI-LBb"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Dzk-9k-cbq" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -950,9 +943,13 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="rnn-hE-pAp"/>
-        <segue reference="Gh1-WF-AJg"/>
-        <segue reference="zAq-bV-BBM"/>
+        <segue reference="fvt-AI-LBb"/>
+        <segue reference="HJf-DH-fL5"/>
+        <segue reference="BT3-o1-w5e"/>
+        <segue reference="JBy-U0-KON"/>
+        <segue reference="hNw-ba-MiR"/>
+        <segue reference="VrU-Rr-6l5"/>
+        <segue reference="yeJ-P1-bvu"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="10.square" catalog="system" width="128" height="114"/>

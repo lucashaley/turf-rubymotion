@@ -25,6 +25,7 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <JavaScriptCore/JavaScriptCore.h>
 #import <AuthenticationServices/AuthenticationServices.h>
+#import <SpriteKit/SpriteKit.h>
 
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
 @end
@@ -53,6 +54,9 @@
 
 @interface MachineViewController: UIViewController
 -(IBAction) viewDidLoad;
+-(IBAction) machine;
+-(IBAction) app_machine;
+-(IBAction) current_game;
 
 @end
 
@@ -64,7 +68,7 @@
 @property IBOutlet UILabel * pouwhenua_label;
 @property IBOutlet UILabel * left_score_label;
 @property IBOutlet UILabel * right_score_label;
-@property IBOutlet SKScene * skview;
+@property IBOutlet SKView * skview;
 
 -(IBAction) setup_mapview;
 -(IBAction) setup_audio;
@@ -102,6 +106,8 @@
 @interface GameOptionsController: MachineViewController
 -(IBAction) viewDidLoad;
 -(IBAction) select_duration:(id) sender;
+-(IBAction) action_continue;
+-(IBAction) action_cancel;
 
 @end
 
@@ -252,6 +258,19 @@
 -(IBAction) segue:(id) name;
 -(IBAction) initialize_location_manager;
 -(IBAction) check_for_game:(id) gamecode;
+-(IBAction) destroy_current_game;
+
+@end
+
+@interface MachineLocation: NSObject
+-(IBAction) initialize;
+
+@end
+
+@interface MachineLogin: NSObject
+-(IBAction) initialize;
+-(IBAction) initialize_firebase_auth;
+-(IBAction) auth_state_changed;
 
 @end
 
@@ -269,18 +288,21 @@
 @property IBOutlet UIButton * button_characters;
 @property IBOutlet UIButton * button_game_new;
 @property IBOutlet UIButton * button_game_join;
+@property IBOutlet UIButton * button_credits;
+@property IBOutlet UIButton * button_how_to_play;
 
 -(IBAction) viewDidLoad;
 -(IBAction) controlTouched:(id) sender;
+-(IBAction) buttons_logged_in;
+-(IBAction) buttons_logged_out;
 -(IBAction) action_login:(id) sender;
 -(IBAction) action_logout:(id) sender;
 -(IBAction) action_test:(id) sender;
+-(IBAction) action_credits:(id) sender;
 -(IBAction) action_settings:(id) sender;
 -(IBAction) action_characters:(id) sender;
 -(IBAction) action_game_new:(id) sender;
 -(IBAction) action_game_join:(id) sender;
--(IBAction) login;
--(IBAction) logout;
 -(IBAction) action_dismiss_login:(id) segue;
 
 @end

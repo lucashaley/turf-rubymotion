@@ -23,7 +23,9 @@ class Machine
                 :is_waiting,
                 :is_playing,
                 :horizontal_accuracy,
-                :app_state_machine
+                :app_state_machine,
+                :login_machine,
+                :location_machine
 
   DEBUGGING = false
   DESIRED_ACCURACY = 30
@@ -40,6 +42,9 @@ class Machine
     @is_playing = false
     @is_waiting = false
 
+    @login_machine = MachineLogin.new
+    @location_machine = MachineLocation.new
+
     ####################
     # FIREBASE
     FIRApp.configure
@@ -48,6 +53,7 @@ class Machine
 
     # this connects to the default asia db
     # @db = FIRDatabase.databaseForApp(@db_app)
+    # this connects to the US
     @db = FIRDatabase.databaseWithURL('https://turf-us.firebaseio.com')
 
     #####################
@@ -98,7 +104,7 @@ class Machine
 
     @app_state_machine = StateMachine::Base.new start_state: :splash, verbose: DEBUGGING
     @app_state_machine.when :splash do |state|
-      state.transition_to :menu,
+      state.transition_to :main_menu,
                           after: 10,
                           on_notification: :app_splash_to_menu,
                           action: proc { transition_splash_to_main_menu }
@@ -116,10 +122,16 @@ class Machine
       state.transition_to :how_to_play,
                           on: :app_main_menu_to_how_to_play,
                           action: proc { transition_main_menu_to_how_to_play }
+      state.transition_to :game_options,
+                          on: :app_main_menu_to_game_options,
+                          action: proc { transition_main_menu_to_game_options }
+      state.transition_to :game_join,
+                          on: :app_main_menu_to_game_join,
+                          action: proc { transition_main_menu_to_game_join }
     end
     @app_state_machine.when :credits do |state|
       state.transition_to :main_menu,
-                          on: :app_credits_to_main_menu,
+                          on: :dismiss_info_view,
                           action: proc { transition_credits_to_main_menu }
     end
     @app_state_machine.when :settings do |state|
@@ -129,13 +141,45 @@ class Machine
     end
     @app_state_machine.when :characters do |state|
       state.transition_to :main_menu,
-                          on: :app_characters_to_main_menu,
+                          on: :dismiss_info_view,
                           action: proc { transition_characters_to_main_menu }
     end
     @app_state_machine.when :how_to_play do |state|
       state.transition_to :main_menu,
-                          on: :app_how_to_play_to_main_menu,
+                          on: :dismiss_info_view,
                           action: proc { transition_how_to_play_to_main_menu }
+    end
+    @app_state_machine.when :game_options do |state|
+      state.transition_to :main_menu,
+                          on: :app_game_options_to_main_menu,
+                          action: proc { transition_game_options_to_main_menu }
+      state.transition_to :character_select,
+                          on: :app_game_options_to_character_select,
+                          action: proc { transition_game_options_to_character_select }
+    end
+    @app_state_machine.when :game_join do |state|
+      state.transition_to :main_menu,
+                          on: :app_game_join_to_main_menu,
+                          action: proc { transition_game_join_to_main_menu }
+      state.transition_to :character_select,
+                          on: :app_game_join_to_character_select,
+                          action: proc { transition_game_join_to_character_select }
+    end
+    @app_state_machine.when :character_select do |state|
+      state.transition_to :main_menu,
+                          on: :app_character_select_to_main_menu,
+                          action: proc { transition_character_select_to_main_menu }
+      state.transition_to :waiting_room,
+                          on: :app_character_select_to_waiting_room,
+                          action: proc { transition_character_select_to_waiting_room }
+    end
+    @app_state_machine.when :waiting_room do |state|
+      state.transition_to :main_menu,
+                          on: :app_waiting_room_to_main_menu,
+                          action: proc { transition_waiting_room_to_main_menu }
+      state.transition_to :game,
+                          on: :app_waiting_room_to_game,
+                          action: proc { transition_waiting_room_to_game }
     end
     @app_state_machine.start!
 
@@ -204,26 +248,38 @@ class Machine
 
   def transition_main_menu_to_credits
     mp __method__
+
+    segue('to_credits')
   end
 
   def transition_credits_to_main_menu
     mp __method__
+
+    dismiss_modal
   end
 
   def transition_main_menu_to_settings
     mp __method__
+
+    segue('to_settings')
   end
 
   def transition_settings_to_main_menu
     mp __method__
+
+    dismiss_modal
   end
 
   def transition_main_menu_to_characters
     mp __method__
+
+    segue('to_characters')
   end
 
   def transition_characters_to_main_menu
     mp __method__
+
+    dismiss_modal
   end
 
   def transition_main_menu_to_how_to_play
@@ -232,6 +288,8 @@ class Machine
 
   def transition_how_to_play_to_main_menu
     mp __method__
+
+    dismiss_modal
   end
 
   def transition_main_menu_to_log_in
@@ -242,16 +300,43 @@ class Machine
     mp __method__
   end
 
-  def transition_main_menu_to_options
+  def transition_main_menu_to_game_options
     mp __method__
+
+    initialize_location_manager
+    create_new_game
+
+    segue('to_game_options')
   end
 
-  def transition_options_to_main_menu
+  def transition_game_options_to_main_menu
     mp __method__
+
+    destroy_current_game
   end
 
-  def transition_options_to_character_select
+  def transition_game_options_to_character_select
     mp __method__
+
+    segue('to_character_select')
+  end
+
+  def transition_main_menu_to_game_join
+    mp __method__
+
+    segue('to_join_game')
+  end
+
+  def transition_game_join_to_main_menu
+    mp __method__
+
+    segue('to_main_menu')
+  end
+
+  def transition_game_join_to_character_select
+    mp __method__
+
+    segue('to_character_select')
   end
 
   def transition_character_select_to_main_menu
@@ -288,12 +373,16 @@ class Machine
   end
 
   def segue(name)
-    puts 'MACHINE SEGUE'.blue if DEBUGGING
+    mp __method__
 
     Bugsnag.leaveBreadcrumbWithMessage("Performing segue: #{name}")
 
     # Can't we just use the current view controller shortcut?
     @delegate.window.rootViewController.performSegueWithIdentifier(name, sender: self)
+  end
+
+  def dismiss_modal
+    @current_view.presentingViewController.dismissViewControllerAnimated(true, completion: nil)
   end
 
   def authUI(authUI, didSignInWithAuthDataResult: result, error: error)
@@ -308,8 +397,8 @@ class Machine
       lm.requestWhenInUseAuthorization
 
       # constant needs to be capitalized because Ruby
-      # lm.desiredAccuracy = KCLLocationAccuracyBestForNavigation
-      lm.desiredAccuracy = KCLLocationAccuracyBest
+      lm.desiredAccuracy = KCLLocationAccuracyBestForNavigation
+      # lm.desiredAccuracy = KCLLocationAccuracyBest
       lm.distanceFilter = 2
       lm.startUpdatingLocation
       lm.delegate = self
@@ -346,7 +435,8 @@ class Machine
   end
 
   def check_for_game(gamecode)
-    puts 'MACHINE CHECK_FOR_GAME'.blue if DEBUGGING
+    mp __method__
+
     puts gamecode.red if DEBUGGING
     games_ref = @db.referenceWithPath('games')
     puts "Games ref: #{games_ref.URL}"
@@ -367,5 +457,37 @@ class Machine
         return next_snapshot.key
       end
     )
+  end
+
+  def create_new_game
+    mp __method__
+
+    Utilities::breadcrumb('create_new_game')
+
+    begin
+      @takaro_fbo = TakaroFbo.new(
+        @db.referenceWithPath('games').childByAutoId,
+        { 'gamecode' => generate_gamecode }
+      )
+    rescue Exception => e
+      Bugsnag.notify(e)
+    end
+  end
+
+  def generate_gamecode
+    mp __method__
+
+    result = rand(36**6).to_s(36)
+    if result.length < 6
+      result = generate_gamecode
+    end
+
+    result
+  end
+
+  def destroy_current_game
+    mp __method__
+
+    @takaro_fbo = nil
   end
 end

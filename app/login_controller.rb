@@ -175,7 +175,11 @@ class LoginController < MachineViewController
         Machine.instance.firebase_email = auth_result.user.providerData[0].email
 
         # and return to the main menu, with the new login in place
-        Machine.instance.current_view.login
+        # Machine.instance.current_view.login
+
+        # this seems super fragile
+        Machine.instance.current_view.buttons_logged_in
+
         presentingViewController.dismissViewControllerAnimated(true, completion: nil)
       end)
     end
