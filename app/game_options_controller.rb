@@ -3,13 +3,18 @@ class GameOptionsController < MachineViewController
     mp __method__
 
     # TODO: this should probably just be set on continue
-    case sender.selectedSegmentIndex
-    when 0
-      current_game.duration = 5
-    when 1
-      current_game.duration = 10
-    when 2
-      current_game.duration = 20
+    # case sender.selectedSegmentIndex
+    # when 0
+    #   current_game.duration = 5
+    # when 1
+    #   current_game.duration = 10
+    # when 2
+    #   current_game.duration = 20
+    # end
+    current_game.duration = case sender.selectedSegmentIndex
+      when 0 then 5
+      when 1 then 10
+      when 2 then 20
     end
   end
 
