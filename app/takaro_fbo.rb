@@ -448,52 +448,52 @@ class TakaroFbo < FirebaseObject
     end
     mp ['coord_array', coord_array]
 
-    # We should check if there are two team coordinates here
-    # If not prior to
+    # # We should check if there are two team coordinates here
+    # # If not prior to
 
-    # use coords to calculate play area
-    lats = coord_array.map { |c| c['latitude'] }.minmax
-    longs = coord_array.map { |c| c['longitude'] }.minmax
+    # # use coords to calculate play area
+    # lats = coord_array.map { |c| c['latitude'] }.minmax
+    # longs = coord_array.map { |c| c['longitude'] }.minmax
 
-    mp ['corners', [lats, longs]]
+    # mp ['corners', [lats, longs]]
 
-    # This is a hack way to find the midpoint
-    # A more accurate solution is here:
-    # https://stackoverflow.com/questions/10559219/determining-midpoint-between-2-coordinates
-    midpoint_array = [(lats[0] + lats[1]) * 0.5, (longs[0] + longs[1]) * 0.5]
-    midpoint_location = CLLocation.alloc.initWithLatitude(midpoint_array[0], longitude: midpoint_array[1])
-    top_location = CLLocation.alloc.initWithLatitude(lats[1], longitude: midpoint_array[1])
-    right_location = CLLocation.alloc.initWithLatitude(midpoint_array[0], longitude: longs[1])
-    latitude_delta = midpoint_location.distanceFromLocation(top_location)
-    longitude_delta = midpoint_location.distanceFromLocation(right_location)
+    # # This is a hack way to find the midpoint
+    # # A more accurate solution is here:
+    # # https://stackoverflow.com/questions/10559219/determining-midpoint-between-2-coordinates
+    # midpoint_array = [(lats[0] + lats[1]) * 0.5, (longs[0] + longs[1]) * 0.5]
+    # midpoint_location = CLLocation.alloc.initWithLatitude(midpoint_array[0], longitude: midpoint_array[1])
+    # top_location = CLLocation.alloc.initWithLatitude(lats[1], longitude: midpoint_array[1])
+    # right_location = CLLocation.alloc.initWithLatitude(midpoint_array[0], longitude: longs[1])
+    # latitude_delta = midpoint_location.distanceFromLocation(top_location)
+    # longitude_delta = midpoint_location.distanceFromLocation(right_location)
 
-    @taiapa_center = MKMapPointForCoordinate(CLLocationCoordinate2DMake(midpoint_array[0], midpoint_array[1]))
+    # @taiapa_center = MKMapPointForCoordinate(CLLocationCoordinate2DMake(midpoint_array[0], midpoint_array[1]))
 
-    # Sometimes the resulting rectangle is super narrow
-    # resize based on the longer side and golden ratio
-    if latitude_delta < longitude_delta
-      latitude_delta = longitude_delta * 0.618034
-    else
-      longitude_delta = latitude_delta * 0.618034
-    end
+    # # Sometimes the resulting rectangle is super narrow
+    # # resize based on the longer side and golden ratio
+    # if latitude_delta < longitude_delta
+    #   latitude_delta = longitude_delta * 0.618034
+    # else
+    #   longitude_delta = latitude_delta * 0.618034
+    # end
 
     # change this
     # and also in voronoi_map.rb line 21
-    @taiapa_region = MKCoordinateRegionMakeWithDistance(
-      midpoint_location.coordinate, latitude_delta * 3, longitude_delta * 3
-    )
+    # @taiapa_region = MKCoordinateRegionMakeWithDistance(
+    #   midpoint_location.coordinate, latitude_delta * 3, longitude_delta * 3
+    # )
 
-    self.playfield = {
-      'midpoint' => midpoint_location.coordinate.to_hash,
-      'latitude_delta' => latitude_delta * FIELD_SCALE,
-      'longitude_delta' => longitude_delta * FIELD_SCALE
-    }
+    # self.playfield = {
+    #   'midpoint' => midpoint_location.coordinate.to_hash,
+    #   'latitude_delta' => latitude_delta * FIELD_SCALE,
+    #   'longitude_delta' => longitude_delta * FIELD_SCALE
+    # }
 
-    self.playfield_region = MKCoordinateRegionMakeWithDistance(
-      midpoint_location.coordinate,
-      latitude_delta * FIELD_SCALE,
-      longitude_delta * FIELD_SCALE
-    )
+    # self.playfield_region = MKCoordinateRegionMakeWithDistance(
+    #   midpoint_location.coordinate,
+    #   latitude_delta * FIELD_SCALE,
+    #   longitude_delta * FIELD_SCALE
+    # )
 
     # we're trying not doing the countdown screen
     # and instead just flagging game_status as ready
