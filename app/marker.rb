@@ -51,8 +51,8 @@ class Marker < FirebaseObject
 		Machine.instance.takaro_fbo.local_player.marker_increment
 		# notification = -> { Notification.center.post 'MapRefresh' }
 		notification = lambda do
-	  	Machine.instance.takaro_fbo.pouwhenua_is_dirty = true
-	  	Notification.center.post 'MapRefresh'
+	  		Machine.instance.takaro_fbo.pouwhenua_is_dirty = true
+	  		Notification.center.post 'MapRefresh'
 		end
 		update_with_block({ 'enabled' => 'false' }, &notification)
   end
