@@ -4,7 +4,7 @@ class GameCountdownController < MachineViewController
 
     mp 'Countdown setting local player status'
     Utilities::breadcrumb('Countdown setting local player status')
-    Machine.instance.takaro_fbo.set_local_player_status('ready')
+    current_game.local_player_status = 'ready'
 
     # @location_update_observer = Notification.center.observe 'CountdownSegueToGame' do |data|
     #   mp 'LETS GOOOOOOOOOOOOOOOO!!!'

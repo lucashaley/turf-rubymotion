@@ -137,7 +137,7 @@ class TakaroFbo < FirebaseObject
 
         if game_state_snapshot.value == 'ready'
           Utilities::breadcrumb('Machine responding to game_state ready')
-          set_local_player_state('ready')
+          local_player_state = 'ready'
         end
 
         if game_state_snapshot.value == 'playing'
@@ -683,16 +683,12 @@ class TakaroFbo < FirebaseObject
     puts "Score for #{kapa_key}: #{score}".focus
   end
 
-  def set_local_player_state(in_state)
+  def local_player_state=(in_state)
     @ref.child('player_states').updateChildValues(
       {
         @local_player.key => in_state
       }
     )
-  end
-
-  def set_game_status(in_status)
-    @ref.child('game_state').setValue(in_status)
   end
 
   # This uses the teams

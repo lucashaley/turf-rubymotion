@@ -324,7 +324,7 @@ class GameController < MachineViewController
     mp @skview
 
     # Machine.instance.is_playing = true
-    Machine.instance.takaro_fbo.set_local_player_state('playing')
+    Machine.instance.takaro_fbo.local_player_state = 'playing'
 
     # should these be here?
     @scores = [0, 0]
