@@ -345,14 +345,25 @@ class Machine
 
   def transition_character_select_to_waiting_room
     mp __method__
+    
+    # initialize the local character
+    @takaro_fbo.initialize_local_player(@local_character)
   end
 
   def transition_waiting_room_to_main_menu
     mp __method__
+
+    destroy_current_game
+    segue('to_main_menu')
   end
 
   def transition_waiting_room_to_game
     mp __method__
+
+    game.set_game_status('prep')
+
+    # game.set_initial_markers # this should be on the server
+    segue('to_game')
   end
 
   def transition_game_to_main_menu
@@ -379,6 +390,11 @@ class Machine
 
     # Can't we just use the current view controller shortcut?
     @delegate.window.rootViewController.performSegueWithIdentifier(name, sender: self)
+  end
+
+  def game
+    mp __method__ # this will be nonsense
+    @takaro_fbo
   end
 
   def dismiss_modal

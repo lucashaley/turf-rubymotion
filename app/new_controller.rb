@@ -23,28 +23,33 @@ class NewController < MachineViewController
 
   def viewDidLoad
     super
-    mp 'NEWCONTROLLER: VIEWDIDLOAD'.light_blue
+    mp __method__
+    # mp 'NEWCONTROLLER: VIEWDIDLOAD'.light_blue
 
     init_observers
 
-    Machine.instance.is_waiting = true
+    # Machine.instance.is_waiting = true
 
-    @takaro = Machine.instance.takaro_fbo
-    @takaro.update({ 'is_waiting' => 'true' })
+    # @takaro = Machine.instance.takaro_fbo
+    # @takaro.update({ 'is_waiting' => 'true' })
 
-    gamecode.text = @takaro.gamecode
+    # gamecode.text = @takaro.gamecode
+    gamecode.text = machine.takaro_fbo.gamecode
 
-    # @takaro.init_local_kaitakaro(Machine.instance.local_character)
-    @takaro.initialize_local_player(Machine.instance.local_character)
+    # this is now handled in the Machine
+    # @takaro.initialize_local_player(Machine.instance.local_character)
 
     Notification.center.post('game_state_waiting_room_notification', nil)
   end
 
   def viewWillAppear(_animated)
-    continue_button.enabled = @takaro.host
+    mp __method__
+    # continue_button.enabled = @takaro.host
+    continue_button.enabled = machine.takaro_fbo.host
   end
 
   def init_observers
+    mp __method__
     Notification.center.addObserver(self,
                                     selector: 'handle_new_player',
                                     name: 'PlayerNew',
@@ -98,11 +103,13 @@ class NewController < MachineViewController
     end
 
     # listen for the character selection
-    @character_select_observer = Notification.center.observe 'SelectCharacter' do |notification|
-      mp 'CHARACTER SELECT'.yellow
-      # @takaro.local_kaitakaro.character = notification.data
-      @takaro.local_player.character = notification.data
-    end
+    # do we still want this like this?
+    # Because it's also done through Machine.local_character and initialize_local_character
+    # @character_select_observer = Notification.center.observe 'SelectCharacter' do |notification|
+    #   mp 'CHARACTER SELECT'.yellow
+    #   # @takaro.local_kaitakaro.character = notification.data
+    #   @takaro.local_player.character = notification.data
+    # end
   end
 
   ### TABLE STUFF
@@ -125,7 +132,9 @@ class NewController < MachineViewController
               end
       puts "table: #{table}; row: #{index_path.row}"
 
-      player = @takaro.list_player_names_for_index(table)[index_path.row]
+      # player = @takaro.list_player_names_for_index(table)[index_path.row]
+      player = machine.takaro_fbo.list_player_names_for_index(table)[index_path.row]
+
 
       puts '⌞'
       puts 'player:'.red
@@ -147,14 +156,16 @@ class NewController < MachineViewController
 
   def tableView(table_view, numberOfRowsInSection: _section)
     puts 'NEWCONTROLLER TABLEVIEW NUMBEROFROWS'.blue if DEBUGGING
-    return 0 unless @takaro
+    # return 0 unless @takaro
+    return 0 unless machine.takaro_fbo
 
     table = case table_view
             when @table_team_a then TABLEVIEW_TEAM_A
             when @table_team_b then TABLEVIEW_TEAM_B
             else 'poop'
             end
-    count = @takaro.player_count_for_index(table)
+    # count = @takaro.player_count_for_index(table)
+    count = machine.takaro_fbo.player_count_for_index(table)
     mp "tableView count: #{count}"
     count
   end
@@ -177,9 +188,10 @@ class NewController < MachineViewController
   def cancel_new_game
     mp __method__
 
-    @takaro = nil
-    Machine.instance.takaro_fbo = nil
-    Machine.instance.segue('ToMenu')
+    # @takaro = nil
+    # machine.takaro_fbo = nil
+    # Machine.instance.takaro_fbo = nil
+    # Machine.instance.segue('ToMenu')
 
     app_machine.event(:app_waiting_room_to_main_menu)
   end
@@ -207,24 +219,29 @@ class NewController < MachineViewController
   end
 
   def continue_button_action(_sender)
-    puts 'NEWCONTROLLER CONTINUE_BUTTON_ACTION'.light_blue if DEBUGGING
-    puts 'Continuing to game'.focus
+    mp __method__
+    # puts 'NEWCONTROLLER CONTINUE_BUTTON_ACTION'.light_blue if DEBUGGING
+    # puts 'Continuing to game'.focus
     # make the first two pouwhenua
+
     # set the machine takaro
-    Machine.instance.takaro_fbo = @takaro
+    # Machine.instance.takaro_fbo = @takaro # what is this doing 
 
     # @takaro.set_initial_pouwhenua
-    @takaro.set_initial_markers
+    # @takaro.set_initial_markers
+
+    app_machine.event(:app_waiting_room_to_game)
   end
 
-  def dismiss_new
-    @takaro = nil
-    Machine.instance.takaro_fbo = nil
-    Machine.instance.segue('ToMenu')
-  end
+  # def dismiss_new
+  #   @takaro = nil
+  #   Machine.instance.takaro_fbo = nil
+  #   Machine.instance.segue('ToMenu')
+  # end
 
   def add_bot_action(_sender)
     puts 'NEWCONTROLLER ADD_BOT_ACTION'.light_blue
-    @takaro.create_bot_player
+    # @takaro.create_bot_player
+    machine.game.create_bot_player
   end
 end

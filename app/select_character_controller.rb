@@ -47,9 +47,9 @@ class SelectCharacterController < MachineViewController
     end
 
     # with the new new/join system, we have the gamecode
-    puts "Takaro gamecode: #{Machine.instance.takaro_fbo.gamecode}".red
+    # puts "Takaro gamecode: #{Machine.instance.takaro_fbo.gamecode}".red
 
-    Notification.center.post("game_state_character_selection_notification", nil)
+    # Notification.center.post("game_state_character_selection_notification", nil)
   end
 
   def create_character_button(title, index)
@@ -73,20 +73,23 @@ class SelectCharacterController < MachineViewController
   end
 
   def select_player_class(sender)
-    puts 'CHARACTERCONTROLLER SELECT_PLAYER_CLASS'.blue if DEBUGGING
+    mp __method__
+    # puts 'CHARACTERCONTROLLER SELECT_PLAYER_CLASS'.blue if DEBUGGING
 
-    character = @player_classes.values[sender.tag]
-    puts "Class selected: #{character}".focus
+    # character = @player_classes.values[sender.tag]
+    # puts "Class selected: #{character}".focus
 
     # directly make a local variable on the Controller, for Join Controller
-    Machine.instance.local_character = character
+    machine.local_character = @player_classes.values[sender.tag]
     # Machine.instance.takaro_fbo.local_kaitakaro.character = character
 
     # post notification for New Controller
-    Notification.center.post('SelectCharacter', character)
+    # Not doing this any more, favoring Machine.local_character and initialize_local_character
+    # Notification.center.post('SelectCharacter', character)
 
     # Machine.instance.segue('ToGame')
     # Machine.instance.segue('ToWaitingRoom')
-    performSegueWithIdentifier('ToWaitingRoom', sender: self)
+    # performSegueWithIdentifier('ToWaitingRoom', sender: self)
+    app_machine.event(:app_character_select_to_waiting_room)
   end
 end
