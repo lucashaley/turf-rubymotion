@@ -498,7 +498,7 @@ class TakaroFbo < FirebaseObject
     # we're trying not doing the countdown screen
     # and instead just flagging game_status as ready
     # Notification.center.post('game_state_countdown_notification', nil)
-    set_game_status('ready')
+    game_state = 'ready'
   end
   # rubocop:enable Metrics/AbcSize
 

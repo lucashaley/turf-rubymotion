@@ -360,7 +360,7 @@ class Machine
   def transition_waiting_room_to_game
     mp __method__
 
-    game.set_game_status('prep')
+    game.game_state = 'prep'
 
     # game.set_initial_markers # this should be on the server
     segue('to_game')
