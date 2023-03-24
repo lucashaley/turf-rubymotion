@@ -43,12 +43,15 @@ class GameController < MachineViewController
   def update_marker_label
     mp __method__
     pouwhenua_label.text = '•' * Machine.instance.takaro_fbo.local_player.marker_current
+    pouwhenua_label.text = '•' * current_game.local_player.marker_current
 
     # change the enable of the button
-    if Machine.instance.takaro_fbo.local_player.marker_current <= 0
+    # if Machine.instance.takaro_fbo.local_player.marker_current <= 0
+    if current_game.local_player.marker_current <= 0
       button_pylon.enabled = false
     else
-      button_pylon.enabled = false & Machine.instance.takaro_fbo.local_player.in_boundary
+      # button_pylon.enabled = false & Machine.instance.takaro_fbo.local_player.in_boundary
+      button_pylon.enabled = false & current_game.local_player.in_boundary
     end
   end
 
@@ -56,7 +59,8 @@ class GameController < MachineViewController
   def setup_timers
     mp __method__
 
-    @timer_count = Machine.instance.takaro_fbo.duration * 60
+    # @timer_count = Machine.instance.takaro_fbo.duration * 60
+    @timer_count = current_game.duration * 60
     # mp @timer_count
     timer_label.text = format_seconds(@timer_count)
     @timer = NSTimer.timerWithTimeInterval(
@@ -619,7 +623,8 @@ class GameController < MachineViewController
   end
 
   def observe_new_pouwhenua
-    mp 'game_controller observe_new_pouwhenua'.blue if DEBUGGING
+    mp __method__
+    # mp 'game_controller observe_new_pouwhenua'.blue if DEBUGGING
     render_overlays
   end
 
