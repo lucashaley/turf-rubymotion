@@ -180,6 +180,9 @@ class Machine
       state.transition_to :game,
                           on: :app_waiting_room_to_game,
                           action: proc { transition_waiting_room_to_game }
+      state.transition_to :prep,
+                          on: :app_waiting_room_to_prep,
+                          action: proc { transition_waiting_room_to_prep }
     end
     @app_state_machine.start!
 
@@ -305,6 +308,7 @@ class Machine
 
     initialize_location_manager
     create_new_game
+    @takaro_fbo.host = true
 
     segue('to_game_options')
   end
@@ -324,6 +328,8 @@ class Machine
   def transition_main_menu_to_game_join
     mp __method__
 
+    initialize_location_manager
+
     segue('to_join_game')
   end
 
@@ -341,13 +347,20 @@ class Machine
 
   def transition_character_select_to_main_menu
     mp __method__
+
+    destroy_current_game
+    segue('to_main_menu')
   end
 
   def transition_character_select_to_waiting_room
     mp __method__
-    
+
     # initialize the local character
     @takaro_fbo.initialize_local_player(@local_character)
+
+    # set the game state
+    @takaro_fbo.game_state = 'waiting_room'
+    segue('to_waiting_room')
   end
 
   def transition_waiting_room_to_main_menu
@@ -357,10 +370,16 @@ class Machine
     segue('to_main_menu')
   end
 
-  def transition_waiting_room_to_game
+  def transition_waiting_room_to_prep
     mp __method__
 
     game.game_state = 'prep'
+  end
+
+  def transition_waiting_room_to_game
+    mp __method__
+
+    # game.game_state = 'prep'
 
     # game.set_initial_markers # this should be on the server
     segue('to_game')
@@ -379,7 +398,10 @@ class Machine
   end
 
   def state=(state)
-    puts 'MACHINE SET_STATE'.blue if DEBUGGING
+    mp __method__
+    mp "Setting state to #{state}"
+    Bugsnag.leaveBreadcrumbWithMessage("Setting state to #{state}")
+
     @fsm.event(state)
   end
 

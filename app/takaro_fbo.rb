@@ -135,8 +135,10 @@ class TakaroFbo < FirebaseObject
         # mp 'GAME_STATE SAVED'
         # mp game_state_snapshot.value
 
-        if game_state_snapshot.value == 'ready'
-          Utilities::breadcrumb('Machine responding to game_state ready')
+
+
+        if game_state_snapshot.value == 'sync'
+          Utilities::breadcrumb('Machine responding to game_state sync')
           local_player_state = 'ready'
         end
 

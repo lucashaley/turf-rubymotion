@@ -51,12 +51,6 @@
 @implementation JoinExistingController
 @end
 
-@implementation KaitakaroFbo
-@end
-
-@implementation KapaFbo
-@end
-
 @implementation LoginController
 @end
 

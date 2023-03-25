@@ -50,7 +50,7 @@ class MachineLocation
     end
   end
 
-  def location = ( new_location, old_location )
+  def location=( new_location, old_location )
     mp __method__
 
     accurate = @horizontal_accuracy <= DESIRED_ACCURACY

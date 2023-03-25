@@ -56,6 +56,8 @@
 -(IBAction) viewDidLoad;
 -(IBAction) machine;
 -(IBAction) app_machine;
+-(IBAction) login_machine;
+-(IBAction) location_machine;
 -(IBAction) current_game;
 
 @end
@@ -104,14 +106,13 @@
 @end
 
 @interface GameOptionsController: MachineViewController
--(IBAction) viewDidLoad;
 -(IBAction) select_duration:(id) sender;
 -(IBAction) action_continue;
 -(IBAction) action_cancel;
 
 @end
 
-@interface InfoViewController: UIViewController
+@interface InfoViewController: MachineViewController
 
 @property IBOutlet UIButton * button_close;
 
@@ -175,47 +176,6 @@
 
 @end
 
-@interface KaitakaroFbo: FirebaseObject
--(IBAction) init_observers;
--(IBAction) coordinate;
--(IBAction) check_taiapa;
--(IBAction) placing:(id) in_bool;
--(IBAction) check_placing;
--(IBAction) recalculate_kapa:(id) in_coordinate;
--(IBAction) exit_bounds;
--(IBAction) enter_bounds;
--(IBAction) eject;
--(IBAction) display_name;
--(IBAction) name_and_character;
--(IBAction) data_for_kapa;
--(IBAction) data_for_pouwhenua;
--(IBAction) character;
--(IBAction) kapa;
--(IBAction) deploy_time;
--(IBAction) lifespan_ms;
--(IBAction) pouwhenua_current;
--(IBAction) pouwhenua_decrement;
--(IBAction) pouwhenua_increment;
-
-@end
-
-@interface KapaFbo: FirebaseObject
--(IBAction) add_kaitakaro:(id) in_kaitakaro;
--(IBAction) remove_kaitakaro:(id) in_kaitakaro;
--(IBAction) check_distance:(id) in_coordinate;
--(IBAction) recalculate_coordinate;
--(IBAction) list_display_names_and_classes;
--(IBAction) kaitakaro;
--(IBAction) kaitakaro_hash;
--(IBAction) color;
--(IBAction) coordinate;
--(IBAction) data_for_kaitakaro;
--(IBAction) data_for_pouwhenua;
--(IBAction) format_to_location_coord:(id) input;
--(IBAction) recursive_symbolize_keys:(id) hsh;
-
-@end
-
 @interface LoginController: MachineViewController
 
 @property IBOutlet UIButton * button_apple;
@@ -244,9 +204,12 @@
 -(IBAction) transition_how_to_play_to_main_menu;
 -(IBAction) transition_main_menu_to_log_in;
 -(IBAction) transition_log_in_to_main_menu;
--(IBAction) transition_main_menu_to_options;
--(IBAction) transition_options_to_main_menu;
--(IBAction) transition_options_to_character_select;
+-(IBAction) transition_main_menu_to_game_options;
+-(IBAction) transition_game_options_to_main_menu;
+-(IBAction) transition_game_options_to_character_select;
+-(IBAction) transition_main_menu_to_game_join;
+-(IBAction) transition_game_join_to_main_menu;
+-(IBAction) transition_game_join_to_character_select;
 -(IBAction) transition_character_select_to_main_menu;
 -(IBAction) transition_character_select_to_waiting_room;
 -(IBAction) transition_waiting_room_to_main_menu;
@@ -256,14 +219,19 @@
 -(IBAction) transition_game_over_to_main_menu;
 -(IBAction) state;
 -(IBAction) segue:(id) name;
+-(IBAction) game;
+-(IBAction) dismiss_modal;
 -(IBAction) initialize_location_manager;
 -(IBAction) check_for_game:(id) gamecode;
+-(IBAction) create_new_game;
+-(IBAction) generate_gamecode;
 -(IBAction) destroy_current_game;
 
 @end
 
 @interface MachineLocation: NSObject
 -(IBAction) initialize;
+-(IBAction) initialize_location_manager;
 
 @end
 
@@ -326,7 +294,6 @@
 -(IBAction) handle_changed_player;
 -(IBAction) cancel_new_game;
 -(IBAction) compose_sms;
--(IBAction) dismiss_new;
 
 @end
 
@@ -423,8 +390,7 @@
 -(IBAction) waiting;
 -(IBAction) playing;
 -(IBAction) game_state;
--(IBAction) set_local_player_state:(id) in_state;
--(IBAction) set_game_status:(id) in_status;
+-(IBAction) local_player_state;
 -(IBAction) player_annotations;
 -(IBAction) marker_annotations;
 -(IBAction) hash_to_CLLocationCoordinate2D:(id) in_hash;

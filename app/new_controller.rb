@@ -225,12 +225,12 @@ class NewController < MachineViewController
     # make the first two pouwhenua
 
     # set the machine takaro
-    # Machine.instance.takaro_fbo = @takaro # what is this doing 
+    # Machine.instance.takaro_fbo = @takaro # what is this doing
 
     # @takaro.set_initial_pouwhenua
     # @takaro.set_initial_markers
 
-    app_machine.event(:app_waiting_room_to_game)
+    app_machine.event(:app_waiting_room_to_prep)
   end
 
   # def dismiss_new
