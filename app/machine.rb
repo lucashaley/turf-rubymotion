@@ -471,6 +471,11 @@ class Machine
     Notification.center.post 'PlayerDisappear'
     # Bugsnag.notifyError(error)
   end
+  
+  def initialize_character_classes
+      characters_ref = @db.referenceWithPath('characters')
+      
+  end
 
   def check_for_game(gamecode)
     mp __method__
