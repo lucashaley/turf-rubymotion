@@ -28,8 +28,7 @@ class AppDelegate
   end
   
   def initialize_bugsnag
-    # trying BugSnag
-    mp 'Bugsnag...'
+    mp __method__
     begin
       Bugsnag.start
       Bugsnag.leaveBreadcrumbWithMessage('Bugsnag started.')
