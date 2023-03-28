@@ -1,5 +1,5 @@
 class NewController < MachineViewController
-  outlet :gamecode, UILabel
+  outlet :gamecode_label, UILabel
   outlet :character_view, CharacterController
   outlet :continue_button, UIButton
   outlet :button_continue, UIButton
@@ -34,7 +34,7 @@ class NewController < MachineViewController
     # @takaro.update({ 'is_waiting' => 'true' })
 
     # gamecode.text = @takaro.gamecode
-    gamecode.text = machine.takaro_fbo.gamecode
+    gamecode_label.text = machine.takaro_fbo.gamecode
 
     # this is now handled in the Machine
     # @takaro.initialize_local_player(Machine.instance.local_character)
@@ -99,7 +99,7 @@ class NewController < MachineViewController
     @gamecode_new_observer = Notification.center.observe 'GamecodeNew' do |notification|
       mp 'new_controller: NEW'.yellow
 
-      gamecode.text = notification.object
+      gamecode_label.text = notification.object
     end
 
     # listen for the character selection
@@ -220,15 +220,6 @@ class NewController < MachineViewController
 
   def continue_button_action(_sender)
     mp __method__
-    # puts 'NEWCONTROLLER CONTINUE_BUTTON_ACTION'.light_blue if DEBUGGING
-    # puts 'Continuing to game'.focus
-    # make the first two pouwhenua
-
-    # set the machine takaro
-    # Machine.instance.takaro_fbo = @takaro # what is this doing
-
-    # @takaro.set_initial_pouwhenua
-    # @takaro.set_initial_markers
 
     app_machine.event(:app_waiting_room_to_prep)
   end
