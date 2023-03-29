@@ -528,6 +528,7 @@ class GameController < MachineViewController
 
     @rendering = true
 
+    # TODO: this is terrible
     if map_view.overlays
       overlays_to_remove = map_view.overlays.mutableCopy
       map_view.removeOverlays(overlays_to_remove)
