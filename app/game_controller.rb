@@ -4,6 +4,7 @@ class GameController < MachineViewController
   outlet :map_view, MKMapView
   outlet :button_pylon, UIButton
   outlet :timer_label, UILabel
+  # TODO: change this here and in xcode
   outlet :pouwhenua_label, UILabel
   outlet :left_score_label, UILabel
   outlet :right_score_label, UILabel
@@ -18,6 +19,7 @@ class GameController < MachineViewController
                 :scores_hash
 
   DEBUGGING = true
+  # TODO: change this
   PYLON_VIEW_IDENTIFIER = 'PylonViewIdentifier'.freeze
   KAITAKARO_VIEW_IDENTIFIER = 'KaitakaroViewIdentifier'.freeze
 
