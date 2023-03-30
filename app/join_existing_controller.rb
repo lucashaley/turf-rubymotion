@@ -1,5 +1,5 @@
 class JoinExistingController < MachineViewController
-  outlet :gamecode, UITextField
+  outlet :gamecode_label, UITextField
   outlet :continue_button, UIButton
   outlet :cancel_button, UIButton
 
@@ -7,35 +7,32 @@ class JoinExistingController < MachineViewController
 
   def viewDidLoad
     super
+    
+    # get the current player's location
+    mp 'ask machine to initialize location'
+    machine.initialize_location_manager
+    
     Notification.center.post('app_state_join_view', nil)
   end
 
   def viewWillAppear(animated)
     super
-    puts 'JOINCONTROLLER VIEWWILLAPPEAR'.blue if DEBUGGING
+    mp __method__
 
     # this shows the keyboard
-    gamecode.becomeFirstResponder
-
-    # get the current player's location
-    puts 'Location?'.red
-    Machine.instance.initialize_location_manager
+    gamecode_label.becomeFirstResponder
 
     # This checks for input in the gamecode input field
     @text_change_observer = Notification.center.observe UITextFieldTextDidChangeNotification do |_notification|
-      puts 'Text did change'.blue if DEBUGGING
       check_input_text
     end
 
     Notification.center.post('game_state_join_notification', nil)
-
-
-    puts 'Trying Firebase Object'.red
-    TakaroFbo.new(Machine.instance.db.referenceWithPath('tests').childByAutoId, { name: 'tomato' })
   end
 
   def textFieldShouldEndEditing(text_field)
-    puts 'JOINCONTROLLER TEXTFIELDSHOULDENDEDITING'.blue if DEBUGGING
+    mp __method__
+    
     # this method should return true if editing should stop
     # and false if it should continue
 
@@ -46,11 +43,11 @@ class JoinExistingController < MachineViewController
 
   # rubocop:disable Metrics/AbcSize
   def check_input_text
-    puts 'JOINCONTROLLER CHECK_INPUT_TEXT'.blue if DEBUGGING
+    mp __method__
 
-    puts "Length: #{gamecode.text.length}".red if DEBUGGING
+    puts "Length: #{gamecode_label.text.length}".red if DEBUGGING
 
-    if gamecode.text.length == 6
+    if gamecode_label.text.length == 6
       # TODO: This should probably be threaded
 
       # this should also check for game_status waiting_room
@@ -72,14 +69,14 @@ class JoinExistingController < MachineViewController
               game_snapshot = snapshot.children.nextObject
               game_hash = game_snapshot.valueInExportFormat
 
-              puts 'OHHH JESUS HERE WE GO'.focus
-              Machine.instance.takaro_fbo = TakaroFbo.new(game_snapshot.ref, {})
-              mp Machine.instance.takaro_fbo
+              mp 'getting existing game'
+              current_game = TakaroFbo.new(game_snapshot.ref, {})
+              mp current_game
 
               continue_button.enabled = true
 
               # hide the keyboard
-              gamecode.resignFirstResponder
+              gamecode_label.resignFirstResponder
             rescue Exception => e
               Utilities::breadcrumb('joining didnt work')
               Bugsnag.notify(e)
@@ -95,8 +92,7 @@ class JoinExistingController < MachineViewController
   def cancel_new_game
     puts 'JoinController: cancel_new_game'
     @takaro = nil
-    Machine.instance.takaro_fbo = nil
+    current_game = nil
     Machine.instance.segue('ToMenu')
-    # self.presentingViewController.dismissViewControllerAnimated(true, completion:nil)
   end
 end
