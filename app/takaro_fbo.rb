@@ -58,15 +58,7 @@ class TakaroFbo < FirebaseObject
   # rubocop:disable Metrics/AbcSize
   def initialize_firebase_observers
     mp __method__
-    # All Players
-#     @ref.child('players').observeEventType(FIRDataEventTypeValue, withBlock:
-#       lambda do |players_snapshot|
-#         mp 'Takaro observe players'
-#         mp players_snapshot.valueInExportFormat
-#
-#         # update the local hash
-#         @players_hash = players_snapshot.valueInExportFormat
-#       end)
+
     # Specific Players
     @ref.child('players').observeEventType(FIRDataEventTypeChildChanged, withBlock:
       lambda do |player_snapshot|
@@ -110,16 +102,6 @@ class TakaroFbo < FirebaseObject
       end.weak!
     )
 
-
-    # All Teams
-    # @ref.child('teams').observeEventType(FIRDataEventTypeValue, withBlock:
-    #   lambda do |teams_snapshot|
-    #     mp 'TEAMS VALUE CALLBACK'
-    #     mp teams_snapshot.value
-    #     # @teams_hash = teams_snapshot.value.values
-    #     # Notification.center.post("teams_changed", @teams_hash)
-    #   end
-    # )
     # Markers
     @ref.child('markers').queryOrderedByChild('enabled').queryEqualToValue('true').observeEventType(FIRDataEventTypeValue, withBlock:
       lambda do |markers_snapshot|
@@ -133,13 +115,20 @@ class TakaroFbo < FirebaseObject
     @ref.child('game_state').observeEventType(
       FIRDataEventTypeValue, withBlock: lambda do |game_state_snapshot|
         # mp 'GAME_STATE SAVED'
-        # mp game_state_snapshot.value
+        mp game_state_snapshot.value
 
 
 
         if game_state_snapshot.value == 'sync'
+          mp 'Game responding to game_state sync'
           Utilities::breadcrumb('Machine responding to game_state sync')
-          local_player_state = 'ready'
+          local_player_state('ready') # this doesnt work
+        end
+
+        if game_state_snapshot.value == 'ready'
+          mp 'Game responding to game_state ready'
+          Utilities::breadcrumb('Machine responding to game_state ready')
+          Machine.instance.app_state_machine.event(:app_waiting_room_to_prep)
         end
 
         if game_state_snapshot.value == 'playing'
@@ -147,43 +136,10 @@ class TakaroFbo < FirebaseObject
 
           Notification.center.post('game_state_playing_notification', nil)
 
-          # this was the old way
-          # Machine.instance.current_view.performSegueWithIdentifier('ToGameCountdown', sender: self)
-
-          # this needs to move
-          # @ref.child('player_status').updateChildValues(
-          #   {
-          #     @local_player.key => 'ready'
-          #   }
-          # )
+          Machine.instance.app_state_machine.event(:app_prep_to_game)
         end
       end.weak!
     )
-
-#     @ref.child('player_status').observeEventType(
-#       FIRDataEventTypeValue, withBlock: lambda do |player_status_snapshot|
-#         mp 'PLAYER_STATUS CHANGED'
-#         mp player_status_snapshot.value
-#
-#         return if player_status_snapshot.value.nil?
-#
-#         # oh shit this works!
-#         mp player_status_snapshot.value.values.all? { |p| p == 'ready' }
-#
-#         if player_status_snapshot.value.values.all? { |p| p == 'ready' }
-#           # We are all ready to go
-#           mp 'HERE WEEEEE GOOOOOOOOOOOOO'
-#
-#           # @ref.child('game_state').setValue('ready')
-#
-#           # this sends to game_countdown_controller
-#           # Notification.center.post('CountdownSegueToGame', nil)
-#
-#           # this sends to takaro game_state_machine
-#           # Notification.center.post('game_state_playing_notification', nil)
-#         end
-#       end
-#     )
 
     # This updates the player location in the location child
     @location_update_observer = Notification.center.observe 'UpdateLocation' do |data|
@@ -685,7 +641,8 @@ class TakaroFbo < FirebaseObject
     puts "Score for #{kapa_key}: #{score}".focus
   end
 
-  def local_player_state=(in_state)
+  def local_player_state(in_state)
+    mp __method__
     @ref.child('player_states').updateChildValues(
       {
         @local_player.key => in_state

@@ -330,7 +330,7 @@ class GameController < MachineViewController
     mp @skview
 
     # Machine.instance.is_playing = true
-    Machine.instance.takaro_fbo.local_player_state = 'playing'
+    Machine.instance.takaro_fbo.local_player_state('playing')
 
     # should these be here?
     @scores = [0, 0]
@@ -345,15 +345,15 @@ class GameController < MachineViewController
 
       mp 'Taiapa vs Playfield!'
       mp 'taiapa'
-      mp Machine.instance.takaro_fbo.taiapa_region
+      mp current_game.taiapa_region
       mp 'playfield'
-      mp Machine.instance.takaro_fbo.playfield
+      mp current_game.playfield
       mp 'playfield_region'
-      mp Machine.instance.takaro_fbo.playfield_region
+      mp current_game.playfield_region
 
-      map_view.setRegion(Machine.instance.takaro_fbo.playfield_region, animated: false)
+      map_view.setRegion(current_game.playfield_region, animated: false)
       map_view.setCameraBoundary(
-        MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro_fbo.playfield_region),
+        MKMapCameraBoundary.alloc.initWithCoordinateRegion(current_game.playfield_region),
         animated: true
       )
     rescue Exception => exception
@@ -378,7 +378,7 @@ class GameController < MachineViewController
       state.on_entry { button_down }
       state.transition_to :primed,
                           # after: Machine.instance.takaro_fbo.local_kaitakaro.deploy_time
-                          after: Machine.instance.takaro_fbo.local_player.deploy_time
+                          after: current_game.local_player.deploy_time
       state.transition_to :up,
                           on: :button_up
       state.transition_to :up,
@@ -414,7 +414,7 @@ class GameController < MachineViewController
     # change the button color
     button_color(UIColor.systemRedColor)
 
-    Machine.instance.takaro_fbo.local_player.placing(true)
+    current_game.local_player.placing(true)
   end
 
   def button_up
@@ -424,7 +424,7 @@ class GameController < MachineViewController
     button_color(UIColor.labelColor)
 
     # Machine.instance.takaro_fbo.local_kaitakaro.placing(true)
-    Machine.instance.takaro_fbo.local_player.placing(true)
+    current_game.local_player.placing(true)
   end
 
   ### Makes an annotation image for the map ###
@@ -540,13 +540,13 @@ class GameController < MachineViewController
 
     # This is a hack to get past having one pylon
     # mp Machine.instance.takaro_fbo.markers_hash
-    return if Machine.instance.takaro_fbo.markers_hash.length < 2
+    return if current_game.markers_hash.length < 2
 
     # add the pouwhenua
-    map_view.addAnnotations(Machine.instance.takaro_fbo.marker_annotations)
+    map_view.addAnnotations(current_game.marker_annotations)
 
     # add the players
-    map_view.addAnnotations(Machine.instance.takaro_fbo.player_annotations)
+    map_view.addAnnotations(current_game.player_annotations)
 
     @voronoi_map.voronoiCells.each do |cell|
       map_view.addOverlay(cell.overlay)

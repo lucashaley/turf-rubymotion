@@ -113,7 +113,7 @@ class Player < FirebaseObject
         puts "FBO:#{@class_name} TEAM CHANGED".red if DEBUGGING
         mp 'Setting dirty to false'
         @location_dirty = false
-      end
+      end.weak!
     )
 
     @ref.child('marker_current').observeEventType(
@@ -121,7 +121,7 @@ class Player < FirebaseObject
       lambda do |marker_snapshot|
         puts "FBO:#{@class_name} MARKER CURRENT CHANGED".red if DEBUGGING
         @marker_current = marker_snapshot.value
-      end
+      end.weak!
     )
   end
 

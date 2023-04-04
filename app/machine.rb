@@ -184,6 +184,11 @@ class Machine
                           on: :app_waiting_room_to_prep,
                           action: proc { transition_waiting_room_to_prep }
     end
+    @app_state_machine.when :prep do |state|
+      state.transition_to :game,
+                          on: :app_prep_to_game,
+                          action: proc { transition_prep_to_game }
+    end
     @app_state_machine.start!
 
     ####################
@@ -376,6 +381,12 @@ class Machine
     game.game_state = 'prep'
   end
 
+  def transition_prep_to_game
+    mp __method__
+
+    segue('to_game')
+  end
+
   def transition_waiting_room_to_game
     mp __method__
 
@@ -471,10 +482,10 @@ class Machine
     Notification.center.post 'PlayerDisappear'
     # Bugsnag.notifyError(error)
   end
-  
+
   def initialize_character_classes
       characters_ref = @db.referenceWithPath('characters')
-      
+
   end
 
   def check_for_game(gamecode)

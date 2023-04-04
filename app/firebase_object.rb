@@ -43,7 +43,7 @@ class FirebaseObject
       lambda do |error, _ref|
         puts "FBO:#{@class_name} setValue".green
         Bugsnag.notifyError(error) unless error.nil?
-      end
+      end.weak!
     )
   end
 
@@ -54,7 +54,7 @@ class FirebaseObject
       lambda do |data_snapshot|
         # mp data_snapshot.valueInExportFormat
         @data_hash = data_snapshot.valueInExportFormat
-      end
+      end.weak!
     )
   end
 
@@ -65,7 +65,7 @@ class FirebaseObject
       lambda do |data_snapshot|
         @data_hash = data_snapshot.valueInExportFormat
         in_proc.call
-      end
+      end.weak!
     )
   end
 
@@ -78,7 +78,7 @@ class FirebaseObject
         # Notification.center.post("#{@class_name}_ChildChanged", data_snapshot.valueInExportFormat)
         Notification.center.post("#{@class_name}_ChildChanged", data_snapshot.valueInExportFormat)
         pull
-      end
+      end.weak!
     )
 
     @ref.observeEventType(
@@ -89,7 +89,7 @@ class FirebaseObject
         Notification.center.post("#{@class_name}_ChildAdded", data_snapshot.valueInExportFormat)
         # Notification.center.post("#{@class_name}_ChildAdded", data_snapshot.valueInExportFormat)
         pull
-      end
+      end.weak!
     )
 
     @ref.observeEventType(
@@ -99,7 +99,7 @@ class FirebaseObject
         # Notification.center.post("#{@class_name}_ChildRemoved", data_snapshot.valueInExportFormat)
         Notification.center.post("#{@class_name}_ChildRemoved", data_snapshot.valueInExportFormat)
         pull
-      end
+      end.weak!
     )
   end
 
@@ -117,7 +117,7 @@ class FirebaseObject
       lambda do |_error, data_snapshot|
         puts "FBO:#{@class_name} VALUE_AT".focus
         return data_snapshot.childSnapshotForPath(node_string).valueInExportFormat.values
-      end
+      end.weak!
     )
   end
 
@@ -158,5 +158,13 @@ class FirebaseObject
 
   def to_s
     "FirebaseObject: #{@class_name}\n\tref: #{@ref}\n\tdata_hash: #{@data_hash}\n"
+  end
+
+  def machine
+    Machine.instance
+  end
+
+  def app_machine
+    machine.app_state_machine
   end
 end

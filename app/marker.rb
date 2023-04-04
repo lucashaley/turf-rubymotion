@@ -41,7 +41,7 @@ class Marker < FirebaseObject
 			FIRDataEventTypeChildChanged, withBlock:
 			lambda do |marker_snapshot|
 				mp "marker snapshot"
-			end
+			end.weak!
 		)
 	end
 
@@ -53,7 +53,7 @@ class Marker < FirebaseObject
 		notification = lambda do
 	  		Machine.instance.takaro_fbo.pouwhenua_is_dirty = true
 	  		Notification.center.post 'MapRefresh'
-		end
+		end.weak!
 		update_with_block({ 'enabled' => 'false' }, &notification)
   end
 end
