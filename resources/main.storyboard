@@ -384,7 +384,7 @@
                         <outlet property="button_continue" destination="UmA-Sh-xgH" id="b2B-u4-bnt"/>
                         <outlet property="cancel_button" destination="NQU-5x-TWF" id="3tI-a0-mQn"/>
                         <outlet property="continue_button" destination="UmA-Sh-xgH" id="7c7-hG-ZSo"/>
-                        <outlet property="gamecode" destination="V47-r9-v7Y" id="zbY-mU-uIr"/>
+                        <outlet property="gamecode_label" destination="V47-r9-v7Y" id="9We-1u-6xR"/>
                         <outlet property="not_close_enough" destination="AFw-8c-ST2" id="twh-B8-0Ii"/>
                         <outlet property="table_team_a" destination="AgA-Xk-jr9" id="txv-ZG-ZEt"/>
                         <outlet property="table_team_b" destination="4iH-LO-1V0" id="Wsb-ey-Qbr"/>
@@ -579,7 +579,7 @@
             <objects>
                 <viewController title="credits" id="V95-ki-Mtz" userLabel="Credits" customClass="InfoViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8GG-Cl-TLL">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Credits!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ucc-WJ-euR">
@@ -590,7 +590,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rMD-Zc-Qeg">
-                                <rect key="frame" x="16" y="138" width="343" height="504"/>
+                                <rect key="frame" x="16" y="138" width="343" height="484"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <string key="text">This game was made by Lucas Haley using the following tools: - RubyMotion - Google Firebase  Playtesters Harry Ford, Stu Dixon, Morgan Odland</string>
@@ -787,7 +787,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
             <objects>
                 <viewController id="DBm-GU-flj" customClass="GameCountdownController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Ws2-Lv-6TM">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Game starting." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tb8-SN-Upb">
@@ -921,7 +921,7 @@ Medium marker placement time. Medium marker lifespan. Can see enemy positions.</
             <objects>
                 <viewController id="QAX-Yg-aGW" userLabel="GameOver" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="eK7-1n-UgD">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Game O'er" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bWj-6U-z6w">

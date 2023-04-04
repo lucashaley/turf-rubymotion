@@ -28,6 +28,9 @@
 #import <SpriteKit/SpriteKit.h>
 
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
+-(IBAction) debug_start_app;
+-(IBAction) initialize_bugsnag;
+
 @end
 
 @interface CharacterController: UIViewController
@@ -164,7 +167,7 @@
 
 @interface JoinExistingController: MachineViewController
 
-@property IBOutlet UITextField * gamecode;
+@property IBOutlet UITextField * gamecode_label;
 @property IBOutlet UIButton * continue_button;
 @property IBOutlet UIButton * cancel_button;
 
@@ -213,6 +216,7 @@
 -(IBAction) transition_character_select_to_main_menu;
 -(IBAction) transition_character_select_to_waiting_room;
 -(IBAction) transition_waiting_room_to_main_menu;
+-(IBAction) transition_waiting_room_to_prep;
 -(IBAction) transition_waiting_room_to_game;
 -(IBAction) transition_game_to_main_menu;
 -(IBAction) transition_game_to_game_over;
@@ -222,6 +226,7 @@
 -(IBAction) game;
 -(IBAction) dismiss_modal;
 -(IBAction) initialize_location_manager;
+-(IBAction) initialize_character_classes;
 -(IBAction) check_for_game:(id) gamecode;
 -(IBAction) create_new_game;
 -(IBAction) generate_gamecode;
@@ -277,7 +282,7 @@
 
 @interface NewController: MachineViewController
 
-@property IBOutlet UILabel * gamecode;
+@property IBOutlet UILabel * gamecode_label;
 @property IBOutlet CharacterController * character_view;
 @property IBOutlet UIButton * continue_button;
 @property IBOutlet UIButton * button_continue;
