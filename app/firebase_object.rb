@@ -71,13 +71,21 @@ class FirebaseObject
 
   def start_observing
     @ref.observeEventType(
+      FIRDataEventTypeValue, withBlock:
+      lambda do |data_snapshot|
+        mp "#{@class_name} changed"
+        @data_hash = data_snapshot.valueInExportFormat
+      end.weak!
+    )
+
+    @ref.observeEventType(
       FIRDataEventTypeChildChanged, withBlock:
       lambda do |data_snapshot|
         # puts "FBO:#{@class_name} CHILDCHANGED".red if DEBUGGING
         # mp data_snapshot.valueInExportFormat if DEBUGGING
         # Notification.center.post("#{@class_name}_ChildChanged", data_snapshot.valueInExportFormat)
         Notification.center.post("#{@class_name}_ChildChanged", data_snapshot.valueInExportFormat)
-        pull
+        # pull
       end.weak!
     )
 
@@ -88,7 +96,7 @@ class FirebaseObject
         # mp data_snapshot.valueInExportFormat if DEBUGGING
         Notification.center.post("#{@class_name}_ChildAdded", data_snapshot.valueInExportFormat)
         # Notification.center.post("#{@class_name}_ChildAdded", data_snapshot.valueInExportFormat)
-        pull
+        # pull
       end.weak!
     )
 
@@ -98,7 +106,7 @@ class FirebaseObject
         # puts "FBO:#{@class_name} CHILDREMOVED".red if DEBUGGING
         # Notification.center.post("#{@class_name}_ChildRemoved", data_snapshot.valueInExportFormat)
         Notification.center.post("#{@class_name}_ChildRemoved", data_snapshot.valueInExportFormat)
-        pull
+        # pull
       end.weak!
     )
   end
@@ -124,6 +132,8 @@ class FirebaseObject
   def update(node_hash)
     puts "FBO:#{@class_name} UPDATE #{node_hash}".blue if DEBUGGING
 
+    # TODO: This could also be made redundant by the new Observe all system...
+    # ... we can just update the child on the server, and the observe will update the data_hash
     # this merges in place, so be careful!
     @data_hash.merge!(node_hash)
 
