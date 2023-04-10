@@ -162,7 +162,8 @@ class Player < FirebaseObject
     # update({ 'coordinate' => in_coordinate })
     @ref.updateChildValues(
       {
-        'coordinate' => in_coordinate
+        'coordinate' => in_coordinate,
+        'mkmappoint' => MKMapPointForCoordinate(in_coordinate.to_CLLocationCoordinate2D).to_hash
       }, withCompletionBlock: lambda do | error, coordinate_ref |
         mp 'finished updating'
         @coordinate_machine.event :finished_updating

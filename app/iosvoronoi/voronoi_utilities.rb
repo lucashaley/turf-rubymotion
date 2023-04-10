@@ -3,11 +3,12 @@ module VoronoiUtilities
   DEBUGGING = false
 
   def vertices_from_cell(cell)
-    puts 'VORONOI_UTILITIES: VERTICES_FROM_CELL'.blue if DEBUGGING
+    mp __method__
+
     vertices = []
 
     # puts 'Cell: '.red
-    # mp cell
+    mp cell
 
     cell.halfedges.each do |halfedge|
       start_point = halfedge.getStartpoint
@@ -21,6 +22,8 @@ module VoronoiUtilities
       end
     end
 
+    mp vertices
+
     vertices
   end
   # is it better to use alias_method?
@@ -29,8 +32,6 @@ module VoronoiUtilities
 
   def overlay_from_vertices(vertices)
     mp __method__
-    # puts 'VORONOI_UTILITIES: OVERLAY_FROM_VERTICES'.blue if DEBUGGING
-    # puts "vertices: #{vertices.length}".red
 
     if vertices.count <= 0
       mp 'there are no vertices'
@@ -38,22 +39,38 @@ module VoronoiUtilities
     end
 
     points = []
+    coords = []
 
     # can we use map here?
     # do we have to do the whole pointer array thing here?
     vertices.each do |vertex|
-      mp = MKMapPointMake(vertex.x, vertex.y)
+      map_point = MKMapPointMake(vertex.x, vertex.y)
       # puts "mp: #{mp.x}, #{mp.y}".red
       # points << MKMapPointMake(vertex.x, vertex.y)
-      points << mp
+      coord = MKCoordinateForMapPoint(map_point)
+      points << map_point
+      coords << coord
     end
+    mp "#{__method__}: There are no points" if points.nil?
+    mp points
+    mp coords
 
     new_points = NSArray.arrayWithArray(points)
+    mp new_points
+    new_coords = NSArray.arrayWithArray(coords)
 
     points_ptr = Pointer.new(MKMapPoint.type, new_points.length)
     new_points.each_with_index do |p, i|
       points_ptr[i] = p
     end
+
+    coords_ptr = Pointer.new(CLLocationCoordinate2D.type, new_coords.length)
+    new_coords.each_with_index do |c, i|
+      coords_ptr[i] = c
+    end
+
+    mp "#{__method__}: #{points_ptr}"
+    mp coords_ptr
 
     # New, more efficient way
     # new_ptr = Pointer.new(MKMapPoint.type, vertices.length)
@@ -65,19 +82,38 @@ module VoronoiUtilities
     # return MKPolygon.polygonWithPoints(points, count: vertices.length)
     MKPolygon.polygonWithPoints(points_ptr, count: points.length)
     # MKPolygon.polygonWithPoints(new_ptr, count: vertices.length)
+
+    MKPolygon.polygonWithCoordinates(coords_ptr, count: coords.length)
   end
   alias :overlayFromVertices :overlay_from_vertices
 
   def mkmaprect_for_coord_region(region)
-    a = MKMapPointForCoordinate(CLLocationCoordinate2DMake( \
-      region.center.latitude + region.span.latitudeDelta / 2, \
-      region.center.longitude - region.span.longitudeDelta / 2
+    mp __method__
+    mp region
+
+    # a = MKMapPointForCoordinate(
+    #   CLLocationCoordinate2DMake( \
+    #     region.center.latitude + region.span.latitudeDelta / 2, \
+    #     region.center.longitude - region.span.longitudeDelta / 2
+    #   )
+    # )
+    a = MKMapPointForCoordinate(
+      CLLocationCoordinate2DMake( \
+        region.center.latitude + region.span.latitudeDelta, \
+        region.center.longitude - region.span.longitudeDelta
       )
     )
 
-    b = MKMapPointForCoordinate(CLLocationCoordinate2DMake( \
-      region.center.latitude - region.span.latitudeDelta / 2, \
-      region.center.longitude + region.span.longitudeDelta / 2
+    # b = MKMapPointForCoordinate(
+    #   CLLocationCoordinate2DMake( \
+    #     region.center.latitude - region.span.latitudeDelta / 2, \
+    #     region.center.longitude + region.span.longitudeDelta / 2
+    #   )
+    # )
+    b = MKMapPointForCoordinate(
+      CLLocationCoordinate2DMake( \
+        region.center.latitude - region.span.latitudeDelta, \
+        region.center.longitude + region.span.longitudeDelta
       )
     )
 

@@ -96,6 +96,12 @@ class MKMapPoint
   def to_cgpoint
     CGPointMake(x, y)
   end
+  def to_hash
+    {
+      'x' => x,
+      'y' => y
+    }
+  end
 end
 
 class MKMapRect
@@ -124,6 +130,27 @@ class MKCoordinateRegion
       'center' => self.center.to_hash,
       'span' => self.span.to_hash
     }
+  end
+  def to_s
+    self.description
+  end
+end
+
+class Cell
+  def to_s
+    self.description
+  end
+end
+
+class Site
+  def to_s
+    self.description
+  end
+end
+
+class Vertex
+  def to_s
+    self.description
   end
 end
 
@@ -195,8 +222,9 @@ module Utilities
   end
 
   def format_to_location_coord(input)
-    # puts 'UTILITIES FORMAT_TO_LOCATION_COORD'.blue
-    # puts "Input: #{input.class}: #{input}".red
+    mp __method__
+    mp input
+
     case input
     when Hash
       return CLLocationCoordinate2DMake(input['latitude'], input['longitude'])

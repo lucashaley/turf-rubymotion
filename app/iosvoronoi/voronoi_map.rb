@@ -69,8 +69,14 @@ class VoronoiMap
     mp __method__
 
     voronoi_cells = []
-    taiapa_region = Machine.instance.takaro_fbo.taiapa_region
-    bounding_box = mkmaprect_for_coord_region(taiapa_region).to_cgrect
+
+#     playfield_region = Machine.instance.takaro_fbo.playfield_region
+#     mp playfield_region
+#
+#     # bounding_box = mkmaprect_for_coord_region(taiapa_region).to_cgrect
+#     bounding_box = mkmaprect_for_coord_region(playfield_region).to_cgrect
+#     mp bounding_box
+    bounding_box = Machine.instance.takaro_fbo.bounding_box_cgrect
 
     voronoi = Voronoi.new
     # not sure we need this
@@ -100,7 +106,8 @@ class VoronoiMap
     mp 'result'
     mp result.cells
     result.cells.each do |c|
-      mp c.site
+      mp "result cell: #{c}"
+      mp "result site: #{c.site}"
     end
 
     # We now have a list of generated cells
@@ -116,6 +123,9 @@ class VoronoiMap
       voronoi_cells << c
     end
 
+    mp 'Matched voronoi cells:'
+    mp voronoi_cells
+
     puts 'FINISHNG VORONOI_CELLS_FROM_PYLONS'.blue if DEBUGGING
     # Machine.instance.takaro_fbo.pouwhenua_is_dirty = false
     @voronoi_cells_cache = voronoi_cells
@@ -123,6 +133,9 @@ class VoronoiMap
   # rubocop:enable Metrics/AbcSize
 
   def voronoi_cells
+    mp __method__
+    mp @voronoi_cells_cache
+
     @voronoi_cells_cache
   end
   alias voronoiCells voronoi_cells

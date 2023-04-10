@@ -6,6 +6,7 @@ class GameController < MachineViewController
   outlet :timer_label, UILabel
   # TODO: change this here and in xcode
   outlet :pouwhenua_label, UILabel
+  outlet :marker_label, UILabel
   outlet :left_score_label, UILabel
   outlet :right_score_label, UILabel
   outlet :skview, SKView
@@ -44,7 +45,7 @@ class GameController < MachineViewController
 
   def update_marker_label
     mp __method__
-    pouwhenua_label.text = '•' * Machine.instance.takaro_fbo.local_player.marker_current
+    # pouwhenua_label.text = '•' * Machine.instance.takaro_fbo.local_player.marker_current
     pouwhenua_label.text = '•' * current_game.local_player.marker_current
 
     # change the enable of the button
@@ -75,7 +76,8 @@ class GameController < MachineViewController
     NSRunLoop.currentRunLoop.addTimer(@timer, forMode: NSDefaultRunLoopMode)
 
     @score_timer = NSTimer.timerWithTimeInterval(
-      0.1,
+      # 0.1,
+      6,
       target: self,
       selector: 'calculate_score',
       userInfo: nil,
@@ -84,7 +86,8 @@ class GameController < MachineViewController
     NSRunLoop.currentRunLoop.addTimer(@score_timer, forMode: NSDefaultRunLoopMode)
 
     @redraw_timer = NSTimer.timerWithTimeInterval(
-      0.1,
+      # 0.1,
+      3,
       target: self,
       selector: 'try_render_overlays',
       # selector: 'render_overlays',
@@ -110,40 +113,45 @@ class GameController < MachineViewController
 
   # rubocop:disable Metrics/AbcSize
   def calculate_score
-    # mp __method__
+    mp __method__
 
     return if @voronoi_map.nil?
-#
-#     mp 'voronoi_map'
-#     mp @voronoi_map
+    return if @voronoi_map.voronoi_cells.nil?
 
     areas_hash = {}
 
     begin
       @voronoi_map.voronoi_cells.each do |vc|
         # mp 'voronoi cell'
-        # mp vc
+        mp 'Current cell:'
+        mp vc
+
+        mp 'verts'
         verts = vc.vertices
+        mp verts
 
         area = 0.0
         verts.each_with_index do |point, index|
+          mp 'point:'
+          mp point
+
           if index + 1 < verts.length
             point2 = verts[index + 1]
           end
           if point2
             # shoelace algorithm
-            # area = area + ((point.x * point2.y) - (point2.x * point.y))
             area += ((point.x * point2.y) - (point2.x * point.y))
           else
             # use the first point with the last point when all the other points have been done
-            # area = area + ((point.x * verts[0].y) - (verts[0].x * point.y))
             area += ((point.x * verts[0].y) - (verts[0].x * point.y))
           end
         end
+        mp area
         # divide by 2 and get the absolute.
-        area = (area / (2.0 * 100_000)).abs.round(1)
-        # mp 'area'
-        # mp area
+        # area = (area / (2.0 * 100_000)).abs.round(1)
+        area = (area / 2).abs.round(1)
+        mp 'area'
+        mp area
 
         if areas_hash.key?(vc.pylon['team_key'])
           areas_hash[vc.pylon['team_key']] += area
@@ -156,23 +164,23 @@ class GameController < MachineViewController
       Bugsnag.notify(exception)
     end
 
-    # mp 'areas_hash'
-    # mp areas_hash
+    mp 'areas_hash'
+    mp areas_hash
 
     total_areas_hash = areas_hash.values.inject(0, :+)
-    # mp 'total_areas_hash'
-    # mp total_areas_hash
+    mp 'total_areas_hash'
+    mp total_areas_hash
 
     delta_hash = {}
 
     begin
-      # something is going on here
+      # something is going on here, still NaN
       areas_hash.each do |key, v|
         # mp key
         s = ((v / total_areas_hash) * 100).round - 50
-        # mp s
+        mp s
         s = s < 0 ? 0 : s
-        # mp s
+        mp s
         delta_hash[key] = s == 0 ? 0 : (s / 10).round # is this necessary?
       end
     rescue Exception => exception
@@ -330,7 +338,7 @@ class GameController < MachineViewController
     mp @skview
 
     # Machine.instance.is_playing = true
-    Machine.instance.takaro_fbo.local_player_state('playing')
+    current_game.local_player_state('playing')
 
     # should these be here?
     @scores = [0, 0]
@@ -342,14 +350,6 @@ class GameController < MachineViewController
       #   MKMapCameraBoundary.alloc.initWithCoordinateRegion(Machine.instance.takaro_fbo.taiapa_region),
       #   animated: true
       # )
-
-      mp 'Taiapa vs Playfield!'
-      mp 'taiapa'
-      mp current_game.taiapa_region
-      mp 'playfield'
-      mp current_game.playfield
-      mp 'playfield_region'
-      mp current_game.playfield_region
 
       map_view.setRegion(current_game.playfield_region, animated: false)
       map_view.setCameraBoundary(
@@ -611,13 +611,6 @@ class GameController < MachineViewController
   def play_forward_sound context = nil
     #play sound code here
   end
-
-#   def handle_new_pouwhenua
-#     puts 'GAME_CONTROLLER: HANDLE_NEW_POUWHENUA'.blue if DEBUGGING
-#
-#     # @button_fsm.event(:button_placed)
-#     Machine.instance.takaro_fbo.create_new_pouwhenua_from_hash
-#   end
 
   def handle_new_marker
     mp __method__

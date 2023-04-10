@@ -1,4 +1,6 @@
 class TakaroFbo < FirebaseObject
+  include VoronoiUtilities
+
   attr_accessor :team_manager,
                 :kaitakaro_array,
                 :kaitakaro_hash,
@@ -12,7 +14,9 @@ class TakaroFbo < FirebaseObject
                 :game_state_machine,
                 :players_hash,
                 :host,
-                :taiapa_region # TODO: this might be hash later?
+                :taiapa_region, # TODO: this might be hash later?
+                :boundary_hash,
+                :bounding_box_cgrect
                 # :playfield_region
 
   DEBUGGING = true
@@ -122,7 +126,8 @@ class TakaroFbo < FirebaseObject
         if game_state_snapshot.value == 'sync'
           mp 'Game responding to game_state sync'
           Utilities::breadcrumb('Machine responding to game_state sync')
-          local_player_state('ready') # this doesnt work
+          local_player_state('ready')
+          prepare_local_variables
         end
 
         if game_state_snapshot.value == 'ready'
@@ -294,6 +299,23 @@ class TakaroFbo < FirebaseObject
     )
   end
 
+  def prepare_local_variables
+    mp __method__
+
+#     pull_with_block
+#       {
+#         @boundary_hash = playfield_region
+#         @bounding_box_cgrect = mkmaprect_for_coord_region(playfield_region).to_cgrect
+#
+#         mp @bounding_box_cgrect
+#       }
+    # TODO: Remove this, as it would be nice if it already updated through FBO
+    # pull_with_block{@bounding_box_cgrect = mkmaprect_for_coord_region(playfield_region).to_cgrect}
+
+    mp playfield_region
+    @bounding_box_cgrect = mkmaprect_for_coord_region(playfield_region).to_cgrect
+  end
+
   def create_bot_player
     mp __method__
 
@@ -311,10 +333,10 @@ class TakaroFbo < FirebaseObject
     mp @bot_centroid
 
     lat_range = BigDecimal(rand(-BOT_DISTANCE..BOT_DISTANCE) * 10**-BOT_DISTANCE_FACTOR)
-    # mp lat_range
+    mp lat_range
     new_lat = BigDecimal(@bot_centroid['latitude']) + lat_range
     long_range = BigDecimal(rand(-BOT_TEAM_DISTANCE..BOT_TEAM_DISTANCE) * 10**-BOT_DISTANCE_FACTOR)
-    # mp long_range
+    mp long_range
     new_long = BigDecimal(@bot_centroid['longitude']) + long_range
     # mp new_lat
     # mp new_long
@@ -333,6 +355,7 @@ class TakaroFbo < FirebaseObject
         'title' => 'Bot Character'
       },
       'coordinate' => bot_coordinate,
+      'mkmappoint' => MKMapPointForCoordinate(bot_coordinate.to_CLLocationCoordinate2D).to_hash
     }
 
     bot_ref = @ref.child('players').childByAutoId
@@ -479,6 +502,8 @@ class TakaroFbo < FirebaseObject
     new_markers_hash.delete('player_key') if is_initial
     new_markers_hash['enabled'] = 'true'
 
+    new_markers_hash['mkmappoint'] = MKMapPointForCoordinate(new_markers_hash['coordinate'])
+
     # new_marker = Marker.new(
     #   @ref.child('markers').childByAutoId, new_markers_hash
     # )
@@ -539,38 +564,38 @@ class TakaroFbo < FirebaseObject
     update({ 'duration' => in_duration })
   end
 
-  def kapa_hash
-    @data_hash['kapa']
-  end
-
-  def kapa_array
-    kapa_hash&.values
-  end
-
-  def kaitakaro
-    @data_hash['kaitakaro']
-  end
-
-  def kaitakaro_for_kapa(kapa_key = @local_kaitakaro.kapa['kapa_key'])
-    kaitakaro.select { |_key, value| value['kapa']['kapa_key'] == kapa_key }
-  end
-
-  def pouwhenua_array
-    # puts "pouwhenua_array: #{@data_hash['pouwhenua']&.values}"
-    @data_hash['pouwhenua']&.values
-
-    # TODO: This doesn't seem to work
-    # h = @data_hash['pouwhenua']&.select { |p| p['enabled'] == 'true' }
-    # h&.values
-  end
-
-  def pouwhenua_array_for_kapa(kapa_key = @local_kaitakaro.kapa['kapa_key'])
-    pouwhenua_array.select { |p| p['kapa_key'] == kapa_key && p['enabled'] == 'true' }
-  end
-
-  def pouwhenua_array_enabled_only
-    pouwhenua_array.select { |p| p['enabled'] == 'true' }
-  end
+#   def kapa_hash
+#     @data_hash['kapa']
+#   end
+#
+#   def kapa_array
+#     kapa_hash&.values
+#   end
+#
+#   def kaitakaro
+#     @data_hash['kaitakaro']
+#   end
+#
+#   def kaitakaro_for_kapa(kapa_key = @local_kaitakaro.kapa['kapa_key'])
+#     kaitakaro.select { |_key, value| value['kapa']['kapa_key'] == kapa_key }
+#   end
+#
+#   def pouwhenua_array
+#     # puts "pouwhenua_array: #{@data_hash['pouwhenua']&.values}"
+#     @data_hash['pouwhenua']&.values
+#
+#     # TODO: This doesn't seem to work
+#     # h = @data_hash['pouwhenua']&.select { |p| p['enabled'] == 'true' }
+#     # h&.values
+#   end
+#
+#   def pouwhenua_array_for_kapa(kapa_key = @local_kaitakaro.kapa['kapa_key'])
+#     pouwhenua_array.select { |p| p['kapa_key'] == kapa_key && p['enabled'] == 'true' }
+#   end
+#
+#   def pouwhenua_array_enabled_only
+#     pouwhenua_array.select { |p| p['enabled'] == 'true' }
+#   end
 
   def markers_array_enabled_only
     mp __method__
@@ -582,21 +607,21 @@ class TakaroFbo < FirebaseObject
     )
   end
 
-  def taiapa=(in_region)
-    update({ 'taiapa' => in_region })
-  end
-
-  def taiapa
-    @data_hash['taiapa']
-  end
-
-  def playfield=(in_region)
-    update({ 'playfield' => in_region })
-  end
-
-  def playfield
-    @data_hash['playfield']
-  end
+#   def taiapa=(in_region)
+#     update({ 'taiapa' => in_region })
+#   end
+#
+#   def taiapa
+#     @data_hash['taiapa']
+#   end
+#
+#   def playfield=(in_region)
+#     update({ 'playfield' => in_region })
+#   end
+#
+#   def playfield
+#     @data_hash['playfield']
+#   end
 
   def playfield_region=(in_region)
     update({ 'playfield_region' => in_region.to_hash })
@@ -604,28 +629,36 @@ class TakaroFbo < FirebaseObject
 
   def playfield_region
     mp __method__
-    mp @data_hash['playfield_region']
 
-    hash_to_MKCoordinateRegion(@data_hash['playfield_region'])
+    if @data_hash['playfield_region'].nil?
+      mp 'playfield_region is empty!'
+      return
+    end
 
-    # @data_hash['playfield_region'].to_MKCoordinateRegion
+    begin
+      mp @data_hash['playfield_region']
+
+      hash_to_MKCoordinateRegion(@data_hash['playfield_region'])
+    rescue Exception => e
+      Bugsnag.notify e
+    end
   end
 
-  def waiting?
-    @data_hash['waiting']
-  end
-
-  def waiting=(in_waiting)
-    update({ 'waiting' => in_waiting })
-  end
-
-  def playing?
-    @data_hash['playing']
-  end
-
-  def playing=(in_playing)
-    update({ 'playing' => in_playing })
-  end
+#   def waiting?
+#     @data_hash['waiting']
+#   end
+#
+#   def waiting=(in_waiting)
+#     update({ 'waiting' => in_waiting })
+#   end
+#
+#   def playing?
+#     @data_hash['playing']
+#   end
+#
+#   def playing=(in_playing)
+#     update({ 'playing' => in_playing })
+#   end
 
   def game_state
     mp __method__
@@ -705,10 +738,22 @@ class TakaroFbo < FirebaseObject
     mp __method__
     mp 'in_region'
     mp in_hash
-    MKCoordinateRegionMakeWithDistance(
-      hash_to_CLLocationCoordinate2D(in_hash['center']),
-      in_hash['span']['latitude_delta'],
-      in_hash['span']['longitude_delta']
-    )
+
+    if in_hash.nil?
+      mp "#{__method__}: in_hash is nil"
+      return
+    end
+
+    begin
+      mp in_hash.keys
+      mp in_hash['center']
+      MKCoordinateRegionMakeWithDistance(
+        hash_to_CLLocationCoordinate2D(in_hash['center']),
+        in_hash['span']['latitude_delta'],
+        in_hash['span']['longitude_delta']
+      )
+    rescue Exception => e
+      Bugsnag.notify e
+    end
   end
 end
