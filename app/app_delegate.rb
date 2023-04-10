@@ -4,7 +4,7 @@ class AppDelegate
   def application(application, didFinishLaunchingWithOptions: launchOptions)
     debug_start_app
     initialize_bugsnag
-    
+
     @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
     storyboard = UIStoryboard.storyboardWithName("main", bundle: nil)
     @window.rootViewController = storyboard.instantiateInitialViewController
@@ -16,17 +16,17 @@ class AppDelegate
 
     true
   end
-  
+
   def debug_start_app
     # puts "\n" * 16
     # puts 'STARTING APPLICATION'
     # puts "\n" * 16
-    
-    mp "\n" * 8
+
+    puts "\n" * 8
     mp 'Starting application'
-    mp "\n" * 8
+    puts "\n" * 8
   end
-  
+
   def initialize_bugsnag
     mp __method__
     begin
