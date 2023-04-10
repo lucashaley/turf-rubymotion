@@ -1,6 +1,6 @@
 class NewController < MachineViewController
   outlet :gamecode_label, UILabel
-  outlet :character_view, CharacterController
+  outlet :character_view, SelectCharacterController
   outlet :continue_button, UIButton
   outlet :button_continue, UIButton
   outlet :cancel_button, UIButton
