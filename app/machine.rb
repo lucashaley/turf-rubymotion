@@ -82,7 +82,9 @@ class Machine
 
     @user = nil
     @auth = FIRAuth.authWithApp(@db_app)
-    puts "User: #{@auth.currentUser}".red
+    # puts "User: #{@auth.currentUser}".red
+    mp @auth
+    mp @auth.currentUser
     FIRAuth.auth.addAuthStateDidChangeListener(handle_auth_state_changed)
 
     @auth_ui = FUIAuth.defaultAuthUI

@@ -54,7 +54,13 @@ end
 
 class CGPoint
   def to_s
-    puts "CGPOINT x: #{x}, y: #{y}"
+    # puts "CGPOINT x: #{x}, y: #{y}"
+    mp self
+  end
+
+  def motion_print(mp)
+    # This will output in red!
+    mp.colorize("GCPoint: x: #{x}, y: #{y}", :red)
   end
 end
 
@@ -184,6 +190,64 @@ end
 class Numeric
   def minutes
     self * 60
+  end
+end
+
+class FIRAuth
+  def to_s
+    {
+      'currentUser' => self.currentUser,
+      'settings' => self.settings
+    }
+  end
+  def motion_print(mp, options)
+    mp options
+    # options[:indent_level] = 2
+    "FIRAuth:" + "\n" + mp.l_custom(self.currentUser, options) + "\n"
+  end
+end
+
+class FIRUser
+  def to_s
+    {
+      'providerData' => self.providerData
+    }.to_s
+  end
+  def motion_print(mp, options)
+    mp options
+    # options[:indent_level] = 3
+    "FIRUser:\n" + mp.l_array(self.providerData, options) + "\n"
+  end
+end
+
+class FIRUserInfo
+  def to_s
+    {
+      'displayName' => self.displayName,
+      'email' => self.email,
+      'providerID' => self.providerID
+    }.to_s
+  end
+  def motion_print(mp, options)
+    mp.l_hash(
+      {
+        'displayName' => self.displayName,
+        'email' => self.email,
+        'providerID' => self.providerID
+      }, options
+    )
+  end
+end
+
+class FIRUserInfoImpl
+  def motion_print(mp, options)
+    mp.l_hash(
+      {
+        'displayName' => self.displayName,
+        'email' => self.email,
+        'providerID' => self.providerID
+      }, options
+    )
   end
 end
 
