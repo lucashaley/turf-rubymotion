@@ -16,7 +16,9 @@ class TakaroFbo < FirebaseObject
                 :host,
                 :taiapa_region, # TODO: this might be hash later?
                 :boundary_hash,
-                :bounding_box_cgrect
+                :bounding_box_cgrect,
+                :overlays,
+                :overlays_multi
                 # :playfield_region
 
   DEBUGGING = true
@@ -113,6 +115,20 @@ class TakaroFbo < FirebaseObject
         # mp markers_snapshot.value
         @markers_hash = markers_snapshot.value
         Notification.center.post("markers_changed", @markers_hash)
+      end.weak!
+    )
+
+    # Cells
+    @ref.child('cells').observeEventType(FIRDataEventTypeValue, withBlock:
+      lambda do |cells_snapshot|
+        mp 'cells updated', force_color: :blue
+        # mp cells_snapshot.value
+
+        # why an array?
+        @cells_hash = cells_snapshot.value unless cells_snapshot.value.nil?
+        # Notification.center.post("markers_changed", @markers_hash)
+
+        create_overlays
       end.weak!
     )
 
@@ -510,6 +526,7 @@ class TakaroFbo < FirebaseObject
 
     # Okay, but this doesnt allow for a death timer!!
     mp 'creating new marker'
+    mp new_markers_hash
     # new_marker = @ref.child('markers').childByAutoId
     # new_marker.setValue(
     #   new_markers_hash
@@ -672,6 +689,163 @@ class TakaroFbo < FirebaseObject
 
   def score(kapa_key, score)
     puts "Score for #{kapa_key}: #{score}".focus
+  end
+
+  def create_overlays
+    mp __method__
+
+    return if @cells_hash.nil?
+
+    mp @cells_hash
+
+    @overlays_multi = []
+
+    verts = []
+    verts_hash = {}
+
+    coords = []
+
+    polygons = []
+    polygons_hash = {}
+
+    new_overlay_hash = {}
+
+    @cells_hash.each do |cell|
+      cell_marker = cell['site']['marker_key']
+      polygons_hash[cell['site']['marker_key']] ||= []
+      verts_hash[cell_marker] = { 'verts' => [] }
+
+      mp 'trying new method'
+      new_overlay = create_overlay_for_cell(cell)
+      mp 'new overlay:'
+      mp new_overlay
+      new_overlay_hash[cell_marker] << new_overlay # this needs to be set up first
+
+      cell['halfedges'].each do |halfedge|
+        mp 'halfedge'
+        mp halfedge
+        # get start point
+        # @edge.left_site == @site ? @edge.vertex_a : @edge.vertex_b
+        start_point = halfedge['edge']['lSite']['marker_key'] == halfedge['site']['marker_key'] ? halfedge['edge']['va'] : halfedge['edge']['vb']
+        # @edge.left_site == @site ? @edge.vertex_b : @edge.vertex_a
+        end_point = halfedge['edge']['lSite']['marker_key'] == halfedge['site']['marker_key'] ? halfedge['edge']['vb'] : halfedge['edge']['va']
+
+        map_point = MKMapPointMake(start_point['x'], start_point['y'])
+        coords << MKCoordinateForMapPoint(map_point)
+
+
+        # verts << {
+        #   'start_point' => start_point,
+        #   'end_point' => end_point
+        # }
+        # verts_hash[cell_marker]['verts'] << {
+        #   'start_point' => start_point,
+        #   'end_point' => end_point
+        # }
+      end
+
+      # mp 'verts:'
+      # mp verts
+      # mp verts_hash
+
+      new_coords = NSArray.arrayWithArray(coords)
+      coords_ptr = Pointer.new(CLLocationCoordinate2D.type, new_coords.length)
+      new_coords.each_with_index do |c, i|
+        coords_ptr[i] = c
+      end
+
+      overlay = MKPolygon.polygonWithCoordinates(coords_ptr, count: coords.length)
+      overlay.overlayColor = CIColor.colorWithString(cell['site']['color'])
+      polygons << overlay
+      polygons_hash[cell['site']['marker_key']] << overlay
+    end # finish looping through cells
+
+    mp polygons
+    mp polygons_hash
+
+    @overlays = polygons
+
+    # Create a pointer array of polygons
+    mp 'creating array of polygon pointers'
+    polygons_hash.each do |k, p|
+      mp 'current polygon key'
+      mp k
+      mp 'current polygon value'
+      mp p
+      polygons_ptr = Pointer.new(:object, p.length)
+      p.each_with_index do |q, i|
+        mp 'current '
+        mp q
+        polygons_ptr[i] = q
+      end
+      mp polygons_ptr
+      @overlays_multi << MKMultiPolygon.alloc.initWithPolygons(polygons_ptr)
+    end
+
+    mp 'overlays_multi'
+    mp @overlays_multi
+  end
+
+  def create_overlay_for_cell(cell)
+    mp __method__
+
+    cell_marker = cell['site']['marker_key']
+    map_points = []
+    markers_ptr = Pointer.new(MKMapPoint.type, cell['halfedges'].length)
+
+    mp 'iterate through halfedges'
+    cell['halfedges'].each_with_index do |halfedge, i|
+      map_point = create_map_point_for_halfedge(halfedge)
+      map_points << map_point
+      markers_ptr[i] = map_point
+    end
+    mp map_points
+    mp markers_ptr
+
+    polygon = MKPolygon.polygonWithPoints(markers_ptr, count: map_points.length)
+    polygon.overlayColor = CIColor.colorWithString(cell['site']['color'])
+
+    mp polygon
+
+    polygon
+  end
+
+  def create_map_point_for_halfedge(halfedge)
+#     {
+#       angle
+#       egde
+#       {
+#         lSite
+#         {
+#
+#         }
+#         rSite
+#         {
+#
+#         }
+#         va
+#         {
+#
+#         }
+#         vb
+#         {
+#
+#         }
+#       }
+#       site
+#       {
+#         color
+#         marker_key
+#         team_key
+#       }
+#     }
+    mp __method__
+    # mp halfedge
+
+    start_point = halfedge['edge']['lSite']['marker_key'] == halfedge['site']['marker_key'] ? halfedge['edge']['va'] : halfedge['edge']['vb']
+    end_point = halfedge['edge']['lSite']['marker_key'] == halfedge['site']['marker_key'] ? halfedge['edge']['vb'] : halfedge['edge']['va']
+
+    map_point = MKMapPointMake(start_point['x'], start_point['y'])
   end
 
   def local_player_state(in_state)

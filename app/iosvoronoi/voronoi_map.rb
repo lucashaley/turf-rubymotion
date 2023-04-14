@@ -84,13 +84,13 @@ class VoronoiMap
 
     # pylons_array = Machine.instance.takaro_fbo.markers_hash.values
     markers_array = Machine.instance.takaro_fbo.markers_hash.values
-    mp 'markers_array'
-    mp markers_array
+    # mp 'markers_array'
+    # mp markers_array
 
     # site_array_map = Machine.instance.takaro_fbo.markers_hash.values.map do |p|
     mp 'Iterating through markers'
     site_array_map = markers_array.map do |marker|
-      mp marker
+      # mp marker
       loc_coord = format_to_location_coord(marker['coordinate'])
       color = CIColor.colorWithString(marker['color'])
       VoronoiSite.new(loc_coord.to_cgpoint, color, marker['team_key'])
@@ -103,11 +103,11 @@ class VoronoiMap
     result = voronoi.computeWithSites(site_array_map, andBoundingBox: bounding_box)
     puts 'COMPUTEWITHSITES FINISHED'.red if DEBUGGING
 
-    mp 'result'
-    mp result.cells
+    # mp 'result'
+    # mp result.cells
     result.cells.each do |c|
-      mp "result cell: #{c}"
-      mp "result site: #{c.site}"
+      # mp "result cell: #{c}"
+      # mp "result site: #{c.site}"
     end
 
     # We now have a list of generated cells
@@ -116,9 +116,9 @@ class VoronoiMap
     mp 'Iterating through cells'
     result.cells.each_with_index do |cell, _index|
       marker = markers_array.detect { |marker| marker['team_key'] == cell.site.pouwhenua_key }
-      mp marker
+      # mp marker
       c = VoronoiCell.new(cell, marker)
-      mp c
+      # mp c
 
       voronoi_cells << c
     end

@@ -31,16 +31,16 @@ class VoronoiCell # < Cell
     mp __method__
 
     # this is actually done in overlay_from_vertices
-    mp 'mapping vertices'
+    # mp 'mapping vertices'
     vertices_coords = vertices.map do |v|
-      mp 'vertex'
-      mp v
+      # mp 'vertex'
+      # mp v
       # we might need to construct using MKMapPointMake(x, y)
       map_point = MKMapPointMake(v.x, v.y)
-      mp MKCoordinateForMapPoint(map_point)
+      # mp MKCoordinateForMapPoint(map_point)
       MKCoordinateForMapPoint(map_point)
     end
-    mp vertices_coords
+    # mp vertices_coords
 
     # THIS IS OTHER PLACES TOO?
     overlay = overlay_from_vertices(vertices)

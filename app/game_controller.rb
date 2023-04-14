@@ -552,6 +552,9 @@ class GameController < MachineViewController
       map_view.addOverlay(cell.overlay)
     end
 
+    # adding new overlays
+    map_view.addOverlays(current_game.overlays) unless current_game.overlays.nil?
+
     @rendering = false
   end
 

@@ -51,12 +51,12 @@ module VoronoiUtilities
       points << map_point
       coords << coord
     end
-    mp "#{__method__}: There are no points" if points.nil?
-    mp points
-    mp coords
+    # mp "#{__method__}: There are no points" if points.nil?
+    # mp points
+    # mp coords
 
     new_points = NSArray.arrayWithArray(points)
-    mp new_points
+    # mp new_points
     new_coords = NSArray.arrayWithArray(coords)
 
     points_ptr = Pointer.new(MKMapPoint.type, new_points.length)
@@ -69,8 +69,8 @@ module VoronoiUtilities
       coords_ptr[i] = c
     end
 
-    mp "#{__method__}: #{points_ptr}"
-    mp coords_ptr
+    # mp "#{__method__}: #{points_ptr}"
+    # mp coords_ptr
 
     # New, more efficient way
     # new_ptr = Pointer.new(MKMapPoint.type, vertices.length)
