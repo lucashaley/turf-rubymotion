@@ -6,9 +6,6 @@
 @implementation AppDelegate
 @end
 
-@implementation CharacterController
-@end
-
 @implementation FirebaseObject
 @end
 
@@ -45,63 +42,6 @@
 @implementation VoronoiMap
 @end
 
-@implementation VoronoiSite
-@end
-
-@implementation JoinExistingController
-@end
-
-@implementation LoginController
-@end
-
-@implementation Machine
-@end
-
-@implementation MachineLocation
-@end
-
-@implementation MachineLogin
-@end
-
-@implementation Marker
-@end
-
-@implementation MenuController
-@end
-
-@implementation NewController
-@end
-
-@implementation Notification
-@end
-
-@implementation NSNotificationCenter
-@end
-
-@implementation Player
-@end
-
-@implementation PlayerCell
-@end
-
-@implementation PouwhenuaFbo
-@end
-
-@implementation SelectCharacterController
-@end
-
-@implementation SettingsController
-@end
-
-@implementation SplashController
-@end
-
-@implementation TakaroFbo
-@end
-
-@implementation Team
-@end
-
 @implementation String
 @end
 
@@ -132,9 +72,84 @@
 @implementation MKCoordinateRegion
 @end
 
+@implementation Cell
+@end
+
+@implementation Site
+@end
+
+@implementation Vertex
+@end
+
 @implementation Hash
 @end
 
 @implementation Numeric
+@end
+
+@implementation FIRAuth
+@end
+
+@implementation FIRUser
+@end
+
+@implementation FIRUserInfo
+@end
+
+@implementation FIRUserInfoImpl
+@end
+
+@implementation VoronoiSite
+@end
+
+@implementation JoinExistingController
+@end
+
+@implementation LoginController
+@end
+
+@implementation Machine
+@end
+
+@implementation MachineLocation
+@end
+
+@implementation MachineLogin
+@end
+
+@implementation Marker
+@end
+
+@implementation MenuController
+@end
+
+@implementation SelectCharacterController
+@end
+
+@implementation NewController
+@end
+
+@implementation Notification
+@end
+
+@implementation NSNotificationCenter
+@end
+
+@implementation Player
+@end
+
+@implementation PlayerCell
+@end
+
+@implementation SettingsController
+@end
+
+@implementation SplashController
+@end
+
+@implementation TakaroFbo
+@end
+
+@implementation Team
 @end
 

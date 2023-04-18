@@ -36,7 +36,7 @@ Motion::Project::App.setup do |app|
   app.name = 'Turf!'
 
   # version for your app
-  app.version = '0.1.33'
+  app.version = '0.1.35'
 
   # ===========================================================================================
   # 3. Set your deployment target (it's recommended that you at least target 10.0 and above).
@@ -82,8 +82,8 @@ Motion::Project::App.setup do |app|
   # This is a force, as for some reason the pods weren't including the resources
   app.resources_dirs += ['vendor/Pods/FirebaseAuthUI/FirebaseAuthUI/Sources/Resources/']
   app.resources_dirs += ['vendor/Pods/FirebaseOAuthUI/FirebaseOAuthUI/Sources/Resources/']
-  app.resources_dirs += ['vendor/Pods/FirebaseEmailAuthUI/FirebaseEmailAuthUI/Sources/Resrouces/']
-  app.resources_dirs += ['vendor/Pods/GoogleSignIn/GoogleSignIn/Sources/Resrouces/']
+  app.resources_dirs += ['vendor/Pods/FirebaseEmailAuthUI/FirebaseEmailAuthUI/Sources/Resources/']
+  app.resources_dirs += ['vendor/Pods/GoogleSignIn/GoogleSignIn/Sources/Resources/']
   # app.resources_dirs += ['vendor/Pods/FirebaseAnalytics/']
 
   # app.vendor_project('vendor/objcvoronoi-master', :xcode,
@@ -152,7 +152,8 @@ Motion::Project::App.setup do |app|
   # this works
   app.release do
     app.codesign_certificate = "iPhone Distribution: Lucas Haley (3DZ7KWNU9A)"
-    app.provisioning_profile = 'provisioning/TurfDistribution02052023.mobileprovision'
+    # app.provisioning_profile = 'provisioning/TurfDistribution02052023.mobileprovision'
+    app.provisioning_profile = 'provisioning/TurfDistribution04162023.mobileprovision'
   end
   app.development do
     app.codesign_certificate = "iPhone Development: Lucas Haley (RU52PCAUBM)"
@@ -196,6 +197,8 @@ Motion::Project::App.setup do |app|
   }
 
   app.pods do
+    # plugin 'cocoapods-pod-sign' # doesn't work
+    
     # use_frameworks!
     source 'https://cdn.cocoapods.org/'
     pod 'Firebase', '~> 8.10.0' # '~> 8.7.0'
@@ -222,6 +225,7 @@ Motion::Project::App.setup do |app|
 
     # https://app.bugsnag.com
     pod 'Bugsnag'
+    
   end
 end
 # rubocop:enable Metrics/BlockLength

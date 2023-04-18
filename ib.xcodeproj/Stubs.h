@@ -33,16 +33,6 @@
 
 @end
 
-@interface CharacterController: UIViewController
-
-@property IBOutlet UIButton * scout_button;
-
--(IBAction) viewDidLoad;
--(IBAction) select_player_class:(id) sender;
--(IBAction) dismiss_modal;
-
-@end
-
 @interface FirebaseObject: NSObject
 -(IBAction) push;
 -(IBAction) pull;
@@ -52,6 +42,8 @@
 -(IBAction) delete;
 -(IBAction) key;
 -(IBAction) to_s;
+-(IBAction) machine;
+-(IBAction) app_machine;
 
 @end
 
@@ -71,6 +63,7 @@
 @property IBOutlet UIButton * button_pylon;
 @property IBOutlet UILabel * timer_label;
 @property IBOutlet UILabel * pouwhenua_label;
+@property IBOutlet UILabel * marker_label;
 @property IBOutlet UILabel * left_score_label;
 @property IBOutlet UILabel * right_score_label;
 @property IBOutlet SKView * skview;
@@ -162,7 +155,201 @@
 
 @end
 
+@interface String: NSObject
+-(IBAction) colorize:(id) color_code;
+-(IBAction) red;
+-(IBAction) green;
+-(IBAction) yellow;
+-(IBAction) blue;
+-(IBAction) pink;
+-(IBAction) light_blue;
+-(IBAction) focus;
+-(IBAction) to_firebase;
+
+@end
+
+@interface Fixnum: NSObject
+-(IBAction) to_firebase;
+-(IBAction) to_s;
+-(IBAction) motion_print:(id) mp;
+-(IBAction) to_hash;
+
+@end
+
+@interface CIColor: NSObject
+-(IBAction) to_firebase;
+-(IBAction) to_s;
+-(IBAction) motion_print:(id) mp;
+-(IBAction) to_hash;
+-(IBAction) to_cgpoint;
+
+@end
+
+@interface CGPoint: NSObject
+-(IBAction) to_s;
+-(IBAction) motion_print:(id) mp;
+-(IBAction) to_hash;
+-(IBAction) to_cgpoint;
+-(IBAction) to_cgrect;
+
+@end
+
+@interface CLLocation: NSObject
+-(IBAction) to_hash;
+-(IBAction) to_s;
+-(IBAction) to_cgpoint;
+-(IBAction) to_cgrect;
+
+@end
+
+@interface CLLocationCoordinate2D: NSObject
+-(IBAction) to_s;
+-(IBAction) to_hash;
+-(IBAction) to_cgpoint;
+-(IBAction) to_cgrect;
+-(IBAction) to_CLLocationCoordinate2D;
+
+@end
+
+@interface MKMapPoint: NSObject
+-(IBAction) to_cgpoint;
+-(IBAction) to_hash;
+-(IBAction) to_cgrect;
+-(IBAction) to_s;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+
+@end
+
+@interface MKMapRect: NSObject
+-(IBAction) to_cgrect;
+-(IBAction) to_hash;
+-(IBAction) to_s;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+-(IBAction) motion_;
+
+@end
+
+@interface MKCoordinateSpan: NSObject
+-(IBAction) to_hash;
+-(IBAction) to_s;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+
+@end
+
+@interface MKCoordinateRegion: NSObject
+-(IBAction) to_hash;
+-(IBAction) to_s;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+
+@end
+
+@interface Cell: NSObject
+-(IBAction) to_s;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+-(IBAction) recursive_symbolize_keys:(id) h;
+
+@end
+
+@interface Site: NSObject
+-(IBAction) to_s;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+-(IBAction) recursive_symbolize_keys:(id) h;
+
+@end
+
+@interface Vertex: NSObject
+-(IBAction) to_s;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+-(IBAction) recursive_symbolize_keys:(id) h;
+
+@end
+
+@interface Hash: NSObject
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+-(IBAction) to_s;
+-(IBAction) recursive_symbolize_keys:(id) h;
+-(IBAction) format_to_location_coord:(id) input;
+-(IBAction) random_color;
+-(IBAction) puts_open;
+-(IBAction) puts_close;
+-(IBAction) breadcrumb:(id) message;
+
+@end
+
+@interface Numeric: NSObject
+-(IBAction) minutes;
+-(IBAction) to_s;
+-(IBAction) recursive_symbolize_keys:(id) h;
+-(IBAction) format_to_location_coord:(id) input;
+-(IBAction) random_color;
+-(IBAction) puts_open;
+-(IBAction) puts_close;
+-(IBAction) breadcrumb:(id) message;
+
+@end
+
+@interface FIRAuth: NSObject
+-(IBAction) to_s;
+-(IBAction) recursive_symbolize_keys:(id) h;
+-(IBAction) format_to_location_coord:(id) input;
+-(IBAction) random_color;
+-(IBAction) puts_open;
+-(IBAction) puts_close;
+-(IBAction) breadcrumb:(id) message;
+
+@end
+
+@interface FIRUser: NSObject
+-(IBAction) to_s;
+-(IBAction) recursive_symbolize_keys:(id) h;
+-(IBAction) format_to_location_coord:(id) input;
+-(IBAction) random_color;
+-(IBAction) puts_open;
+-(IBAction) puts_close;
+-(IBAction) breadcrumb:(id) message;
+
+@end
+
+@interface FIRUserInfo: NSObject
+-(IBAction) to_s;
+-(IBAction) recursive_symbolize_keys:(id) h;
+-(IBAction) format_to_location_coord:(id) input;
+-(IBAction) random_color;
+-(IBAction) puts_open;
+-(IBAction) puts_close;
+-(IBAction) breadcrumb:(id) message;
+
+@end
+
+@interface FIRUserInfoImpl: NSObject
+-(IBAction) recursive_symbolize_keys:(id) h;
+-(IBAction) format_to_location_coord:(id) input;
+-(IBAction) random_color;
+-(IBAction) puts_open;
+-(IBAction) puts_close;
+-(IBAction) breadcrumb:(id) message;
+
+@end
+
 @interface VoronoiSite: Site
+-(IBAction) to_s;
+
 @end
 
 @interface JoinExistingController: MachineViewController
@@ -217,6 +404,7 @@
 -(IBAction) transition_character_select_to_waiting_room;
 -(IBAction) transition_waiting_room_to_main_menu;
 -(IBAction) transition_waiting_room_to_prep;
+-(IBAction) transition_prep_to_game;
 -(IBAction) transition_waiting_room_to_game;
 -(IBAction) transition_game_to_main_menu;
 -(IBAction) transition_game_to_game_over;
@@ -280,10 +468,16 @@
 
 @end
 
+@interface SelectCharacterController: MachineViewController
+-(IBAction) viewDidLoad;
+-(IBAction) select_player_class:(id) sender;
+
+@end
+
 @interface NewController: MachineViewController
 
 @property IBOutlet UILabel * gamecode_label;
-@property IBOutlet CharacterController * character_view;
+@property IBOutlet SelectCharacterController * character_view;
 @property IBOutlet UIButton * continue_button;
 @property IBOutlet UIButton * button_continue;
 @property IBOutlet UIButton * cancel_button;
@@ -346,17 +540,6 @@
 
 @end
 
-@interface PouwhenuaFbo: FirebaseObject
--(IBAction) destroy;
-
-@end
-
-@interface SelectCharacterController: MachineViewController
--(IBAction) viewDidLoad;
--(IBAction) select_player_class:(id) sender;
-
-@end
-
 @interface SettingsController: MachineViewController
 -(IBAction) viewDidLoad;
 -(IBAction) dismiss_modal;
@@ -373,6 +556,7 @@
 -(IBAction) initialize_firebase_observers;
 -(IBAction) initialize_state_machine;
 -(IBAction) initialize_local_player:(id) in_character;
+-(IBAction) prepare_local_variables;
 -(IBAction) create_bot_player;
 -(IBAction) kapa_with_key:(id) in_key;
 -(IBAction) get_kapa_for_coordinate:(id) coordinate;
@@ -381,21 +565,13 @@
 -(IBAction) list_player_names_for_index:(id) in_index;
 -(IBAction) gamecode;
 -(IBAction) duration;
--(IBAction) kapa_hash;
--(IBAction) kapa_array;
--(IBAction) kaitakaro;
--(IBAction) kaitakaro_for_kapa:(id) kapa_key;
--(IBAction) pouwhenua_array;
--(IBAction) pouwhenua_array_for_kapa:(id) kapa_key;
--(IBAction) pouwhenua_array_enabled_only;
 -(IBAction) markers_array_enabled_only;
--(IBAction) taiapa;
--(IBAction) playfield;
 -(IBAction) playfield_region;
--(IBAction) waiting;
--(IBAction) playing;
 -(IBAction) game_state;
--(IBAction) local_player_state;
+-(IBAction) create_overlays;
+-(IBAction) create_overlay_for_cell:(id) cell;
+-(IBAction) create_map_point_for_halfedge:(id) halfedge;
+-(IBAction) local_player_state:(id) in_state;
 -(IBAction) player_annotations;
 -(IBAction) marker_annotations;
 -(IBAction) hash_to_CLLocationCoordinate2D:(id) in_hash;
@@ -416,127 +592,6 @@
 -(IBAction) data_for_pouwhenua;
 -(IBAction) format_to_location_coord:(id) input;
 -(IBAction) recursive_symbolize_keys:(id) hsh;
-
-@end
-
-@interface String: NSObject
--(IBAction) colorize:(id) color_code;
--(IBAction) red;
--(IBAction) green;
--(IBAction) yellow;
--(IBAction) blue;
--(IBAction) pink;
--(IBAction) light_blue;
--(IBAction) focus;
--(IBAction) to_firebase;
-
-@end
-
-@interface Fixnum: NSObject
--(IBAction) to_firebase;
--(IBAction) to_s;
--(IBAction) to_hash;
-
-@end
-
-@interface CIColor: NSObject
--(IBAction) to_firebase;
--(IBAction) to_s;
--(IBAction) to_hash;
--(IBAction) to_cgpoint;
-
-@end
-
-@interface CGPoint: NSObject
--(IBAction) to_s;
--(IBAction) to_hash;
--(IBAction) to_cgpoint;
--(IBAction) to_cgrect;
-
-@end
-
-@interface CLLocation: NSObject
--(IBAction) to_hash;
--(IBAction) to_s;
--(IBAction) to_cgpoint;
--(IBAction) to_cgrect;
--(IBAction) to_;
-
-@end
-
-@interface CLLocationCoordinate2D: NSObject
--(IBAction) to_s;
--(IBAction) to_hash;
--(IBAction) to_cgpoint;
--(IBAction) to_cgrect;
--(IBAction) to_CLLocationCoordinate2D;
-
-@end
-
-@interface MKMapPoint: NSObject
--(IBAction) to_cgpoint;
--(IBAction) to_cgrect;
--(IBAction) to_hash;
--(IBAction) to_CLLocationCoordinate2D;
--(IBAction) test;
--(IBAction) minutes;
--(IBAction) recursive_symbolize_keys:(id) h;
-
-@end
-
-@interface MKMapRect: NSObject
--(IBAction) to_cgrect;
--(IBAction) to_hash;
--(IBAction) to_CLLocationCoordinate2D;
--(IBAction) test;
--(IBAction) minutes;
--(IBAction) recursive_symbolize_keys:(id) h;
-
-@end
-
-@interface MKCoordinateSpan: NSObject
--(IBAction) to_hash;
--(IBAction) to_CLLocationCoordinate2D;
--(IBAction) test;
--(IBAction) minutes;
--(IBAction) recursive_symbolize_keys:(id) h;
--(IBAction) format_to_location_coord:(id) input;
-
-@end
-
-@interface MKCoordinateRegion: NSObject
--(IBAction) to_hash;
--(IBAction) to_CLLocationCoordinate2D;
--(IBAction) test;
--(IBAction) minutes;
--(IBAction) recursive_symbolize_keys:(id) h;
--(IBAction) format_to_location_coord:(id) input;
--(IBAction) random_color;
--(IBAction) puts_open;
-
-@end
-
-@interface Hash: NSObject
--(IBAction) to_CLLocationCoordinate2D;
--(IBAction) test;
--(IBAction) minutes;
--(IBAction) recursive_symbolize_keys:(id) h;
--(IBAction) format_to_location_coord:(id) input;
--(IBAction) random_color;
--(IBAction) puts_open;
--(IBAction) puts_close;
--(IBAction) breadcrumb:(id) message;
-
-@end
-
-@interface Numeric: NSObject
--(IBAction) minutes;
--(IBAction) recursive_symbolize_keys:(id) h;
--(IBAction) format_to_location_coord:(id) input;
--(IBAction) random_color;
--(IBAction) puts_open;
--(IBAction) puts_close;
--(IBAction) breadcrumb:(id) message;
 
 @end
 

@@ -39,3 +39,6 @@ gem 'motion-lager'
 
 # https://github.com/tmeinlschmidt/rm-digest
 # gem 'rm-digest'
+
+# https://github.com/1677/CocoaPods-pod-sign
+gem 'cocoapods-pod-sign'
