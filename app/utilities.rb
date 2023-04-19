@@ -142,12 +142,12 @@ class MKCoordinateRegion
   end
 end
 
-# class MKPolygon
-#   def motion_print(mp)
-#     # This will output in red!
-#     mp.colorize("MKPolygon: x: #{self.x}, y: #{self.y}", :red)
-#   end
-# end
+class MKPolygon
+  def motion_print(mp)
+    # This will output in red!
+    mp.colorize("MKPolygon: #{self.points}")
+  end
+end
 
 class Cell
   def to_s
