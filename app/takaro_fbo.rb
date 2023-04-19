@@ -709,57 +709,62 @@ class TakaroFbo < FirebaseObject
     polygons_hash = {}
 
     new_overlay_hash = {}
+    new_pointer_hash = {}
 
     @cells_hash.each do |cell|
       cell_marker = cell['site']['marker_key']
       polygons_hash[cell['site']['marker_key']] ||= []
-      verts_hash[cell_marker] = { 'verts' => [] }
+      verts_hash[cell_marker] = []
+      new_overlay_hash[cell_marker] ||= []
 
       mp 'trying new method'
       new_overlay = create_overlay_for_cell(cell)
       mp 'new overlay:'
       mp new_overlay
-      new_overlay_hash[cell_marker] << new_overlay # this needs to be set up first
+      new_overlay_hash[cell_marker] << new_overlay
+      mp 'new overlay hash:'
+      mp new_overlay_hash
+      mp '-------------------'
 
-      cell['halfedges'].each do |halfedge|
-        mp 'halfedge'
-        mp halfedge
-        # get start point
-        # @edge.left_site == @site ? @edge.vertex_a : @edge.vertex_b
-        start_point = halfedge['edge']['lSite']['marker_key'] == halfedge['site']['marker_key'] ? halfedge['edge']['va'] : halfedge['edge']['vb']
-        # @edge.left_site == @site ? @edge.vertex_b : @edge.vertex_a
-        end_point = halfedge['edge']['lSite']['marker_key'] == halfedge['site']['marker_key'] ? halfedge['edge']['vb'] : halfedge['edge']['va']
-
-        map_point = MKMapPointMake(start_point['x'], start_point['y'])
-        coords << MKCoordinateForMapPoint(map_point)
-
-
-        # verts << {
-        #   'start_point' => start_point,
-        #   'end_point' => end_point
-        # }
-        # verts_hash[cell_marker]['verts'] << {
-        #   'start_point' => start_point,
-        #   'end_point' => end_point
-        # }
-      end
-
-      # mp 'verts:'
-      # mp verts
-      # mp verts_hash
-
-      new_coords = NSArray.arrayWithArray(coords)
-      coords_ptr = Pointer.new(CLLocationCoordinate2D.type, new_coords.length)
-      new_coords.each_with_index do |c, i|
-        coords_ptr[i] = c
-      end
-
-      overlay = MKPolygon.polygonWithCoordinates(coords_ptr, count: coords.length)
-      overlay.overlayColor = CIColor.colorWithString(cell['site']['color'])
-      polygons << overlay
-      polygons_hash[cell['site']['marker_key']] << overlay
+#       cell['halfedges'].each do |halfedge|
+#         mp 'halfedge'
+#         mp halfedge
+#         # get start point
+#         # @edge.left_site == @site ? @edge.vertex_a : @edge.vertex_b
+#         start_point = halfedge['edge']['lSite']['marker_key'] == halfedge['site']['marker_key'] ? halfedge['edge']['va'] : halfedge['edge']['vb']
+#         # @edge.left_site == @site ? @edge.vertex_b : @edge.vertex_a
+#         end_point = halfedge['edge']['lSite']['marker_key'] == halfedge['site']['marker_key'] ? halfedge['edge']['vb'] : halfedge['edge']['va']
+# 
+#         map_point = MKMapPointMake(start_point['x'], start_point['y'])
+#         coords << MKCoordinateForMapPoint(map_point)
+#       end
+# 
+#       new_coords = NSArray.arrayWithArray(coords)
+#       coords_ptr = Pointer.new(CLLocationCoordinate2D.type, new_coords.length)
+#       new_coords.each_with_index do |c, i|
+#         coords_ptr[i] = c
+#       end
+# 
+#       overlay = MKPolygon.polygonWithCoordinates(coords_ptr, count: coords.length)
+#       overlay.overlayColor = CIColor.colorWithString(cell['site']['color'])
+#       polygons << overlay
+#       polygons_hash[cell['site']['marker_key']] << overlay
     end # finish looping through cells
-
+    
+    # TODO: turn this into a method
+    new_overlay_hash.each do |key, team|
+      mp 'team overlay:'
+      mp key
+      mp team
+      new_pointer_hash[key] = Pointer.new(:object, team.length)
+      team.each_with_index do |poly, i|
+        new_pointer_hash[key][i] = poly
+      end
+    end
+    mp 'new_overlay_hash'
+    mp new_overlay_hash
+    mp '................'
+    
     mp polygons
     mp polygons_hash
 
