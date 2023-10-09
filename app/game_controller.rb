@@ -122,6 +122,9 @@ class GameController < MachineViewController
 
     begin
       @voronoi_map.voronoi_cells.each do |vc|
+        team_key = vc.pylon['team_key']
+        mp team_key
+        
         # mp 'voronoi cell'
         mp 'Current cell:'
         mp vc
@@ -148,15 +151,16 @@ class GameController < MachineViewController
         end
         mp area
         # divide by 2 and get the absolute.
+        # TODO: Why divide by 2?
         # area = (area / (2.0 * 100_000)).abs.round(1)
         area = (area / 2).abs.round(1)
         mp 'area'
         mp area
 
-        if areas_hash.key?(vc.pylon['team_key'])
-          areas_hash[vc.pylon['team_key']] += area
+        if areas_hash.key?(team_key)
+          areas_hash[team_key] += area
         else
-          areas_hash[vc.pylon['team_key']] = area
+          areas_hash[team_key] = area
         end
       end
     rescue Exception => exception
@@ -167,14 +171,14 @@ class GameController < MachineViewController
     mp 'areas_hash'
     mp areas_hash
 
-    total_areas_hash = areas_hash.values.inject(0, :+)
+    total_areas_hash = areas_hash.values.inject(0, :+) # whut
     mp 'total_areas_hash'
     mp total_areas_hash
 
     delta_hash = {}
 
     begin
-      # something is going on here, still NaN
+      # TODO: something is going on here, still NaN
       areas_hash.each do |key, v|
         # mp key
         s = ((v / total_areas_hash) * 100).round - 50
