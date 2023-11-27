@@ -36,7 +36,7 @@ Motion::Project::App.setup do |app|
   app.name = 'Turf!'
 
   # version for your app
-  app.version = '0.1.35'
+  app.version = '0.1.38'
 
   # ===========================================================================================
   # 3. Set your deployment target (it's recommended that you at least target 10.0 and above).
@@ -77,13 +77,14 @@ Motion::Project::App.setup do |app|
   app.info_plist['UIRequiredDeviceCapabilities'] = ['arm64']
 
   # app.frameworks += ['CoreLocation', 'MessageUI', 'MapKit', 'AudioToolbox', 'JavaScriptCore', 'FirebaseAnalytics']
-  app.frameworks += ['CoreLocation', 'MessageUI', 'MapKit', 'AudioToolbox', 'JavaScriptCore', 'AuthenticationServices', 'SpriteKit']
+  app.frameworks += ['CoreLocation', 'MessageUI', 'MapKit', 'AudioToolbox', 'JavaScriptCore', 'AuthenticationServices', 'SpriteKit', 'Polyline']
 
   # This is a force, as for some reason the pods weren't including the resources
   app.resources_dirs += ['vendor/Pods/FirebaseAuthUI/FirebaseAuthUI/Sources/Resources/']
   app.resources_dirs += ['vendor/Pods/FirebaseOAuthUI/FirebaseOAuthUI/Sources/Resources/']
   app.resources_dirs += ['vendor/Pods/FirebaseEmailAuthUI/FirebaseEmailAuthUI/Sources/Resources/']
   app.resources_dirs += ['vendor/Pods/GoogleSignIn/GoogleSignIn/Sources/Resources/']
+  app.resources_dirs += ['vendor/Pods/Polyline/Sources/Polyline/']
   # app.resources_dirs += ['vendor/Pods/FirebaseAnalytics/']
 
   # app.vendor_project('vendor/objcvoronoi-master', :xcode,
@@ -200,6 +201,8 @@ Motion::Project::App.setup do |app|
     # plugin 'cocoapods-pod-sign' # doesn't work
     
     # use_frameworks!
+    # use_frameworks! :linkage => :static
+    
     source 'https://cdn.cocoapods.org/'
     pod 'Firebase', '~> 8.10.0' # '~> 8.7.0'
     pod 'Firebase/Auth', '~> 8.10.0'
@@ -225,7 +228,27 @@ Motion::Project::App.setup do |app|
 
     # https://app.bugsnag.com
     pod 'Bugsnag'
+
+    # # https://cocoapods.org/pods/Polyline
+    # pod 'Polyline', '~> 5.0'
+    #     
+    # # https://github.com/mapbox/MapboxStatic.swift
+    # pod 'MapboxStatic.swift', '~> 0.12'
     
+    # https://github.com/wawandco/away
+    # pod 'Away'
+    
+    # https://github.com/maciekish/MockingPlace
+    # pod 'MockingPlace'
+    post_install do |installer|
+      installer.generated_projects.each do |project|
+        project.targets.each do |target|
+            target.build_configurations.each do |config|
+                config.build_settings["DEVELOPMENT_TEAM"] = "3DZ7KWNU9A"
+             end
+        end
+      end
+    end
   end
 end
 # rubocop:enable Metrics/BlockLength

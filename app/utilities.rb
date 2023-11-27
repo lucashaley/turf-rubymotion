@@ -149,6 +149,12 @@ class MKPolygon
   end
 end
 
+class MKMultiPolygon
+  def motion_print(mp)
+    mp.colorize("MKMultiPolygon: #{self.polygons}")
+  end
+end
+
 class Cell
   def to_s
     self.description

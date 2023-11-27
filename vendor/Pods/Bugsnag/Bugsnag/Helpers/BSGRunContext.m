@@ -23,6 +23,10 @@
 #import <sys/stat.h>
 #import <sys/sysctl.h>
 
+#if __has_include(<os/proc.h>)
+#include <os/proc.h>
+#endif
+
 
 // Fields which may be updated from arbitrary threads simultaneously should be
 // updated using this macro to avoid data races (which are detected by TSan.)
@@ -45,7 +49,7 @@ static void InstallTimer(void);
 #pragma mark - Initial setup
 
 /// Populates `bsg_runContext`
-static void InitRunContext() {
+static void InitRunContext(void) {
     bsg_runContext->isDebuggerAttached = bsg_ksmachisBeingTraced();
     
     bsg_runContext->isLaunching = YES;
@@ -74,19 +78,19 @@ static void InitRunContext() {
     }
     
     BSGRunContextUpdateTimestamp();
-    InstallTimer();
-    
     BSGRunContextUpdateMemory();
     if (!bsg_runContext->memoryLimit) {
         bsg_log_debug(@"Cannot query `memoryLimit` on this device");
     }
+
+    InstallTimer();
     
     // Set `structVersion` last so that BSGRunContextLoadLast() will reject data
     // that is not fully initialised.
     bsg_runContext->structVersion = BSGRUNCONTEXT_VERSION;
 }
 
-static uint64_t GetBootTime() {
+static uint64_t GetBootTime(void) {
     struct timeval tv;
     size_t len = sizeof(tv);
     int ret = sysctl((int[]){CTL_KERN, KERN_BOOTTIME}, 2, &tv, &len, NULL, 0);
@@ -94,7 +98,7 @@ static uint64_t GetBootTime() {
     return (uint64_t)tv.tv_sec * USEC_PER_SEC + (uint64_t)tv.tv_usec;
 }
 
-static bool GetIsActive() {
+static bool GetIsActive(void) {
 #if TARGET_OS_OSX
     return GetIsForeground();
 #endif
@@ -110,7 +114,7 @@ static bool GetIsActive() {
 #endif
 }
 
-static bool GetIsForeground() {
+static bool GetIsForeground(void) {
 #if TARGET_OS_OSX
     return [[NSAPPLICATION sharedApplication] isActive];
 #endif
@@ -182,7 +186,7 @@ static UIApplication * GetUIApplication(void) {
 
 #endif
 
-static void InstallTimer() {
+static void InstallTimer(void) {
     static dispatch_source_t timer;
     
     dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_UTILITY, 0);
@@ -206,27 +210,43 @@ static void InstallTimer() {
 
 #if TARGET_OS_IOS || TARGET_OS_TV || TARGET_OS_OSX
 
-static void NoteAppActive() {
+static void NoteAppActive(__unused CFNotificationCenterRef center,
+                          __unused void *observer,
+                          __unused CFNotificationName name,
+                          __unused const void *object,
+                          __unused CFDictionaryRef userInfo) {
     bsg_runContext->isActive = YES;
     bsg_runContext->isForeground = YES;
     BSGRunContextUpdateTimestamp();
 }
 
-static void NoteAppBackground() {
+static void NoteAppBackground(__unused CFNotificationCenterRef center,
+                              __unused void *observer,
+                              __unused CFNotificationName name,
+                              __unused const void *object,
+                              __unused CFDictionaryRef userInfo) {
     bsg_runContext->isActive = NO;
     bsg_runContext->isForeground = NO;
     BSGRunContextUpdateTimestamp();
 }
 
 #if !TARGET_OS_OSX
-static void NoteAppInactive() {
+static void NoteAppInactive(__unused CFNotificationCenterRef center,
+                            __unused void *observer,
+                            __unused CFNotificationName name,
+                            __unused const void *object,
+                            __unused CFDictionaryRef userInfo) {
     bsg_runContext->isActive = NO;
     bsg_runContext->isForeground = YES;
     BSGRunContextUpdateTimestamp();
 }
 #endif
 
-static void NoteAppWillTerminate() {
+static void NoteAppWillTerminate(__unused CFNotificationCenterRef center,
+                                 __unused void *observer,
+                                 __unused CFNotificationName name,
+                                 __unused const void *object,
+                                 __unused CFDictionaryRef userInfo) {
     bsg_runContext->isTerminating = YES;
     BSGRunContextUpdateTimestamp();
 }
@@ -235,15 +255,27 @@ static void NoteAppWillTerminate() {
 
 #if TARGET_OS_IOS
 
-static void NoteBatteryLevel() {
+static void NoteBatteryLevel(__unused CFNotificationCenterRef center,
+                             __unused void *observer,
+                             __unused CFNotificationName name,
+                             __unused const void *object,
+                             __unused CFDictionaryRef userInfo) {
     bsg_runContext->batteryLevel = BSGGetDevice().batteryLevel;
 }
 
-static void NoteBatteryState() {
+static void NoteBatteryState(__unused CFNotificationCenterRef center,
+                             __unused void *observer,
+                             __unused CFNotificationName name,
+                             __unused const void *object,
+                             __unused CFDictionaryRef userInfo) {
     bsg_runContext->batteryState = BSGGetDevice().batteryState;
 }
 
-static void NoteOrientation() {
+static void NoteOrientation(__unused CFNotificationCenterRef center,
+                            __unused void *observer,
+                            __unused CFNotificationName name,
+                            __unused const void *object,
+                            __unused CFDictionaryRef userInfo) {
     UIDeviceOrientation orientation = [UIDEVICE currentDevice].orientation;
     if (orientation != UIDeviceOrientationUnknown) {
         bsg_runContext->lastKnownOrientation = orientation;
@@ -272,7 +304,7 @@ static void NoteThermalState(__unused CFNotificationCenterRef center,
 
 #if BSG_HAVE_OOM_DETECTION
 
-static void ObserveMemoryPressure() {
+static void ObserveMemoryPressure(void) {
     // DISPATCH_SOURCE_TYPE_MEMORYPRESSURE arrives slightly sooner than
     // UIApplicationDidReceiveMemoryWarningNotification
     dispatch_source_t source =
@@ -293,7 +325,7 @@ static void ObserveMemoryPressure() {
 
 #endif
 
-static void AddObservers() {
+static void AddObservers(void) {
     CFNotificationCenterRef center = CFNotificationCenterGetLocalCenter();
     
 #define OBSERVE(name, function) CFNotificationCenterAddObserver(\
@@ -341,11 +373,11 @@ static void AddObservers() {
 
 #pragma mark - Misc
 
-void BSGRunContextUpdateTimestamp() {
+void BSGRunContextUpdateTimestamp(void) {
     ATOMIC_SET(bsg_runContext->timestamp, CFAbsoluteTimeGetCurrent());
 }
 
-static void UpdateHostMemory() {
+static void UpdateHostMemory(void) {
     static _Atomic mach_port_t host_atomic = 0;
     mach_port_t host = atomic_load(&host_atomic);
     if (!host) {
@@ -363,10 +395,16 @@ static void UpdateHostMemory() {
     }
     
     size_t hostMemoryFree = host_vm.free_count * vm_kernel_page_size;
-    bsg_runContext->hostMemoryFree = hostMemoryFree;
+    ATOMIC_SET(bsg_runContext->hostMemoryFree, hostMemoryFree);
 }
 
-static void UpdateTaskMemory() {
+void setMemoryUsage(uint64_t footprint, uint64_t available) {
+    uint64_t limit = footprint + available;
+    ATOMIC_SET(bsg_runContext->memoryAvailable, available);
+    ATOMIC_SET(bsg_runContext->memoryLimit, limit);
+}
+
+static void UpdateTaskMemory(void) {
     task_vm_info_data_t task_vm = {0};
     mach_msg_type_number_t count = TASK_VM_INFO_COUNT;
     kern_return_t kr = task_info(current_task(), TASK_VM_INFO,
@@ -383,15 +421,18 @@ static void UpdateTaskMemory() {
     // this code must be compiled out when building with older SDKs.
 #ifdef TASK_VM_INFO_REV4_COUNT
     if (task_vm.limit_bytes_remaining) {
-        unsigned long long available = task_vm.limit_bytes_remaining;
-        unsigned long long limit = footprint + available;
-        ATOMIC_SET(bsg_runContext->memoryAvailable, available);
-        ATOMIC_SET(bsg_runContext->memoryLimit, limit);
+        setMemoryUsage(footprint, task_vm.limit_bytes_remaining);
+    } else {
+#if !TARGET_OS_OSX
+    if (@available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)) {
+        setMemoryUsage(footprint, os_proc_available_memory());
+    }
+#endif
     }
 #endif
 }
 
-void BSGRunContextUpdateMemory() {
+void BSGRunContextUpdateMemory(void) {
     UpdateTaskMemory();
     UpdateHostMemory();
 }
@@ -401,7 +442,7 @@ void BSGRunContextUpdateMemory() {
 
 #if !TARGET_OS_WATCH
 
-bool BSGRunContextWasKilled() {
+bool BSGRunContextWasKilled(void) {
     // App extensions have a different lifecycle and the heuristic used for
     // finding app terminations rooted in fixable code does not apply
     if ([BSG_KSSystemInfo isRunningInAppExtension]) {

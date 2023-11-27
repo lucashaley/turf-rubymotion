@@ -18,7 +18,8 @@ class TakaroFbo < FirebaseObject
                 :boundary_hash,
                 :bounding_box_cgrect,
                 :overlays,
-                :overlays_multi
+                :overlays_multi,
+                :map_image
                 # :playfield_region
 
   DEBUGGING = true
@@ -317,6 +318,7 @@ class TakaroFbo < FirebaseObject
 
   def prepare_local_variables
     mp __method__
+    Utilities::breadcrumb('Prepare local variables')
 
 #     pull_with_block
 #       {
@@ -330,6 +332,40 @@ class TakaroFbo < FirebaseObject
 
     mp playfield_region
     @bounding_box_cgrect = mkmaprect_for_coord_region(playfield_region).to_cgrect
+    
+    
+    # url_string = "https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/[-77.043686,38.892035,-77.028923,38.904192]/400x400?padding=50,10,20&access_token=pk.eyJ1IjoibHVjYXNoYWxleSIsImEiOiJjajR4eGV3dWwxb3V4MzNwaHA5NzNxbWgyIn0.Rb_2idHnl4JoMVry6eVeug"
+    # HTTP.get(url_string) do |response|
+    #   # this will be called asynchronously
+    #   mp '----- HTTP response!'
+    #   if response.success?
+    #     puts "Success!"
+    #     mp response.inspect
+    #   else
+    #     puts "Oops! Something went wrong."
+    #   end
+    # end
+    # 
+    # image_data = NSData.alloc.initWithContentsOfURL(NSURL.URLWithString(url_string))
+    # @map_image = UIImage.imageWithData(image_data)
+    
+    # Mapbox way
+    # NSURL *styleURL = [NSURL URLWithString:@"<#your mapbox: style URL#>"];
+    # MBSnapshotCamera *camera = [MBSnapshotCamera cameraLookingAtCenterCoordinate:CLLocationCoordinate2DMake(45.52, -122.681944)
+    #                                                                    zoomLevel:12];
+    # MBSnapshotOptions *options = [[MBSnapshotOptions alloc] initWithStyleURL:styleURL
+    #                                                                   camera:camera
+    #                                                                     size:CGSizeMake(200, 200)];
+    # MBSnapshot *snapshot = [[MBSnapshot alloc] initWithOptions:options
+    #                                                accessToken:@"<#your access token#>"];
+
+    # styleURL = NSURL.URLWithString('mapbox://styles/lucashaley/cj4xxgfnk4g7o2qscbrk4l8wp')
+    # camera = MBSnapshotCamera.cameraLookingAtCenterCoordinate(CLLocationCoordinate2DMake(45.52, -122.681944), zoomLevel:12)
+    # options = MBSnapshotOptions.alloc.initWithStyleURL(styleURL, camera:camera, size:CGSizeMake(200, 200))
+    # snapshot = MBSnapshot.alloc.initWithOptions(options, accessToken:'pk.eyJ1IjoibHVjYXNoYWxleSIsImEiOiJjajR4eGV3dWwxb3V4MzNwaHA5NzNxbWgyIn0.Rb_2idHnl4JoMVry6eVeug')
+    # @map_image = snapshot.image
+    # 
+    # mp @map_image
   end
 
   def create_bot_player
@@ -518,7 +554,10 @@ class TakaroFbo < FirebaseObject
     new_markers_hash.delete('player_key') if is_initial
     new_markers_hash['enabled'] = 'true'
 
-    new_markers_hash['mkmappoint'] = MKMapPointForCoordinate(new_markers_hash['coordinate'])
+    # TODO: this is expecting a CLLocationCoordinate2D
+    # new_markers_hash['mkmappoint'] = MKMapPointForCoordinate(new_markers_hash['coordinate'].to_CLLocationCoordinate2D)
+    # TODO: This is super ugly
+    new_markers_hash['mkmappoint'] = MKMapPointForCoordinate(new_markers_hash['coordinate'].to_CLLocationCoordinate2D).to_hash
 
     # new_marker = Marker.new(
     #   @ref.child('markers').childByAutoId, new_markers_hash
@@ -696,99 +735,29 @@ class TakaroFbo < FirebaseObject
 
     return if @cells_hash.nil?
 
-    mp @cells_hash
-
     @overlays_multi = []
-
-    verts = []
-    verts_hash = {}
-
-    coords = []
-
-    polygons = []
-    polygons_hash = {}
-
     new_overlay_hash = {}
     new_pointer_hash = {}
 
     @cells_hash.each do |cell|
       cell_marker = cell['site']['marker_key']
-      polygons_hash[cell['site']['marker_key']] ||= []
-      verts_hash[cell_marker] = []
-      new_overlay_hash[cell_marker] ||= []
-
-      mp 'trying new method'
+      new_overlay_hash[cell_marker] ||= {
+        'polygons' => [],
+        'color' => cell['site']['color']
+      }
       new_overlay = create_overlay_for_cell(cell)
-      mp 'new overlay:'
-      mp new_overlay
-      new_overlay_hash[cell_marker] << new_overlay
-      mp 'new overlay hash:'
-      mp new_overlay_hash
-      mp '-------------------'
-
-#       cell['halfedges'].each do |halfedge|
-#         mp 'halfedge'
-#         mp halfedge
-#         # get start point
-#         # @edge.left_site == @site ? @edge.vertex_a : @edge.vertex_b
-#         start_point = halfedge['edge']['lSite']['marker_key'] == halfedge['site']['marker_key'] ? halfedge['edge']['va'] : halfedge['edge']['vb']
-#         # @edge.left_site == @site ? @edge.vertex_b : @edge.vertex_a
-#         end_point = halfedge['edge']['lSite']['marker_key'] == halfedge['site']['marker_key'] ? halfedge['edge']['vb'] : halfedge['edge']['va']
-# 
-#         map_point = MKMapPointMake(start_point['x'], start_point['y'])
-#         coords << MKCoordinateForMapPoint(map_point)
-#       end
-# 
-#       new_coords = NSArray.arrayWithArray(coords)
-#       coords_ptr = Pointer.new(CLLocationCoordinate2D.type, new_coords.length)
-#       new_coords.each_with_index do |c, i|
-#         coords_ptr[i] = c
-#       end
-# 
-#       overlay = MKPolygon.polygonWithCoordinates(coords_ptr, count: coords.length)
-#       overlay.overlayColor = CIColor.colorWithString(cell['site']['color'])
-#       polygons << overlay
-#       polygons_hash[cell['site']['marker_key']] << overlay
+      new_overlay_hash[cell_marker]['polygons'] << new_overlay
     end # finish looping through cells
-    
-    # TODO: turn this into a method
-    new_overlay_hash.each do |key, team|
-      mp 'team overlay:'
-      mp key
+
+    mp 'trying to make multipolygons'
+    new_overlay_hash.each do |team, data|
+      mp 'for team:'
       mp team
-      new_pointer_hash[key] = Pointer.new(:object, team.length)
-      team.each_with_index do |poly, i|
-        new_pointer_hash[key][i] = poly
-      end
+      multi = MKMultiPolygon.alloc.initWithPolygons(data['polygons'])
+      multi.overlayColor = CIColor.colorWithString(data['color'])
+      mp multi
+      @overlays_multi << multi
     end
-    mp 'new_overlay_hash'
-    mp new_overlay_hash
-    mp '................'
-    
-    mp polygons
-    mp polygons_hash
-
-    @overlays = polygons
-
-    # Create a pointer array of polygons
-    mp 'creating array of polygon pointers'
-    polygons_hash.each do |k, p|
-      mp 'current polygon key'
-      mp k
-      mp 'current polygon value'
-      mp p
-      polygons_ptr = Pointer.new(:object, p.length)
-      p.each_with_index do |q, i|
-        mp 'current '
-        mp q
-        polygons_ptr[i] = q
-      end
-      mp polygons_ptr
-      @overlays_multi << MKMultiPolygon.alloc.initWithPolygons(polygons_ptr)
-    end
-
-    mp 'overlays_multi'
-    mp @overlays_multi
   end
 
   def create_overlay_for_cell(cell)
@@ -804,13 +773,9 @@ class TakaroFbo < FirebaseObject
       map_points << map_point
       markers_ptr[i] = map_point
     end
-    mp map_points
-    mp markers_ptr
 
     polygon = MKPolygon.polygonWithPoints(markers_ptr, count: map_points.length)
     polygon.overlayColor = CIColor.colorWithString(cell['site']['color'])
-
-    mp polygon
 
     polygon
   end

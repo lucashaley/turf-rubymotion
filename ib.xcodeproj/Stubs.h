@@ -199,6 +199,7 @@
 -(IBAction) to_s;
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
+-(IBAction) motion_print:(id) mp;
 
 @end
 
@@ -207,6 +208,7 @@
 -(IBAction) to_hash;
 -(IBAction) to_cgpoint;
 -(IBAction) to_cgrect;
+-(IBAction) motion_print:(id) mp;
 -(IBAction) to_CLLocationCoordinate2D;
 
 @end
@@ -216,6 +218,7 @@
 -(IBAction) to_hash;
 -(IBAction) to_cgrect;
 -(IBAction) to_s;
+-(IBAction) motion_print:(id) mp;
 -(IBAction) to_CLLocationCoordinate2D;
 -(IBAction) test;
 -(IBAction) minutes;
@@ -226,6 +229,17 @@
 -(IBAction) to_cgrect;
 -(IBAction) to_hash;
 -(IBAction) to_s;
+-(IBAction) motion_print:(id) mp;
+-(IBAction) to_CLLocationCoordinate2D;
+-(IBAction) test;
+-(IBAction) minutes;
+
+@end
+
+@interface MKCoordinateSpan: NSObject
+-(IBAction) to_hash;
+-(IBAction) to_s;
+-(IBAction) motion_print:(id) mp;
 -(IBAction) to_CLLocationCoordinate2D;
 -(IBAction) test;
 -(IBAction) minutes;
@@ -233,21 +247,23 @@
 
 @end
 
-@interface MKCoordinateSpan: NSObject
+@interface MKCoordinateRegion: NSObject
 -(IBAction) to_hash;
 -(IBAction) to_s;
+-(IBAction) motion_print:(id) mp;
 -(IBAction) to_CLLocationCoordinate2D;
 -(IBAction) test;
 -(IBAction) minutes;
 
 @end
 
-@interface MKCoordinateRegion: NSObject
--(IBAction) to_hash;
+@interface MKPolygon: NSObject
+-(IBAction) motion_print:(id) mp;
 -(IBAction) to_s;
 -(IBAction) to_CLLocationCoordinate2D;
 -(IBAction) test;
 -(IBAction) minutes;
+-(IBAction) recursive_symbolize_keys:(id) h;
 
 @end
 

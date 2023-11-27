@@ -46,14 +46,14 @@ class Marker < FirebaseObject
 	end
 
   def destroy
-		puts "FBO:#{@class_name} destroy".red if DEBUGGING
-		# Machine.instance.takaro_fbo.local_kaitakaro.pouwhenua_increment
-		Machine.instance.takaro_fbo.local_player.marker_increment
-		# notification = -> { Notification.center.post 'MapRefresh' }
-		notification = lambda do
-	  		Machine.instance.takaro_fbo.pouwhenua_is_dirty = true
-	  		Notification.center.post 'MapRefresh'
-		end.weak!
-		update_with_block({ 'enabled' => 'false' }, &notification)
+  	mp __method__
+			# Machine.instance.takaro_fbo.local_kaitakaro.pouwhenua_increment
+			Machine.instance.takaro_fbo.local_player.marker_increment
+			# notification = -> { Notification.center.post 'MapRefresh' }
+			notification = lambda do
+					Machine.instance.takaro_fbo.pouwhenua_is_dirty = true
+					Notification.center.post 'MapRefresh'
+			end.weak!
+			update_with_block({ 'enabled' => 'false' }, &notification)
   end
 end

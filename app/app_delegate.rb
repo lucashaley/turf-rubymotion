@@ -4,6 +4,7 @@ class AppDelegate
   def application(application, didFinishLaunchingWithOptions: launchOptions)
     debug_start_app
     initialize_bugsnag
+    # MockingPlace.enable
 
     @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
     storyboard = UIStoryboard.storyboardWithName("main", bundle: nil)

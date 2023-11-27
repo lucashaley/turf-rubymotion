@@ -72,6 +72,9 @@
 @implementation MKCoordinateRegion
 @end
 
+@implementation MKPolygon
+@end
+
 @implementation Cell
 @end
 

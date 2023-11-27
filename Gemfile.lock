@@ -226,6 +226,8 @@ GEM
     molinillo (0.8.0)
     moticons (1.1.0)
       motion-cocoapods
+    motion-http (1.1.0)
+      motion-lager
     motion-lager (1.0.0)
     motion-provisioning (1.1.0)
       fastlane (~> 2.182)
@@ -328,6 +330,7 @@ DEPENDENCIES
   ib
   moticons
   motion-cocoapods!
+  motion-http
   motion-lager
   motion-provisioning
   motion-state-machine

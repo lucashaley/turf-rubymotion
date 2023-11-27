@@ -328,6 +328,10 @@ class GameController < MachineViewController
     # https://stackoverflow.com/questions/6020612/mkmapkit-not-showing-userlocation
     setup_mapview
 
+    # SKView stuff
+    background_image = UIImageView.alloc.initWithImage(current_game.map_image)
+    skview.addSubview(background_image)
+    
     # add_overlays_and_annotations
 
     render_overlays
@@ -413,7 +417,7 @@ class GameController < MachineViewController
   end
 
   def button_down
-    mp 'GameController button_down'.red
+    mp 'GameController button_down'
 
     # change the button color
     button_color(UIColor.systemRedColor)
@@ -422,7 +426,7 @@ class GameController < MachineViewController
   end
 
   def button_up
-    mp 'GameController button_up'.red
+    mp 'GameController button_up'
 
     # change the button color
     button_color(UIColor.labelColor)
@@ -504,8 +508,22 @@ class GameController < MachineViewController
   # end
 
   def mapView(_map_view, rendererForOverlay: overlay)
-    # puts 'GAME_CONTROLLER: MAPVIEW.RENDERFOROVERLAY'.blue if DEBUGGING
-    rend = MKPolygonRenderer.alloc.initWithOverlay(overlay)
+    mp __method__
+    mp 'overlay:'
+    mp overlay
+    mp 'overlayColor:'
+    mp overlay.overlayColor
+    
+    rend = case overlay
+    when MKMultiPolygon
+      MKMultiPolygonRenderer.alloc.initWithMultiPolygon(overlay)
+    when MKPolygon
+      MKPolygonRenderer.alloc.initWithOverlay(overlay)
+    end
+    
+    mp rend
+    # rend = MKPolygonRenderer.alloc.initWithOverlay(overlay)
+    
     rend.lineWidth = 0.75
     rend.strokeColor = UIColor.colorWithHue(1.0, saturation: 1.0, brightness: 1.0, alpha: 1.0)
     # overlay.fillColor = UIColor.systemGreenColor
@@ -513,9 +531,15 @@ class GameController < MachineViewController
     unless overlay.overlayColor.nil?
       # rend.fillColor = UIColor.colorWithCGColor(overlay.overlayColor.CGColor)
       # puts "overlayColor: #{overlay.overlayColor}".focus
+      mp 'color'
+      mp UIColor.colorWithCIColor(overlay.overlayColor)
       rend.fillColor = UIColor.colorWithCIColor(overlay.overlayColor).colorWithAlphaComponent(0.5)
     end
     rend.lineJoin = KCGLineJoinMiter
+    
+    mp 'rend'
+    mp rend
+    
     rend
   end
 
@@ -528,7 +552,7 @@ class GameController < MachineViewController
   end
 
   def render_overlays
-    # mp __method__
+    mp __method__
 
     @rendering = true
 
@@ -547,17 +571,24 @@ class GameController < MachineViewController
     return if current_game.markers_hash.length < 2
 
     # add the pouwhenua
+    mp current_game.marker_annotations
     map_view.addAnnotations(current_game.marker_annotations)
+    
+    # MKMultiPolygon version
+    mp 'addOverlays MULTI'
+    mp current_game.overlays_multi
+    map_view.addOverlays(current_game.overlays_multi)
+    mp map_view.overlays
 
     # add the players
     map_view.addAnnotations(current_game.player_annotations)
 
-    @voronoi_map.voronoiCells.each do |cell|
-      map_view.addOverlay(cell.overlay)
-    end
-
-    # adding new overlays
-    map_view.addOverlays(current_game.overlays) unless current_game.overlays.nil?
+#     @voronoi_map.voronoiCells.each do |cell|
+#       map_view.addOverlay(cell.overlay)
+#     end
+# 
+#     # adding new overlays
+#     map_view.addOverlays(current_game.overlays) unless current_game.overlays.nil?
 
     @rendering = false
   end

@@ -42,3 +42,6 @@ gem 'motion-lager'
 
 # https://github.com/1677/CocoaPods-pod-sign
 gem 'cocoapods-pod-sign'
+
+# https://github.com/rubymotion-community/motion-http
+gem 'motion-http'
